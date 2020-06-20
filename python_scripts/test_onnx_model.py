@@ -18,11 +18,8 @@ results = session.run([], {first_input_name : indata1})
 
 starttime = time.time()
 for i in range(1):
-    print("index {}\n".format(i))
     results = session.run([], {first_input_name : indata1})
-    print("results num is {}".format(len(results)))
 
-# print(results[3].shape)
 endtime = time.time()
 print((endtime - starttime))
-print(results[0])
+

@@ -1,0 +1,5 @@
+convert_fp32_to_fp16.py      convert fp32 onnx model to fp16 model
+onnx_edit.py                 refer to https://github.com/saurabh-shandilya/onnx-utils.git
+parse_onnx_model.py          parse onnx(fp32 or fp16) model and generate **.json and ***.bin files for c++ code
+test_onnx_model.py           test onnx model with onnxruntime,compaing with c++ results
+simplfy_and_infer_shape.py   simplfy onnx model and infer op's shape

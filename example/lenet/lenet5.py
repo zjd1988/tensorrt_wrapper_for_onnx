@@ -33,19 +33,3 @@ class Lenet5(nn.Module):
         x = F.relu(self.fc2(x))
         x = F.softmax(self.fc3(x), dim=1)
         return x
-
-def main():
-    print('cuda device count: ', torch.cuda.device_count())
-    torch.manual_seed(1234)
-    net = Lenet5()
-    net = net.to('cuda:0')
-    net.eval()
-    tmp = torch.ones(1, 1, 32, 32).to('cuda:0')
-    out = net(tmp)
-    print('lenet out shape:', out.shape)
-    print('lenet out:', out)
-    torch.save(net, "lenet5.pth")
-
-if __name__ == '__main__':
-    main()
-

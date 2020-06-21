@@ -54,5 +54,6 @@
         "utility": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "python.pythonPath": "/home/xj-zjd/anaconda3/envs/tensorrt_wrapper/bin/python"
 }

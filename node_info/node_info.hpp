@@ -9,8 +9,10 @@
 using namespace std;
 #define MAX_DIM_NUM 8
 
+
 namespace tensorrtInference
 {
+    
     enum NodeType
     {
         Conv2d = 0,
@@ -42,16 +44,14 @@ namespace tensorrtInference
         void addOutput(std::string output);
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) = 0;
         void printNodeInfo();
-        // std::vector<std::string> getDependNodes();
     private:
         std::string nodeType;
         std::string subNodeType;
         std::vector<std::string> inputs;
         std::vector<std::string> outputs;
-        // std::vector<std::string> dependNodes;
     };
-
-    extern nodeInfo* (*parseNodeInfoFromJsonFuncArr[])(std::string, Json::Value&);
+    typedef nodeInfo* (*nodeParseFunc)(std::string, Json::Value&);
+    extern nodeParseFunc getNodeParseFuncMap(std::string onnxNodeType);
 }
 
 #endif 

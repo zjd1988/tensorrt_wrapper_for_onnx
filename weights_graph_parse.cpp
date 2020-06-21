@@ -26,13 +26,10 @@ namespace tensorrtInference
         Json::Value root;
         if (!reader.parse(jsonStream, root, false))
         {
+            std::cout << "parse json file " << jsonFile << " fail!!!" << std::endl;
             jsonStream.close();
             weightStream.close();
             return;
-        }
-        //generate string to NodeType map
-        {
-            generateNodeTypeMap();
         }
         //get fp16 flag
         {
@@ -48,21 +45,6 @@ namespace tensorrtInference
                 topoNodeOrder.push_back(nodeName);
             }
         }
-        // //extrac depend nodes info
-        // {
-        //     auto depend_nodes = root["depend_nodes"];
-        //     for (auto elem : depend_nodes.getMemberNames())
-        //     {
-        //         int size = depend_nodes[elem].size();
-        //         std::vector<std::string> nodeNames;
-        //         for(int i = 0; i < size; i++)
-        //         {
-        //             auto nodeName = depend_nodes[elem][i].asString();
-        //             nodeNames.push_back(nodeName);
-        //         }
-        //         dependNodes[elem] = nodeNames;
-        //     }
-        // }
         //extract weight info 
         {
             auto weihtsInfo = root["weights_info"];
@@ -126,43 +108,20 @@ namespace tensorrtInference
         }
         weightsData.clear();
     }
-    void weightsAndGraphParse::generateNodeTypeMap()
-    {
-        mapStringToNodeType["Conv"]       = NodeType::Conv2d;
-        mapStringToNodeType["Add"]        = NodeType::ElementWise;
-        mapStringToNodeType["Sub"]        = NodeType::ElementWise;
-        mapStringToNodeType["Mul"]        = NodeType::ElementWise;
-        mapStringToNodeType["Div"]        = NodeType::ElementWise;
-        mapStringToNodeType["Max"]        = NodeType::ElementWise;
-        mapStringToNodeType["Equal"]      = NodeType::ElementWise;
-        mapStringToNodeType["Greater"]    = NodeType::ElementWise;
-        mapStringToNodeType["Clip"]       = NodeType::Activation;
-        mapStringToNodeType["Reshape"]    = NodeType::Shuffle;
-        mapStringToNodeType["Transpose"]  = NodeType::Shuffle;
-        mapStringToNodeType["Pad"]        = NodeType::Padding;
-        mapStringToNodeType["Sqrt"]       = NodeType::Unary;
-        mapStringToNodeType["Reciprocal"] = NodeType::Unary;
-        mapStringToNodeType["Abs"]        = NodeType::Unary;
-        mapStringToNodeType["Softmax"]    = NodeType::Softmax;
-        mapStringToNodeType["ReduceSum"]  = NodeType::Reduce;
-        mapStringToNodeType["MaxPool"]    = NodeType::Pooling;
-        mapStringToNodeType["Slice"]      = NodeType::Slice;
-        mapStringToNodeType["Cast"]       = NodeType::Identity;
-        mapStringToNodeType["NonZero"]    = NodeType::NonZero;
-    }
+
     bool weightsAndGraphParse::extractNodeInfo(Json::Value &root)
     {
+        
         for (auto elem : root.getMemberNames()) {
             if(root[elem]["op_type"].isString())
             {
                 auto op_type = root[elem]["op_type"].asString();
-                // if(op_type.compare("NonZero") == 0)
-                //     printf("run here!\n");
-                if(mapStringToNodeType.count(op_type) != 0)
+
+                std::shared_ptr<nodeInfo> node;
+                auto parseNodeInfoFromJsonFunc = getNodeParseFuncMap(op_type);
+                if(parseNodeInfoFromJsonFunc != nullptr)
                 {
-                    NodeType nodeType = mapStringToNodeType[op_type];
-                    std::shared_ptr<nodeInfo> node;
-                    auto curr_node = parseNodeInfoFromJsonFuncArr[nodeType](op_type, root[elem]);
+                    auto curr_node = parseNodeInfoFromJsonFunc(op_type, root[elem]);
                     if(curr_node == nullptr)
                         return false;
                     // curr_node->printNodeInfo();

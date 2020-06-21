@@ -39,7 +39,6 @@ namespace tensorrtInference
         bool getFp16Flag() {return fp16Flag;}
     private:
         bool extractNodeInfo(Json::Value &root);
-        void generateNodeTypeMap();
         std::vector<std::string> topoNodeOrder;
         std::map<std::string, std::shared_ptr<nodeInfo>> nodeInfoMap;
         std::map<std::string, weightInfo> netWeightsInfo;

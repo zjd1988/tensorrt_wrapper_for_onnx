@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 find_package(OpenCV REQUIRED)
 find_package(CUDA)
 include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories(/data/Code/tensorrt_7.0/TensorRT-7.0.0.11/include)
+include_directories(/home/xj-zjd/TensorRT-7.0.0.11/include)
 include_directories(${PROJECT_BINARY_DIR}/../ ${PROJECT_BINARY_DIR}/../jsoncpp-00.11.0/include)
 include_directories(${PROJECT_BINARY_DIR}/../node_info)
 include_directories(${PROJECT_BINARY_DIR}/../node_create)
@@ -12,12 +12,12 @@ include_directories(${PROJECT_BINARY_DIR}/../node_info/plugin)
 include_directories(/usr/local/cuda-10.0/include)
 include_directories(${PROJECT_BINARY_DIR}/../cub-1.8.0)
 
-link_directories(/data/Code/tensorrt_7.0/TensorRT-7.0.0.11/lib)
+link_directories(/home/xj-zjd/TensorRT-7.0.0.11/lib)
 link_directories(/usr/local/cuda-10.0/lib64)
 link_directories(${PROJECT_BINARY_DIR}/../jsoncpp-00.11.0/build-shared/)
 add_compile_options(-std=c++11 -w)
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11 -w" )
-cuda_add_executable(test_json test_json.cpp
+cuda_add_executable(example example/example.cpp
                          weights_graph_parse.cpp
                          tensorrt_engine.cpp
                          ${PROJECT_BINARY_DIR}/../node_info/node_info.cpp
@@ -49,7 +49,7 @@ cuda_add_executable(test_json test_json.cpp
                          ${PROJECT_BINARY_DIR}/../node_create/plugin/nonzero_plugin.cu
                          ${PROJECT_BINARY_DIR}/../cuda_impl/nonzero_cuda_impl.cu
                          ${PROJECT_BINARY_DIR}/../cuda_impl/convert_cuda_impl.cu)
-target_link_libraries(test_json jsoncpp)
-target_link_libraries(test_json nvinfer)
-target_link_libraries(test_json cudart)
-target_link_libraries(test_json ${OpenCV_LIBS})
+target_link_libraries(example jsoncpp)
+target_link_libraries(example nvinfer)
+target_link_libraries(example cudart)
+target_link_libraries(example ${OpenCV_LIBS})

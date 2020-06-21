@@ -21,23 +21,31 @@ namespace tensorrtInference
         tensorrtEngine(std::string engineFile);
         ~tensorrtEngine();
         bool saveEnginePlanFile(std::string saveFile);
-        void doInference(std::vector<void*> data, int batchSize, bool fp16InferenceFlag);
+        void doInference(bool syncFlag);
         void createEngine(unsigned int maxBatchSize);
-        std::map<std::string, int> getBindingNamesIndexMap();
+        // std::map<std::string, int> getBindingNamesIndexMap();
+        std::map<std::string, void*> getBindingNamesBufferMap();
     private:
         void initConstTensors(std::map<std::string, nvinfer1::ITensor*>& tensors, nvinfer1::INetworkDefinition* network);
         void setNetInput(std::map<std::string, nvinfer1::ITensor*>& tensors, nvinfer1::INetworkDefinition* network);
         void createNetBackbone(std::map<std::string, nvinfer1::ITensor*>& tensors, nvinfer1::INetworkDefinition* network);
         std::vector<int> getBindingByteCount();
+        bool mallocEngineMem();
         void preprocessInputData();
         void postprocessOutputData();
-        // void setNetOutput(nvinfer1::INetworkDefinition* network, nvinfer1::DataType dataType);
+
         Logger mLogger;
         std::shared_ptr<tensorrtInference::weightsAndGraphParse> weightsAndGraph;
         nvinfer1::IRuntime* runtime;
         nvinfer1::IBuilder* builder;
         nvinfer1::ICudaEngine* cudaEngine;
         nvinfer1::IExecutionContext* context;
+        //malloc before inference
+        std::map<int, void*> hostMemMap;
+        std::map<int, void*> deviceMemMap;
+        std::map<int, void*> deviceFp16MemMap;
+        //cuda stream
+        cudaStream_t stream;
     };
 }
 

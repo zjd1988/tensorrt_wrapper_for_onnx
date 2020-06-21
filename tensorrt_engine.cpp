@@ -3,6 +3,7 @@
 #include "nonzero_cuda_impl.hpp"
 #include "convert_cuda_impl.hpp"
 #include <fstream>
+#include <vector>
 
 using namespace std;
 
@@ -14,6 +15,9 @@ namespace tensorrtInference
         cudaEngine = nullptr;
         runtime = nullptr;
         context = nullptr;
+        hostMemMap.clear();
+        deviceMemMap.clear();
+        deviceFp16MemMap.clear();
         builder = createInferBuilder(mLogger);
         CHECK_ASSERT(builder != nullptr, "create builder fail!\n");
         weightsAndGraph.reset(new weightsAndGraphParse(jsonFile, weightsFile));
@@ -40,6 +44,8 @@ namespace tensorrtInference
         CHECK_ASSERT(cudaEngine != nullptr, "create engine fail!\n");
         context = cudaEngine->createExecutionContext();
         CHECK_ASSERT(context != nullptr, "create context fail!\n");
+        bool ret = mallocEngineMem();
+        CHECK_ASSERT(ret != true, "malloc engine host/device mem fail!\n");
         delete[] trtModelStream;
     }
     tensorrtEngine::~tensorrtEngine()
@@ -52,6 +58,53 @@ namespace tensorrtInference
             cudaEngine->destroy();
         if(runtime != nullptr)
             runtime->destroy();
+        for(auto it : hostMemMap){
+            free(it.second);
+        }
+        for(auto it : deviceMemMap){
+            cudaFree(it.second);
+        }
+        for(auto it : deviceFp16MemMap){
+            cudaFree(it.second);
+        }
+        hostMemMap.clear();
+        deviceMemMap.clear();
+        deviceFp16MemMap.clear();
+        cudaStreamDestroy(stream);
+    }
+    bool tensorrtEngine::mallocEngineMem()
+    {
+        const nvinfer1::ICudaEngine& engine = context->getEngine();
+        int nbBindings = engine.getNbBindings();
+        auto byteCount = getBindingByteCount();
+        for(int i = 0; i < nbBindings; i++)
+        {
+            nvinfer1::DataType dataType = engine.getBindingDataType(i);
+            void *buffer = nullptr;
+            if(dataType == nvinfer1::DataType::kHALF)
+                buffer = malloc(byteCount[i]);
+            else
+                buffer = malloc(byteCount[i] * 2);
+            CHECK_ASSERT(buffer != nullptr, "malloc %s host mem fail\n", engine.getBindingName(i));
+            hostMemMap[i] = buffer;
+
+            void *deviceBuffer = nullptr;
+            cudaError_t cudastatus;
+            if(dataType == nvinfer1::DataType::kHALF)
+            {
+                cudastatus = cudaMalloc(&deviceBuffer, byteCount[i]);
+                CHECK_ASSERT(cudastatus == cudaSuccess, "malloc %s device mem fail: %s\n", engine.getBindingName(i),
+                            cudaGetErrorString(cudastatus));
+                deviceFp16MemMap[i] = deviceBuffer;
+            }
+
+            deviceBuffer = nullptr;
+            cudastatus = cudaMalloc(&deviceBuffer, byteCount[i]);
+            CHECK_ASSERT(cudastatus == cudaSuccess, "malloc %s device mem fail: %s\n", engine.getBindingName(i),
+                        cudaGetErrorString(cudastatus));
+            deviceMemMap[i] = deviceBuffer;
+        }
+        return true;
     }
     bool tensorrtEngine::saveEnginePlanFile(std::string saveFile)
     {
@@ -104,7 +157,6 @@ namespace tensorrtInference
                 dims.d[2] = shape[2];
                 dims.d[3] = shape[3];
                 constLayer = network->addConstant(dims, weights);
-                // constLayer = network->addConstant(nvinfer1::Dims4(shape[0], shape[1], shape[2], shape[3]), weights);
             }
             else if(shape.size() == 3)
             {
@@ -115,7 +167,6 @@ namespace tensorrtInference
                 dims.d[2] = shape[1];
                 dims.d[3] = shape[2];
                 constLayer = network->addConstant(dims, weights);
-                // constLayer = network->addConstant(nvinfer1::Dims4(1, shape[0], shape[1], shape[2]), weights);
             }
             else if(shape.size() == 2)
             {
@@ -126,7 +177,6 @@ namespace tensorrtInference
                 dims.d[2] = shape[0];
                 dims.d[3] = shape[1];
                 constLayer = network->addConstant(dims, weights);
-                // constLayer = network->addConstant(nvinfer1::Dims4(1, 1, shape[0], shape[1]), weights);
             }
             else if(shape.size() == 1)
             {
@@ -137,7 +187,6 @@ namespace tensorrtInference
                 dims.d[2] = 1;
                 dims.d[3] = shape[0];
                 constLayer = network->addConstant(dims, weights);
-                // constLayer = network->addConstant(nvinfer1::Dims4(1, 1, 1, shape[0]), weights);
             }
             else
                 LOG("const tensor shape size is %d (%d %d %d %d), \n", shape.size(), shape[0], shape[1], shape[2], shape[3]);
@@ -233,24 +282,38 @@ namespace tensorrtInference
         // Don't need the network any more
         network->destroy();
     }
-    std::map<std::string, int> tensorrtEngine::getBindingNamesIndexMap()
+    // std::map<std::string, int> tensorrtEngine::getBindingNamesIndexMap()
+    // {
+    //     std::map<std::string, int> bindingNamesIndexMap;
+    //     if(cudaEngine == nullptr)
+    //         LOG("create engine first!\n");
+    //     int nbBinding = cudaEngine->getNbBindings();
+    //     for(int i = 0; i < nbBinding; i++)
+    //     {
+    //         std::string tensorName(cudaEngine->getBindingName(i));
+    //         bindingNamesIndexMap[tensorName] = i;
+    //     }
+    //     return bindingNamesIndexMap;
+    // }
+    std::map<std::string, void*> tensorrtEngine::getBindingNamesBufferMap()
     {
-        std::map<std::string, int> bindingNamesIndexMap;
+        std::map<std::string, void*> bindingNamesBufferMap;
         if(cudaEngine == nullptr)
             LOG("create engine first!\n");
         int nbBinding = cudaEngine->getNbBindings();
         for(int i = 0; i < nbBinding; i++)
         {
             std::string tensorName(cudaEngine->getBindingName(i));
-            bindingNamesIndexMap[tensorName] = i;
+            bindingNamesBufferMap[tensorName] = hostMemMap[i];
         }
-        return bindingNamesIndexMap;
+        return bindingNamesBufferMap;
     }
     std::vector<int> tensorrtEngine::getBindingByteCount()
     {
         std::vector<int> byteCount;
         const nvinfer1::ICudaEngine& engine = context->getEngine();
         int nbBinding = engine.getNbBindings();
+        int batchSize = engine.getMaxBatchSize();
         for(int i = 0; i < nbBinding; i++)
         {
             int totalByteCount = 1;
@@ -264,179 +327,87 @@ namespace tensorrtInference
                 eleByteCount = 2;
             else if(dataType == nvinfer1::DataType::kINT32)
                 eleByteCount = 4;
-            else if(dataType == nvinfer1::DataType::kBOOL)
-                eleByteCount = 1;                
+            else if(dataType == nvinfer1::DataType::kBOOL || dataType == nvinfer1::DataType::kINT8)
+                eleByteCount = 1;
             else
-                CHECK_ASSERT(0, "current only support float/half!\n");
+                CHECK_ASSERT(0, "current only support float/half/int32/bool/int8 !\n");
             for(int i = 0; i < dims.nbDims; i++) {
                 eleSize *= dims.d[i];
             }
-            totalByteCount = eleSize * eleByteCount;
+            totalByteCount = batchSize * eleSize * eleByteCount;
             byteCount.push_back(totalByteCount);
         }
         return byteCount;
     }
-    void tensorrtEngine::doInference(std::vector<void*> data, int batchSize, bool fp16InferenceFlag)
+    void tensorrtEngine::postprocessOutputData()
     {
         const nvinfer1::ICudaEngine& engine = context->getEngine();
-        std::vector<void*> input;
-        std::vector<void*> output;
-        for(int i = 0; i < data.size(); i++)
+        int nbBindings = engine.getNbBindings();
+        auto bindingByteCount = getBindingByteCount();
+        cudaError_t cudastatus;
+        for(int i = 0; i < nbBindings; i++)
         {
             if(engine.bindingIsInput(i) == true)
-                input.push_back(data[i]);
-            else
-                output.push_back(data[i]);
-        }
-        int inputSize = input.size();
-        int outputSize = output.size();
-        // Pointers to input and output device buffers to pass to engine.
-        // Engine requires exactly IEngine::getNbBindings() number of buffers.
-        CHECK_ASSERT(engine.getNbBindings() == (inputSize + outputSize), "binding size must be equal to inputSize + outputSize \n");
-        std::vector<void*> bufferArr(inputSize + outputSize);
-        std::vector<void*> bufferFp16Arr(inputSize + outputSize);
-        std::vector<int> bindingByteCount = getBindingByteCount();
-        for(int i = 0; i < inputSize; i++)
-        {
-            void* buffer = nullptr;
-            int count = bindingByteCount[i];
-            cudaError_t cudastatus = cudaMalloc(&buffer, batchSize * count);
-            CHECK_ASSERT(cudastatus == cudaSuccess, "net input tensor %s malloc fail: %s\n", engine.getBindingName(i),
-                         cudaGetErrorString(cudastatus));
-            bufferArr[i] = buffer;
-            if(fp16InferenceFlag)
-            {
-                buffer = nullptr;
-                cudastatus = cudaMalloc(&buffer, batchSize * count * 2);
-                CHECK_ASSERT(cudastatus == cudaSuccess, "fp16 inference : net input tensor %s malloc fail: %s\n", engine.getBindingName(i),
-                            cudaGetErrorString(cudastatus));
-                bufferFp16Arr[i] = buffer;
-            }
-        }
-        for(int i = inputSize; i < inputSize + outputSize; i++)
-        {
-            void* buffer = nullptr;
-            int count = bindingByteCount[i];
-            cudaError_t cudastatus = cudaMalloc(&buffer, batchSize * count);
-            CHECK_ASSERT(cudastatus == cudaSuccess, "net output tensor %s malloc fail: %s\n", engine.getBindingName(i),
-                         cudaGetErrorString(cudastatus));
-            bufferArr[i] = buffer;
-            if(fp16InferenceFlag)
-            {
-                buffer = nullptr;
-                cudastatus = cudaMalloc(&buffer, batchSize * count * 2);
-                CHECK_ASSERT(cudastatus == cudaSuccess, "fp16 inference : net input tensor %s malloc fail: %s\n", engine.getBindingName(i),
-                            cudaGetErrorString(cudastatus));
-                bufferFp16Arr[i] = buffer;
-            }            
-        }
-
-        // Create stream
-        cudaStream_t stream;
-        cudaError_t cudastatus = cudaStreamCreate(&stream);
-        CHECK_ASSERT(cudastatus == cudaSuccess, "create cuda stream fail: %s\n", cudaGetErrorString(cudastatus));
-        if(fp16InferenceFlag)
-        {
-            // DMA input batch data to device, infer on the batch asynchronously, and DMA output back to host
-            for(int i = 0; i < inputSize; i++)
-            {
-                int byteCount = bindingByteCount[i] * batchSize;
-                int eleCount = byteCount / 2;
-                cudaError_t cudastatus = cudaMemcpyAsync(bufferFp16Arr[i], input[i], byteCount * 2, cudaMemcpyHostToDevice, stream);
-                CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s copy to device fail: %s\n", engine.getBindingName(i),
-                            cudaGetErrorString(cudastatus));
-                CudaImpl::ConvertFp32ToFp16CudaImpl(bufferFp16Arr[i], eleCount, bufferArr[i], stream);
-            }
-        }
-        else
-        {
-            // DMA input batch data to device, infer on the batch asynchronously, and DMA output back to host
-            for(int i = 0; i < inputSize; i++)
-            {
-                int count = bindingByteCount[i];
-                cudaError_t cudastatus = cudaMemcpyAsync(bufferArr[i], input[i], batchSize * count, cudaMemcpyHostToDevice, stream);
-                CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s copy to device fail: %s\n", engine.getBindingName(i),
-                            cudaGetErrorString(cudastatus));
-            }            
-        }
-
-
-        context->enqueue(batchSize, &bufferArr[0], stream, nullptr);
-
-//temp add for hfnet
-#if 1
-        void* buffer = nullptr;
-        int index = getBindingNamesIndexMap()["prefix/pred/keypoint_extraction/Greater:0"];
-        cudastatus = cudaMalloc(&buffer, bindingByteCount[index] * sizeof(int));
-        CHECK_ASSERT(cudastatus == cudaSuccess, "cudaMalloc execute fail\n");
-
-        if(fp16InferenceFlag)
-        {
-            CudaImpl::NoneZeroCudaImpl((const unsigned char*)bufferArr[index], bindingByteCount[index], (int*)buffer, stream);
-            cudastatus = cudaMemcpyAsync(output[index - inputSize], buffer, bindingByteCount[index] * sizeof(int), cudaMemcpyDeviceToHost, stream);
-            CHECK_ASSERT(cudastatus == cudaSuccess, "cudaMemcpyAsync execute fail\n");
-            for(int i = 0; i < outputSize; i++)
-            {
-                if((i + inputSize) == index)
-                    continue;
-                int bufferIndex = inputSize + i;
-                int byteCount = bindingByteCount[bufferIndex];
-                CudaImpl::ConvertFp16ToFp32CudaImpl(bufferArr[bufferIndex], byteCount / 2, bufferFp16Arr[bufferIndex], stream);
-                cudastatus = cudaMemcpyAsync(output[i], bufferFp16Arr[bufferIndex], batchSize * byteCount * 2 , cudaMemcpyDeviceToHost, stream);
-                CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s copy from device fail: %s\n", engine.getBindingName(bufferIndex),
-                            cudaGetErrorString(cudastatus));
-            }
-        }
-        else
-        {
-            CudaImpl::NoneZeroCudaImpl((const unsigned char*)bufferArr[index], bindingByteCount[index], (int*)buffer, stream);
-            cudastatus = cudaMemcpyAsync(output[index - inputSize], buffer, bindingByteCount[index] * sizeof(int), cudaMemcpyDeviceToHost, stream);
-            CHECK_ASSERT(cudastatus == cudaSuccess, "cudaMemcpyAsync execute fail\n");
-            for(int i = 0; i < outputSize; i++)
-            {
-                if((i + inputSize) == index)
-                    continue;
-                int bufferIndex = inputSize + i;
-                int count = bindingByteCount[bufferIndex];
-                cudastatus = cudaMemcpyAsync(output[i], bufferArr[bufferIndex], batchSize * count, cudaMemcpyDeviceToHost, stream);
-                CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s copy from device fail: %s\n", engine.getBindingName(bufferIndex),
-                            cudaGetErrorString(cudastatus));
-            }
-        }
-        cudaStreamSynchronize(stream);
-        // Release stream and buffers
-        cudaStreamDestroy(stream);
-        cudaFree(buffer);
-        if(fp16InferenceFlag)
-        {
-            for(int i = 0; i < inputSize + outputSize; i++)
-            {
-                cudaFree(bufferFp16Arr[i]);
-            }
-        }
-        for(int i = 0; i < inputSize + outputSize; i++)
-        {
-            cudaFree(bufferArr[i]);
-        }
-#else
-        for(int i = 0; i < outputSize; i++)
-        {
-            int bufferIndex = inputSize + i;
+                continue;
+            nvinfer1::DataType dataType = engine.getBindingDataType(i);
+            int bufferIndex = i;
             int count = bindingByteCount[bufferIndex];
-            cudaError_t cudastatus = cudaMemcpyAsync(output[i], bufferArr[bufferIndex], batchSize * count, cudaMemcpyDeviceToHost, stream);
-            CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s copy from device fail: %s\n", engine.getBindingName(bufferIndex),
-                         cudaGetErrorString(cudastatus));
+            if(dataType == nvinfer1::DataType::kHALF)
+            {
+                CudaImpl::ConvertFp16ToFp32CudaImpl(deviceFp16MemMap[bufferIndex], count, deviceMemMap[bufferIndex], stream);
+                cudastatus = cudaGetLastError();
+                CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s launch fp16->fp32 fail: %s\n", engine.getBindingName(bufferIndex),
+                        cudaGetErrorString(cudastatus));
+                count *= 2;
+            }
+            cudastatus = cudaMemcpyAsync(hostMemMap[bufferIndex], deviceMemMap[bufferIndex], count, cudaMemcpyDeviceToHost, stream);
+            CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s copy to host from device fail: %s\n", engine.getBindingName(bufferIndex),
+                        cudaGetErrorString(cudastatus));
         }
-        cudaStreamSynchronize(stream);
-        // Release stream and buffers
-        cudaStreamDestroy(stream);
-
-        //
-        cudaFree(bufferArr[i]);
-        for(int i = 0; i < inputSize + outputSize; i++)
+    }
+    void tensorrtEngine::preprocessInputData()
+    {
+        const nvinfer1::ICudaEngine& engine = context->getEngine();
+        int nbBindings = engine.getNbBindings();
+        auto bindingByteCount = getBindingByteCount();
+        cudaError_t cudastatus;
+        for(int i = 0; i < nbBindings; i++)
         {
-            cudaFree(bufferArr[i]);
-        }        
-#endif
+            if(engine.bindingIsInput(i) != true)
+                continue;
+            nvinfer1::DataType dataType = engine.getBindingDataType(i);
+            int bufferIndex = i;
+            int count = (dataType == nvinfer1::DataType::kHALF) ? bindingByteCount[bufferIndex] * 2: bindingByteCount[bufferIndex];
+            cudaError_t cudastatus = cudaMemcpyAsync(deviceMemMap[bufferIndex], hostMemMap[bufferIndex], count, cudaMemcpyHostToDevice, stream);
+            CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s copy frome host to device fail: %s\n", engine.getBindingName(bufferIndex),
+                        cudaGetErrorString(cudastatus));
+            if(dataType == nvinfer1::DataType::kHALF)
+            {
+                CudaImpl::ConvertFp32ToFp16CudaImpl(deviceMemMap[bufferIndex], count / 2, deviceFp16MemMap[bufferIndex], stream);
+                cudastatus = cudaGetLastError();
+                CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s fp32->fp16 fail: %s\n", engine.getBindingName(i),
+                            cudaGetErrorString(cudastatus));
+            }
+        }
+    }
+    void tensorrtEngine::doInference(bool syncFlag)
+    {
+        const nvinfer1::ICudaEngine& engine = context->getEngine();
+        int batchSize = engine.getMaxBatchSize();
+        int nbBindings = engine.getNbBindings();
+        preprocessInputData();
+        std::vector<void*> bufferArr;
+        for(int i = 0; i < nbBindings; i++)
+        {
+            nvinfer1::DataType dataType = engine.getBindingDataType(i);
+            if(dataType == nvinfer1::DataType::kHALF)
+                bufferArr.push_back(deviceFp16MemMap[i]);
+            else
+                bufferArr.push_back(deviceMemMap[i]);
+        }
+        context->enqueue(batchSize, &bufferArr[0], stream, nullptr);
+        postprocessOutputData();
+        if(syncFlag)
+            cudaStreamSynchronize(stream);
     }
 }

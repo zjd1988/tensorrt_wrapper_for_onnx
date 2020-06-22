@@ -14,6 +14,7 @@
 #include "create_shape_node.hpp"
 #include "create_gather_node.hpp"
 #include "create_unsqueeze_node.hpp"
+#include "create_concatenation_node.hpp"
 
 namespace tensorrtInference
 {
@@ -29,21 +30,22 @@ namespace tensorrtInference
     {
         if(createNodeFuncMap.size() == 0)
         {
-            createNodeFuncMap["ElementWise"] = tensorrtInference::createElementWiseNode;
-            createNodeFuncMap["Activation"]  = tensorrtInference::createActivationNode;
-            createNodeFuncMap["Padding"]     = tensorrtInference::createPaddingNode;
-            createNodeFuncMap["Reduce"]      = tensorrtInference::createReduceNode;
-            createNodeFuncMap["Softmax"]     = tensorrtInference::createSoftmaxNode;
-            createNodeFuncMap["Unary"]       = tensorrtInference::createUnaryNode;
-            createNodeFuncMap["Shuffle"]     = tensorrtInference::createShuffleNode;
-            createNodeFuncMap["Conv2d"]      = tensorrtInference::createConv2dNode;
-            createNodeFuncMap["Slice"]       = tensorrtInference::createSliceNode;
-            createNodeFuncMap["Identity"]    = tensorrtInference::createIdentityNode;
-            createNodeFuncMap["Pooling"]     = tensorrtInference::createPoolingNode;
-            createNodeFuncMap["NonZero"]     = tensorrtInference::createNonZeroNode;
-            createNodeFuncMap["Shape"]       = tensorrtInference::createShapeNode;
-            createNodeFuncMap["Gather"]      = tensorrtInference::createGatherNode;
-            createNodeFuncMap["Unsqueeze"]   = tensorrtInference::createUnsqueezeNode;
+            createNodeFuncMap["ElementWise"]    = tensorrtInference::createElementWiseNode;
+            createNodeFuncMap["Activation"]     = tensorrtInference::createActivationNode;
+            createNodeFuncMap["Padding"]        = tensorrtInference::createPaddingNode;
+            createNodeFuncMap["Reduce"]         = tensorrtInference::createReduceNode;
+            createNodeFuncMap["Softmax"]        = tensorrtInference::createSoftmaxNode;
+            createNodeFuncMap["Unary"]          = tensorrtInference::createUnaryNode;
+            createNodeFuncMap["Shuffle"]        = tensorrtInference::createShuffleNode;
+            createNodeFuncMap["Conv2d"]         = tensorrtInference::createConv2dNode;
+            createNodeFuncMap["Slice"]          = tensorrtInference::createSliceNode;
+            createNodeFuncMap["Identity"]       = tensorrtInference::createIdentityNode;
+            createNodeFuncMap["Pooling"]        = tensorrtInference::createPoolingNode;
+            createNodeFuncMap["NonZero"]        = tensorrtInference::createNonZeroNode;
+            createNodeFuncMap["Shape"]          = tensorrtInference::createShapeNode;
+            createNodeFuncMap["Gather"]         = tensorrtInference::createGatherNode;
+            createNodeFuncMap["Unsqueeze"]      = tensorrtInference::createUnsqueezeNode;
+            createNodeFuncMap["Concatenation"]  = tensorrtInference::createConcatenationNode; 
         }
         auto inputs = nodeConfInfo->getInputs();
         for(int i = 0; i < inputs.size(); i++)

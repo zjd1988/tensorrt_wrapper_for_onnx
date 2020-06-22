@@ -14,6 +14,7 @@
 #include "shape_node_info.hpp"
 #include "gather_node_info.hpp"
 #include "unsqueeze_node_info.hpp"
+#include "concatenation_node_info.hpp"
 
 #define PARSE_NODE_FUNC(nodeType)                                          \
 nodeInfo* parse##nodeType##NodeInfo(std::string type, Json::Value& root)   \
@@ -60,14 +61,7 @@ namespace tensorrtInference
             LOG("----index %d tensor : %s\n", i, output[i].c_str());
         }
     }
-    // std::map<std::string, nodeParseFunc> nodeParseFuncMap;
-    // static void registerNodeParseFunc(std::string nodeType, nodeParseFunc func)
-    // {    
-    //     if(nodeParseFuncMap.count(nodeType) == 0)
-    //         nodeParseFuncMap[nodeType] = func;
-    //     else
-    //         std::cout << "already register" << nodeType << "parse func" << std::endl;
-    // }
+
 
     class NodeParse
     {
@@ -123,6 +117,7 @@ namespace tensorrtInference
         onnxNodeTypeToTensorrtNodeTypeMap["Shape"]            = "Shape";
         onnxNodeTypeToTensorrtNodeTypeMap["Gather"]           = "Gather";
         onnxNodeTypeToTensorrtNodeTypeMap["Unsqueeze"]        = "Unsqueeze";
+        onnxNodeTypeToTensorrtNodeTypeMap["Concat"]           = "Concatenation";
     }
     NodeParse* NodeParse::instance = new NodeParse;
 
@@ -142,6 +137,7 @@ namespace tensorrtInference
     PARSE_NODE_FUNC(Shape)
     PARSE_NODE_FUNC(Gather)
     PARSE_NODE_FUNC(Unsqueeze)
+    PARSE_NODE_FUNC(Concatenation)
 
 
     nodeParseFunc getNodeParseFuncMap(std::string onnxNodeType)

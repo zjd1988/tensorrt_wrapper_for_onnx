@@ -6,6 +6,8 @@
 
 3 python 3.5+
 
+# verified models
+1 lenet ./example/lenet/lenet.onnx
 
 
 # limitations
@@ -19,3 +21,7 @@
 1 https://github.com/saurabh-shandilya/onnx-utils.git
 
 2 https://github.com/wang-xinyu/tensorrtx.git
+
+3 https://github.com/onnx/onnx-tensorrt.git
+
+4 https://github.com/microsoft/onnxruntime.git

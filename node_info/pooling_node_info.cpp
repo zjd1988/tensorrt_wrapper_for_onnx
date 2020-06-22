@@ -9,6 +9,9 @@ namespace tensorrtInference
         kernelShape.clear();
         pads.clear();
         strides.clear();
+        ceil_mode = 0;
+        count_include_pad = 0;
+        auto_pad = "NOTSET";
         setNodeType("Pooling");
         setSubNodeType("");
     }
@@ -61,9 +64,21 @@ namespace tensorrtInference
                     strides.push_back(attr[elem][i].asInt());
                 }
             }
+            else if(elem.compare("ceil_mode") == 0)
+            {
+                ceil_mode = attr[elem].asInt();
+            }
+            else if(elem.compare("count_include_pad") == 0)
+            {
+                count_include_pad = attr[elem].asInt();
+            }
+            else if(elem.compare("auto_pad") == 0)
+            {
+                auto_pad = attr[elem].asString();
+            }
             else
             {
-                LOG("currnet Pooling node not support %s \n", elem.c_str());
+                LOG("currnet Pooling node not support %s attribute\n", elem.c_str());
             }
         }
         return true;
@@ -84,6 +99,13 @@ namespace tensorrtInference
         for(int i = 0; i < strides.size(); i++) {
             LOG("%d ", strides[i]);  
         }
+        // LOG("\n----dilations is : ");
+        // for(int i = 0; i < dilations.size(); i++) {
+        //     LOG("%d ", dilations[i]);
+        // }
+        LOG("\n----ceil_mode is : %d", ceil_mode);
+        LOG("\n----count_include_pad is : %d", count_include_pad);
+        LOG("\n----auto_pad is : %s", auto_pad.c_str());
         LOG("\n");
     }    
 }

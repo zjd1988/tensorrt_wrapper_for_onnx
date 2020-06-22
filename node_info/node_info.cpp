@@ -45,7 +45,6 @@ namespace tensorrtInference
     std::vector<std::string> nodeInfo::getInputs() { return inputs; }
     void nodeInfo::addInput(std::string input) { inputs.push_back(input); }
     void nodeInfo::addOutput(std::string output) { outputs.push_back(output); }
-    // std::vector<std::string> nodeInfo::getDependNodes() { return dependNodes; }
     void nodeInfo::printNodeInfo() {
         LOG("################### NODE INFO ######################\n");
         LOG("currend node type is %s , sub node type is %s\n", nodeType.c_str(), subNodeType.c_str());
@@ -100,27 +99,28 @@ namespace tensorrtInference
     }
     void NodeParse::registerNodeParseFunc()
     {
-        onnxNodeTypeToTensorrtNodeTypeMap["Conv"]       = "Conv2d";
-        onnxNodeTypeToTensorrtNodeTypeMap["Add"]        = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Sub"]        = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Mul"]        = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Div"]        = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Max"]        = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Equal"]      = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Greater"]    = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Clip"]       = "Activation";
-        onnxNodeTypeToTensorrtNodeTypeMap["Reshape"]    = "Shuffle";
-        onnxNodeTypeToTensorrtNodeTypeMap["Transpose"]  = "Shuffle";
-        onnxNodeTypeToTensorrtNodeTypeMap["Pad"]        = "Padding";
-        onnxNodeTypeToTensorrtNodeTypeMap["Sqrt"]       = "Unary";
-        onnxNodeTypeToTensorrtNodeTypeMap["Reciprocal"] = "Unary";
-        onnxNodeTypeToTensorrtNodeTypeMap["Abs"]        = "Unary";
-        onnxNodeTypeToTensorrtNodeTypeMap["Softmax"]    = "Softmax";
-        onnxNodeTypeToTensorrtNodeTypeMap["ReduceSum"]  = "Reduce";
-        onnxNodeTypeToTensorrtNodeTypeMap["MaxPool"]    = "Pooling";
-        onnxNodeTypeToTensorrtNodeTypeMap["Slice"]      = "Slice";
-        onnxNodeTypeToTensorrtNodeTypeMap["Cast"]       = "Identity";
-        onnxNodeTypeToTensorrtNodeTypeMap["NonZero"]    = "NonZero";
+        onnxNodeTypeToTensorrtNodeTypeMap["Conv"]             = "Conv2d";
+        onnxNodeTypeToTensorrtNodeTypeMap["Add"]              = "ElementWise";
+        onnxNodeTypeToTensorrtNodeTypeMap["Sub"]              = "ElementWise";
+        onnxNodeTypeToTensorrtNodeTypeMap["Mul"]              = "ElementWise";
+        onnxNodeTypeToTensorrtNodeTypeMap["Div"]              = "ElementWise";
+        onnxNodeTypeToTensorrtNodeTypeMap["Max"]              = "ElementWise";
+        onnxNodeTypeToTensorrtNodeTypeMap["Equal"]            = "ElementWise";
+        onnxNodeTypeToTensorrtNodeTypeMap["Greater"]          = "ElementWise";
+        onnxNodeTypeToTensorrtNodeTypeMap["Clip"]             = "Activation";
+        onnxNodeTypeToTensorrtNodeTypeMap["Reshape"]          = "Shuffle";
+        onnxNodeTypeToTensorrtNodeTypeMap["Transpose"]        = "Shuffle";
+        onnxNodeTypeToTensorrtNodeTypeMap["Pad"]              = "Padding";
+        onnxNodeTypeToTensorrtNodeTypeMap["Sqrt"]             = "Unary";
+        onnxNodeTypeToTensorrtNodeTypeMap["Reciprocal"]       = "Unary";
+        onnxNodeTypeToTensorrtNodeTypeMap["Abs"]              = "Unary";
+        onnxNodeTypeToTensorrtNodeTypeMap["Softmax"]          = "Softmax";
+        onnxNodeTypeToTensorrtNodeTypeMap["ReduceSum"]        = "Reduce";
+        onnxNodeTypeToTensorrtNodeTypeMap["MaxPool"]          = "Pooling";
+        onnxNodeTypeToTensorrtNodeTypeMap["AveragePool"]      = "Pooling";
+        onnxNodeTypeToTensorrtNodeTypeMap["Slice"]            = "Slice";
+        onnxNodeTypeToTensorrtNodeTypeMap["Cast"]             = "Identity";
+        onnxNodeTypeToTensorrtNodeTypeMap["NonZero"]          = "NonZero";
     }
     NodeParse* NodeParse::instance = new NodeParse;
 

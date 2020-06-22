@@ -45,7 +45,7 @@ namespace tensorrtInference
         std::vector<std::string> inputTensorNames;
         std::vector<std::string> outputTensorNames;
         std::map<std::string, char*> weightsData;
-        std::map<std::string, NodeType> mapStringToNodeType;
+        // std::map<std::string, NodeType> mapStringToNodeType;
         bool initFlag = false;
         bool fp16Flag = false;
     };

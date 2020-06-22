@@ -66,11 +66,15 @@ namespace tensorrtInference
             }
             else if(elem.compare("ceil_mode") == 0)
             {
-                ceil_mode = attr[elem].asInt();
+                auto size = attr[elem].size();
+                CHECK_ASSERT(size == 1, "Pooling node's ceil_mode must have 1 element\n");
+                ceil_mode = attr[elem][0].asInt();
             }
             else if(elem.compare("count_include_pad") == 0)
             {
-                count_include_pad = attr[elem].asInt();
+                auto size = attr[elem].size();
+                CHECK_ASSERT(size == 1, "Pooling node's count_include_pad must have 1 element\n");
+                count_include_pad = attr[elem][0].asInt();
             }
             else if(elem.compare("auto_pad") == 0)
             {
@@ -99,10 +103,6 @@ namespace tensorrtInference
         for(int i = 0; i < strides.size(); i++) {
             LOG("%d ", strides[i]);  
         }
-        // LOG("\n----dilations is : ");
-        // for(int i = 0; i < dilations.size(); i++) {
-        //     LOG("%d ", dilations[i]);
-        // }
         LOG("\n----ceil_mode is : %d", ceil_mode);
         LOG("\n----count_include_pad is : %d", count_include_pad);
         LOG("\n----auto_pad is : %s", auto_pad.c_str());

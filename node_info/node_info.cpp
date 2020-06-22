@@ -11,7 +11,9 @@
 #include "slice_node_info.hpp"
 #include "identity_node_info.hpp"
 #include "nonzero_node_info.hpp"
-#include <assert.h>
+#include "shape_node_info.hpp"
+#include "gather_node_info.hpp"
+#include "unsqueeze_node_info.hpp"
 
 #define PARSE_NODE_FUNC(nodeType)                                          \
 nodeInfo* parse##nodeType##NodeInfo(std::string type, Json::Value& root)   \
@@ -24,8 +26,7 @@ nodeInfo* parse##nodeType##NodeInfo(std::string type, Json::Value& root)   \
     return nullptr;                                                        \
 }
 
-#define REGISTER_ONNX_NODE_PARSE(onnxNodeType, tensorrtNodeType)     \
-NodeParse::registerNodeParseFunc(##onnxNodeType, ##tensorrtNodeType);
+
 
 namespace tensorrtInference 
 {
@@ -59,16 +60,14 @@ namespace tensorrtInference
             LOG("----index %d tensor : %s\n", i, output[i].c_str());
         }
     }
-    std::map<std::string, nodeParseFunc> nodeParseFuncMap;
-    static void registerNodeParseFunc(std::string nodeType, nodeParseFunc func)
-    {    
-        if(nodeParseFuncMap.count(nodeType) == 0)
-            nodeParseFuncMap[nodeType] = func;
-        else
-            std::cout << "already register" << nodeType << "parse func" << std::endl;
-    }
-
-
+    // std::map<std::string, nodeParseFunc> nodeParseFuncMap;
+    // static void registerNodeParseFunc(std::string nodeType, nodeParseFunc func)
+    // {    
+    //     if(nodeParseFuncMap.count(nodeType) == 0)
+    //         nodeParseFuncMap[nodeType] = func;
+    //     else
+    //         std::cout << "already register" << nodeType << "parse func" << std::endl;
+    // }
 
     class NodeParse
     {
@@ -121,6 +120,9 @@ namespace tensorrtInference
         onnxNodeTypeToTensorrtNodeTypeMap["Slice"]            = "Slice";
         onnxNodeTypeToTensorrtNodeTypeMap["Cast"]             = "Identity";
         onnxNodeTypeToTensorrtNodeTypeMap["NonZero"]          = "NonZero";
+        onnxNodeTypeToTensorrtNodeTypeMap["Shape"]            = "Shape";
+        onnxNodeTypeToTensorrtNodeTypeMap["Gather"]           = "Gather";
+        onnxNodeTypeToTensorrtNodeTypeMap["Unsqueeze"]        = "Unsqueeze";
     }
     NodeParse* NodeParse::instance = new NodeParse;
 
@@ -137,6 +139,9 @@ namespace tensorrtInference
     PARSE_NODE_FUNC(Slice)
     PARSE_NODE_FUNC(Identity)
     PARSE_NODE_FUNC(NonZero)
+    PARSE_NODE_FUNC(Shape)
+    PARSE_NODE_FUNC(Gather)
+    PARSE_NODE_FUNC(Unsqueeze)
 
 
     nodeParseFunc getNodeParseFuncMap(std::string onnxNodeType)

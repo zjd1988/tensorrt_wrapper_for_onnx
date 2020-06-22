@@ -13,21 +13,21 @@ using namespace std;
 namespace tensorrtInference
 {
     
-    enum NodeType
-    {
-        Conv2d = 0,
-        ElementWise,
-        Activation,
-        Shuffle,
-        Padding,
-        Unary,
-        Softmax,
-        Reduce,
-        Pooling,
-        Slice,
-        Identity,
-        NonZero,
-    };
+    // enum NodeType
+    // {
+    //     Conv2d = 0,
+    //     ElementWise,
+    //     Activation,
+    //     Shuffle,
+    //     Padding,
+    //     Unary,
+    //     Softmax,
+    //     Reduce,
+    //     Pooling,
+    //     Slice,
+    //     Identity,
+    //     NonZero,
+    // };
     
     class nodeInfo
     {

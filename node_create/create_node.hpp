@@ -6,6 +6,8 @@
 #include "weights_graph_parse.hpp"
 #include "utils.hpp"
 #include <iostream>
+#include <numeric>
+#include <algorithm>
 using namespace std;
 
 namespace tensorrtInference
@@ -35,6 +37,8 @@ namespace tensorrtInference
     extern std::vector<float> parseFloatArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape);
     extern std::vector<int> parseIntArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape);
     extern int getTensorrtDataType(OnnxDataType onnxDataType);
+    extern std::vector<int> dimsToVector(nvinfer1::Dims dims);
+    extern nvinfer1::Dims vectorToDims(std::vector<int> shape);
 }
 
 #endif

@@ -11,6 +11,9 @@
 #include "create_identity_node.hpp"
 #include "create_pooling_node.hpp"
 #include "create_nonzero_node.hpp"
+#include "create_shape_node.hpp"
+#include "create_gather_node.hpp"
+#include "create_unsqueeze_node.hpp"
 
 namespace tensorrtInference
 {
@@ -38,6 +41,9 @@ namespace tensorrtInference
             createNodeFuncMap["Identity"]    = tensorrtInference::createIdentityNode;
             createNodeFuncMap["Pooling"]     = tensorrtInference::createPoolingNode;
             createNodeFuncMap["NonZero"]     = tensorrtInference::createNonZeroNode;
+            createNodeFuncMap["Shape"]       = tensorrtInference::createShapeNode;
+            createNodeFuncMap["Gather"]      = tensorrtInference::createGatherNode;
+            createNodeFuncMap["Unsqueeze"]   = tensorrtInference::createUnsqueezeNode;
         }
         auto inputs = nodeConfInfo->getInputs();
         for(int i = 0; i < inputs.size(); i++)
@@ -133,5 +139,26 @@ namespace tensorrtInference
             default:
                 return -1;
         }
+    }
+
+    std::vector<int> dimsToVector(nvinfer1::Dims dims)
+    {
+        std::vector<int> shapeVec;
+        for(int i = 0; i < dims.nbDims; i++)
+        {
+            shapeVec.push_back(dims.d[i]);
+        }
+        return shapeVec;
+    }
+    nvinfer1::Dims vectorToDims(std::vector<int> shape)
+    {
+        int size = shape.size();
+        nvinfer1::Dims dims;
+        dims.nbDims = size;
+        for(int i = 0; i < size; i++)
+        {
+            dims.d[i] = shape[i];
+        }
+        return dims;
     }
 }

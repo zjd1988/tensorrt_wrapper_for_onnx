@@ -189,5 +189,4 @@ namespace tensorrtInference
         }
         return constTensorNames;
     }
-
 }

@@ -33,6 +33,9 @@ cuda_add_executable(example example/example.cpp
                          ${PROJECT_BINARY_DIR}/../node_info/slice_node_info.cpp
                          ${PROJECT_BINARY_DIR}/../node_info/identity_node_info.cpp
                          ${PROJECT_BINARY_DIR}/../node_info/nonzero_node_info.cpp
+                         ${PROJECT_BINARY_DIR}/../node_info/shape_node_info.cpp
+                         ${PROJECT_BINARY_DIR}/../node_info/gather_node_info.cpp
+                         ${PROJECT_BINARY_DIR}/../node_info/unsqueeze_node_info.cpp
                          ${PROJECT_BINARY_DIR}/../node_create/create_node.cpp
                          ${PROJECT_BINARY_DIR}/../node_create/create_activation_node.cpp
                          ${PROJECT_BINARY_DIR}/../node_create/create_elementwise_node.cpp
@@ -46,6 +49,9 @@ cuda_add_executable(example example/example.cpp
                          ${PROJECT_BINARY_DIR}/../node_create/create_identity_node.cpp
                          ${PROJECT_BINARY_DIR}/../node_create/create_pooling_node.cpp
                          ${PROJECT_BINARY_DIR}/../node_create/create_nonzero_node.cpp
+                         ${PROJECT_BINARY_DIR}/../node_create/create_shape_node.cpp
+                         ${PROJECT_BINARY_DIR}/../node_create/create_gather_node.cpp
+                         ${PROJECT_BINARY_DIR}/../node_create/create_unsqueeze_node.cpp
                          ${PROJECT_BINARY_DIR}/../node_create/plugin/nonzero_plugin.cu
                          ${PROJECT_BINARY_DIR}/../cuda_impl/nonzero_cuda_impl.cu
                          ${PROJECT_BINARY_DIR}/../cuda_impl/convert_cuda_impl.cu)

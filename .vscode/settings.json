@@ -53,7 +53,9 @@
         "cinttypes": "cpp",
         "utility": "cpp",
         "typeindex": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "string": "cpp",
+        "*.cuh": "cpp"
     },
     "python.pythonPath": "/home/xj-zjd/anaconda3/envs/tensorrt_wrapper/bin/python"
 }

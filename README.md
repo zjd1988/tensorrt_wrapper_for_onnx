@@ -9,7 +9,7 @@ coding ...
 3 python 3.5+
 
 # verified models
-1 lenet ./example/lenet/lenet.onnx
+1 lenet ./example/lenet/lenet.onnx    ------- not ready
 
 
 # limitations

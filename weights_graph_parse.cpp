@@ -102,11 +102,20 @@ namespace tensorrtInference
     }
     weightsAndGraphParse::~weightsAndGraphParse()
     {
-        for(auto it : weightsData) {
-            if(it.second != nullptr)
-                free(it.second);
+        // for(auto it : weightsData) {
+        //     if(it.second != nullptr)
+        //         free(it.second);
+        // }
+        // weightsData.clear();
+
+        for(auto it : netWeightsInfo)
+        {
+            if(it.second.data != nullptr)
+            {
+                free(it.second.data);
+                it.second.data = nullptr;
+            }
         }
-        weightsData.clear();
     }
 
     bool weightsAndGraphParse::extractNodeInfo(Json::Value &root)
@@ -148,10 +157,6 @@ namespace tensorrtInference
     const std::vector<std::string>& weightsAndGraphParse::getTopoNodeOrder()
     {
         return topoNodeOrder;
-    }
-    const std::map<std::string, char*>& weightsAndGraphParse::getWeightsData()
-    {
-        return weightsData;
     }
     const std::map<std::string, weightInfo>& weightsAndGraphParse::getWeightsInfo()
     {

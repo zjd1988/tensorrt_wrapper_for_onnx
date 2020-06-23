@@ -282,19 +282,7 @@ namespace tensorrtInference
         // Don't need the network any more
         network->destroy();
     }
-    // std::map<std::string, int> tensorrtEngine::getBindingNamesIndexMap()
-    // {
-    //     std::map<std::string, int> bindingNamesIndexMap;
-    //     if(cudaEngine == nullptr)
-    //         LOG("create engine first!\n");
-    //     int nbBinding = cudaEngine->getNbBindings();
-    //     for(int i = 0; i < nbBinding; i++)
-    //     {
-    //         std::string tensorName(cudaEngine->getBindingName(i));
-    //         bindingNamesIndexMap[tensorName] = i;
-    //     }
-    //     return bindingNamesIndexMap;
-    // }
+
     std::map<std::string, void*> tensorrtEngine::getBindingNamesBufferMap()
     {
         std::map<std::string, void*> bindingNamesBufferMap;

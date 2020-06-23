@@ -13,7 +13,7 @@ namespace tensorrtInference
         ~ConcatenationNodeInfo();
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        int getAxes(){return axis;}
+        int getAxis(){return axis;}
     private:
         int axis;
     };

@@ -51,5 +51,31 @@ namespace tensorrtInference
         Severity reportableSeverity{Severity::kWARNING};
     };
 
-}
+    enum OnnxDataType {
+        DEFAULT,
+        FLOAT,
+        UINT8,
+        INT8,
+        UINT16,
+        INT16,
+        INT32,
+        INT64,
+        STRING,
+        BOOL,
+        FLOAT16,
+        DOUBLE,
+        UINT32,
+        UINT64,
+        COMPLEX64,
+        COMPLEX128,
+        BFLOAT16,
+    };
+
+    extern int onnxDataTypeEleCount[];
+    extern std::vector<float> parseFloatArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape);
+    extern std::vector<int> parseIntArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape);
+    extern int getTensorrtDataType(OnnxDataType onnxDataType);
+    extern std::vector<int> dimsToVector(nvinfer1::Dims dims);
+    extern nvinfer1::Dims vectorToDims(std::vector<int> shape);
+} //tensorrtInference
 #endif

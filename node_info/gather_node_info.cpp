@@ -17,7 +17,7 @@ namespace tensorrtInference
     {
         setSubNodeType(type);
         auto inputSize = root["inputs"].size();
-        CHECK_ASSERT(inputSize == 1, "Gather node must have 1 inputs\n");
+        CHECK_ASSERT(inputSize == 2, "Gather node must have 2 inputs\n");
         for(int i = 0; i < inputSize; i++)
         {
             addInput(root["inputs"][i].asString());
@@ -45,4 +45,4 @@ namespace tensorrtInference
         }
         return true;
     }
-}
+} //tensorrtInference

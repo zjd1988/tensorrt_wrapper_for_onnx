@@ -55,7 +55,9 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "string": "cpp",
-        "*.cuh": "cpp"
+        "*.cuh": "cpp",
+        "*.ipp": "cpp",
+        "random": "cpp"
     },
     "python.pythonPath": "/home/xj-zjd/anaconda3/envs/tensorrt_wrapper/bin/python"
 }

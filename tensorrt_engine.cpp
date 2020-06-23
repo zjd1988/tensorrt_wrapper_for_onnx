@@ -245,6 +245,12 @@ namespace tensorrtInference
                 nvinfer1::Dims dims = layer->getOutput(i)->getDimensions();
                 if(dims.nbDims == 4)
                     LOG("tensor %s  shape is %d %d %d %d\n", outputs[i].c_str(), dims.d[0], dims.d[1], dims.d[2], dims.d[3]);
+                else if(dims.nbDims == 3)
+                    LOG("tensor %s  shape is %d %d %d\n", outputs[i].c_str(), dims.d[0], dims.d[1], dims.d[2]);
+                else if(dims.nbDims == 2)
+                    LOG("tensor %s  shape is %d %d\n", outputs[i].c_str(), dims.d[0], dims.d[1]);
+                else
+                    LOG("tensor %s  shape is %d\n", outputs[i].c_str(), dims.d[0]);
             }
         }
     }

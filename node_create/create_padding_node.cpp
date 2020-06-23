@@ -11,7 +11,7 @@ namespace tensorrtInference
     {
         auto subType = nodeConfInfo->getSubNodeType();
         auto inputs = nodeConfInfo->getInputs();
-        CHECK_ASSERT(inputs.size(), "Padding node must have 2 inputs\n");
+        CHECK_ASSERT(inputs.size() >= 1, "Padding node must have 2 inputs\n");
         nvinfer1::ITensor* inputTensors = tensors[inputs[0]];
         auto shape = nodeWeightsInfo[inputs[1]].shape;
         CHECK_ASSERT(shape.size() == 1 && shape[0] == 8, "Pads value must be 8 (Nbegin, Cbegin, Hbegin, Wbegin, Nend, Cend, Hend, Wend)\n");

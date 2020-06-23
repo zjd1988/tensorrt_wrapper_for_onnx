@@ -6,12 +6,11 @@
 #include <vector>
 #include "json/json.h"
 #include "utils.hpp"
+#include "node_info.hpp"
 using namespace std;
-#define MAX_DIM_NUM 8
-
 
 namespace tensorrtInference
-{   
+{
     class nodeInfo
     {
     public:
@@ -33,7 +32,26 @@ namespace tensorrtInference
         std::vector<std::string> inputs;
         std::vector<std::string> outputs;
     };
+
     typedef nodeInfo* (*nodeParseFunc)(std::string, Json::Value&);
+
+    class NodeParse
+    {
+    private:
+        static NodeParse* instance;
+        void registerNodeParseFunc();
+        std::map<std::string, nodeParseFunc> nodeParseFuncMap;
+        std::map<std::string, std::string> onnxNodeTypeToTensorrtNodeTypeMap;
+        NodeParse()
+        {
+        }
+    public:
+        nodeParseFunc getNodeParseFunc(std::string nodeType);
+        static NodeParse* getInstance() {
+            return instance;
+        }
+    };
+    
     extern nodeParseFunc getNodeParseFuncMap(std::string onnxNodeType);
 }
 

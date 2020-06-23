@@ -17,6 +17,8 @@ coding ...
 
 2 only support fp32/fp16 model
 
+3 onnx model supports op version 11+
+
 
 
 # reference

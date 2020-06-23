@@ -30,31 +30,39 @@ namespace tensorrtInference
             auto dims = parseIntArrayValue(nodeWeightsInfo[inputs[1]].dataType, nodeWeightsInfo[inputs[1]].data, 
                             nodeWeightsInfo[inputs[1]].byteCount, nodeWeightsInfo[inputs[1]].shape);
             shuffle = network->addShuffle(*inputTensors);
-            CHECK_ASSERT(shuffle, "create shuffle node fail\n");
-            auto tensorDims = inputTensors->getDimensions();
-            if(dims.size() == 4 && tensorDims.nbDims == 4)
-                shuffle->setReshapeDimensions(nvinfer1::Dims4(dims[0], dims[1], dims[2], dims[3]));
-            else if(dims.size() == 3 && tensorDims.nbDims == 3)
-                shuffle->setReshapeDimensions(nvinfer1::DimsCHW(dims[0], dims[1], dims[2]));
-            else if(dims.size() == 2 && tensorDims.nbDims == 2)
-                shuffle->setReshapeDimensions(nvinfer1::DimsHW(dims[0], dims[1]));
-            else if(dims.size() < tensorDims.nbDims)
+            CHECK_ASSERT(shuffle, "create shuffle node fail\n");            
+
+            nvinfer1::Dims newDims;
+            newDims.nbDims = dims.size();
+            for(int i = 0; i < dims.size(); i++)
             {
-                nvinfer1::Dims temp;
-                temp.nbDims = tensorDims.nbDims;
-                for(int i = 0; i < temp.nbDims; i++)
-                {
-                    if(i < dims.size())
-                        temp.d[i] = 1;
-                    else
-                        temp.d[i] = dims[i-dims.size()];
-                }
-                shuffle->setReshapeDimensions(temp);
+                newDims.d[i] = dims[i];
             }
-            else
-            {
-                CHECK_ASSERT(0, "current only support 2 3 or 4 dims for reshape\n");
-            }
+            shuffle->setReshapeDimensions(newDims);
+            // auto tensorDims = inputTensors->getDimensions();
+            // if(dims.size() == 4 && tensorDims.nbDims == 4)
+            //     shuffle->setReshapeDimensions(nvinfer1::Dims4(dims[0], dims[1], dims[2], dims[3]));
+            // else if(dims.size() == 3 && tensorDims.nbDims == 3)
+            //     shuffle->setReshapeDimensions(nvinfer1::DimsCHW(dims[0], dims[1], dims[2]));
+            // else if(dims.size() == 2 && tensorDims.nbDims == 2)
+            //     shuffle->setReshapeDimensions(nvinfer1::DimsHW(dims[0], dims[1]));
+            // else if(dims.size() < tensorDims.nbDims)
+            // {
+            //     nvinfer1::Dims temp;
+            //     temp.nbDims = tensorDims.nbDims;
+            //     for(int i = 0; i < temp.nbDims; i++)
+            //     {
+            //         if(i < dims.size())
+            //             temp.d[i] = 1;
+            //         else
+            //             temp.d[i] = dims[i-dims.size()];
+            //     }
+            //     shuffle->setReshapeDimensions(temp);
+            // }
+            // else
+            // {
+            //     CHECK_ASSERT(0, "current only support 2 3 or 4 dims for reshape\n");
+            // }
         }
         return shuffle;
     }

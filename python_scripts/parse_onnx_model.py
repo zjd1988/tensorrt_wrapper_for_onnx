@@ -11,7 +11,7 @@ onnx_data_type["UINT8"] = 2
 onnx_data_type["INT8"] = 3
 onnx_data_type["UINT16"] = 4
 onnx_data_type["INT16"] = 5
-onnx_data_type["INT64"] = 6
+onnx_data_type["INT32"] = 6
 onnx_data_type["INT64"] = 7
 onnx_data_type["STRING"] = 8
 onnx_data_type["BOOL"] = 9
@@ -23,12 +23,32 @@ onnx_data_type["COMPLEX64"] = 14
 onnx_data_type["COMPLEX128"] = 15
 onnx_data_type["BFLOAT16"] = 16
 
+
+attr_type = {}
+attr_type["UNDEFINED"] = 0
+attr_type["FLOAT"] = 1
+attr_type["INT"] = 2
+attr_type["STRING"] = 3
+attr_type["TENSOR"] = 4
+attr_type["GRAPH"] = 5
+attr_type["FLOATS"] = 6
+attr_type["INTS"] = 7
+attr_type["STRINGS"] = 8
+attr_type["TENSORS"] = 9
+attr_type["GRAPHS"] = 10
+attr_type["SPARSE_TENSOR"] = 11
+attr_type["SPARSE_TENSORS"] = 12
+
 def get_node_attribute(node_attr, attributes):
     for i in range(len(node_attr)):
-        if node_attr[i].type == 2:
+        if node_attr[i].type == attr_type["INT"]:
             attributes[node_attr[i].name] = [node_attr[i].i]
-        elif node_attr[i].type == 7:
+        elif node_attr[i].type == attr_type["INTS"]:
             attributes[node_attr[i].name] = list(node_attr[i].ints)
+        elif node_attr[i].type == attr_type["FLOAT"]:
+            attributes[node_attr[i].name] = [node_attr[i].f]
+        elif node_attr[i].type == attr_type["FLOATS"]:
+            attributes[node_attr[i].name] = list(node_attr[i].floats)            
         else:
             pass
 
@@ -40,8 +60,6 @@ def conv_node_func(node_info, weights_info):
     op_type = node_info.op_type
     attributes = {}
     node_attr = node_info.attribute
-    # for i in range(len(node_attr)):
-    #     attributes[node_attr[i].name] = list(node_attr[i].ints)
     get_node_attribute(node_attr, attributes)
 
     node["inputs"] = inputs
@@ -182,8 +200,6 @@ def softmax_node_func(node_info, weights_info):
     op_type = node_info.op_type
     attributes = {}
     node_attr = node_info.attribute
-    # for i in range(len(node_attr)):
-    #     attributes[node_attr[i].name] = list(node_attr[i].ints)
     get_node_attribute(node_attr, attributes)
 
     node["inputs"] = inputs
@@ -201,8 +217,6 @@ def reducesum_node_func(node_info, weights_info):
     op_type = node_info.op_type
     attributes = {}
     node_attr = node_info.attribute
-    # for i in range(len(node_attr)):
-    #     attributes[node_attr[i].name] = list(node_attr[i].ints)
     get_node_attribute(node_attr, attributes)
 
     node["inputs"] = inputs
@@ -269,6 +283,41 @@ def maxpool_node_func(node_info, weights_info):
     node["attributes"] = attributes
     return node
 node_func["MaxPool"] = maxpool_node_func
+
+#AveragePool op
+def averagepool_node_func(node_info, weights_info):
+    node = {}
+    inputs = list(node_info.input)
+    outputs = list(node_info.output)
+    op_type = node_info.op_type
+    attributes = {}
+    node_attr = node_info.attribute
+    get_node_attribute(node_attr, attributes)
+
+    node["inputs"] = inputs
+    node["outputs"] = outputs
+    node["op_type"] = op_type
+    node["attributes"] = attributes
+    return node
+node_func["AveragePool"] = averagepool_node_func
+
+
+#Gemm op
+def gemm_node_func(node_info, weights_info):
+    node = {}
+    inputs = list(node_info.input)
+    outputs = list(node_info.output)
+    op_type = node_info.op_type
+    attributes = {}
+    node_attr = node_info.attribute
+    get_node_attribute(node_attr, attributes)
+
+    node["inputs"] = inputs
+    node["outputs"] = outputs
+    node["op_type"] = op_type
+    node["attributes"] = attributes
+    return node
+node_func["Gemm"] = gemm_node_func
 
 #Cast op
 def cast_node_func(node_info, weights_info):
@@ -351,6 +400,19 @@ def equal_node_func(node_info, weights_info):
     return node
 node_func["Equal"] = equal_node_func
 
+#Relu op
+def relu_node_func(node_info, weights_info):
+    node = {}
+    inputs = list(node_info.input)
+    outputs = list(node_info.output)
+    op_type = node_info.op_type
+
+    node["inputs"] = inputs
+    node["outputs"] = outputs
+    node["op_type"] = op_type
+    return node
+node_func["Relu"] = relu_node_func
+
 #NonZero op
 def nonzero_node_func(node_info, weights_info):
     node = {}
@@ -407,7 +469,7 @@ def parse_onnx_graph(graph, weights_info):
 
 def save_simplify_graph(simply_graph, name):
     json_str = json.dumps(simply_graph)
-    with open(name + '.json', 'w') as f:
+    with open(name + '_graph.json', 'w') as f:
         f.write(json_str)
 
 def get_graph_weights(graph):
@@ -513,7 +575,10 @@ def generate_depend_nodes(topo_order, simply_graph):
 
 if __name__ == "__main__":
     #1 load onnx model
-    onnx_model = onnx.load("hfnet_github_desc_fp16.onnx")
+    onnx_file_name = "../example/lenet/lenet_simplify.onnx"
+    onnx_model = onnx.load(onnx_file_name)
+    json_file_prefix = os.path.dirname(onnx_file_name) + "/net"
+    weight_file_prefix = json_file_prefix
     #2 check onnx model
     # onnx.checker.check_model(onnx_model)
     #3 parse onnx graph
@@ -521,7 +586,7 @@ if __name__ == "__main__":
     weights_info, fp16_flag = get_graph_weights(graph)
     simply_graph = parse_onnx_graph(graph, weights_info)
     #4 update weights info offset and save to file
-    update_weights_offset_and_save(weights_info, "hfnet_github")
+    update_weights_offset_and_save(weights_info, weight_file_prefix)
     #5 generate topology order from simply graph
     topo_order = generate_topo_order(simply_graph["nodes_info"], weights_info)
     #6 generate depend nodes from topo order
@@ -532,6 +597,6 @@ if __name__ == "__main__":
     simply_graph["topo_order"] = topo_order
     simply_graph["weights_info"] = weights_info
     simply_graph["fp16_flag"] = fp16_flag
-    save_simplify_graph(simply_graph, "hfnet_github_graph")
+    save_simplify_graph(simply_graph, json_file_prefix)
 
     print("convert success!!!")

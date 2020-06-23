@@ -34,9 +34,11 @@ namespace tensorrtInference
         {
             if (onnxPads.size() > 0)
             {
+                begPadding->nbDims = kernelSize->nbDims;
+                endPadding->nbDims = kernelSize->nbDims;
                 int ndim = onnxPads.size() / 2;
                 CHECK_ASSERT(ndim <= kernelSize->nbDims, "pads must be less than 2x kernel size\n");
-                for (int i = 0; i < kernelSize->nbDims; ++i)
+                for (int i = 0; i < begPadding->nbDims; ++i)
                 {
                     if (i < ndim)
                     {

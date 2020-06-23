@@ -9,7 +9,7 @@
 using namespace std;
 using namespace tensorrtInference;
 
-#define NET_NAME "lenet"
+#define NET_NAME "./example/lenet"
 #define GRAPH_JSON_FILE(net)    net "/net_graph.json"
 #define GRAPH_WEIGHTS_FILE(net) net "/net_weights.bin"
 #define GRAPH_ENGINE_FILE(net)  net "/net.engine"

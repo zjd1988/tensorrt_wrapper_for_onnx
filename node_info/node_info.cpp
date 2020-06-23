@@ -15,8 +15,9 @@
 #include "gather_node_info.hpp"
 #include "unsqueeze_node_info.hpp"
 #include "concatenation_node_info.hpp"
+#include "gemm_node_info.hpp"
 
-#define PARSE_NODE_FUNC(nodeType)                                          \
+#define PARSE_NODE_FUNC_DEF(nodeType)                                      \
 nodeInfo* parse##nodeType##NodeInfo(std::string type, Json::Value& root)   \
 {                                                                          \
     nodeInfo* node = new nodeType##NodeInfo();                             \
@@ -27,10 +28,11 @@ nodeInfo* parse##nodeType##NodeInfo(std::string type, Json::Value& root)   \
     return nullptr;                                                        \
 }
 
+#define PARSE_NODE_FUNC(nodeType) parse##nodeType##NodeInfo
 
-
-namespace tensorrtInference 
+namespace tensorrtInference
 {
+    //nodeInfo member function def
     nodeInfo::nodeInfo() {
         inputs.clear();
         outputs.clear();
@@ -63,86 +65,70 @@ namespace tensorrtInference
     }
 
 
-    class NodeParse
-    {
-    private:
-        static NodeParse* instance;
-        std::map<std::string, nodeParseFunc> nodeParseFuncMap;
-        std::map<std::string, std::string> onnxNodeTypeToTensorrtNodeTypeMap;
-        void registerNodeParseFunc();
-        NodeParse()
-        {
-        }
-    public:
-        nodeParseFunc getNodeParseFunc(std::string nodeType);
-        static NodeParse* getInstance() {
-            return instance;
-        }
-    };
+    PARSE_NODE_FUNC_DEF(Conv2d)
+    PARSE_NODE_FUNC_DEF(ElementWise)
+    PARSE_NODE_FUNC_DEF(Activation)
+    PARSE_NODE_FUNC_DEF(Shuffle)
+    PARSE_NODE_FUNC_DEF(Padding)
+    PARSE_NODE_FUNC_DEF(Unary)
+    PARSE_NODE_FUNC_DEF(Softmax)
+    PARSE_NODE_FUNC_DEF(Reduce)
+    PARSE_NODE_FUNC_DEF(Pooling)
+    PARSE_NODE_FUNC_DEF(Slice)
+    PARSE_NODE_FUNC_DEF(Identity)
+    PARSE_NODE_FUNC_DEF(NonZero)
+    PARSE_NODE_FUNC_DEF(Shape)
+    PARSE_NODE_FUNC_DEF(Gather)
+    PARSE_NODE_FUNC_DEF(Unsqueeze)
+    PARSE_NODE_FUNC_DEF(Concatenation)
+    PARSE_NODE_FUNC_DEF(Gemm)
+
+    //nodeParseFunc member function def
     nodeParseFunc NodeParse::getNodeParseFunc(std::string onnxNodeType)
     {
-        std::string tensorrtNodeType;
-        if(onnxNodeTypeToTensorrtNodeTypeMap.size() == 0)
+        if(nodeParseFuncMap.size() == 0)
             registerNodeParseFunc();
-        tensorrtNodeType = onnxNodeTypeToTensorrtNodeTypeMap[onnxNodeType];
-        if(nodeParseFuncMap.count(tensorrtNodeType) != 0)
-            return nodeParseFuncMap[tensorrtNodeType];
+        if(nodeParseFuncMap.count(onnxNodeType) != 0)
+            return nodeParseFuncMap[onnxNodeType];
         else
             (nodeParseFunc)nullptr;
     }
     void NodeParse::registerNodeParseFunc()
     {
-        onnxNodeTypeToTensorrtNodeTypeMap["Conv"]             = "Conv2d";
-        onnxNodeTypeToTensorrtNodeTypeMap["Add"]              = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Sub"]              = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Mul"]              = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Div"]              = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Max"]              = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Equal"]            = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Greater"]          = "ElementWise";
-        onnxNodeTypeToTensorrtNodeTypeMap["Clip"]             = "Activation";
-        onnxNodeTypeToTensorrtNodeTypeMap["Reshape"]          = "Shuffle";
-        onnxNodeTypeToTensorrtNodeTypeMap["Transpose"]        = "Shuffle";
-        onnxNodeTypeToTensorrtNodeTypeMap["Pad"]              = "Padding";
-        onnxNodeTypeToTensorrtNodeTypeMap["Sqrt"]             = "Unary";
-        onnxNodeTypeToTensorrtNodeTypeMap["Reciprocal"]       = "Unary";
-        onnxNodeTypeToTensorrtNodeTypeMap["Abs"]              = "Unary";
-        onnxNodeTypeToTensorrtNodeTypeMap["Softmax"]          = "Softmax";
-        onnxNodeTypeToTensorrtNodeTypeMap["ReduceSum"]        = "Reduce";
-        onnxNodeTypeToTensorrtNodeTypeMap["MaxPool"]          = "Pooling";
-        onnxNodeTypeToTensorrtNodeTypeMap["AveragePool"]      = "Pooling";
-        onnxNodeTypeToTensorrtNodeTypeMap["Slice"]            = "Slice";
-        onnxNodeTypeToTensorrtNodeTypeMap["Cast"]             = "Identity";
-        onnxNodeTypeToTensorrtNodeTypeMap["NonZero"]          = "NonZero";
-        onnxNodeTypeToTensorrtNodeTypeMap["Shape"]            = "Shape";
-        onnxNodeTypeToTensorrtNodeTypeMap["Gather"]           = "Gather";
-        onnxNodeTypeToTensorrtNodeTypeMap["Unsqueeze"]        = "Unsqueeze";
-        onnxNodeTypeToTensorrtNodeTypeMap["Concat"]           = "Concatenation";
+        nodeParseFuncMap["Conv"]             = PARSE_NODE_FUNC(Conv2d);
+        nodeParseFuncMap["Add"]              = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Sub"]              = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Mul"]              = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Div"]              = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Max"]              = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Equal"]            = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Greater"]          = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Clip"]             = PARSE_NODE_FUNC(Activation);
+        nodeParseFuncMap["Relu"]             = PARSE_NODE_FUNC(Activation);
+        nodeParseFuncMap["Reshape"]          = PARSE_NODE_FUNC(Shuffle);
+        nodeParseFuncMap["Transpose"]        = PARSE_NODE_FUNC(Shuffle);
+        nodeParseFuncMap["Pad"]              = PARSE_NODE_FUNC(Padding);
+        nodeParseFuncMap["Sqrt"]             = PARSE_NODE_FUNC(Unary);
+        nodeParseFuncMap["Reciprocal"]       = PARSE_NODE_FUNC(Unary);
+        nodeParseFuncMap["Abs"]              = PARSE_NODE_FUNC(Unary);
+        nodeParseFuncMap["Softmax"]          = PARSE_NODE_FUNC(Softmax);
+        nodeParseFuncMap["ReduceSum"]        = PARSE_NODE_FUNC(Reduce);
+        nodeParseFuncMap["MaxPool"]          = PARSE_NODE_FUNC(Pooling);
+        nodeParseFuncMap["AveragePool"]      = PARSE_NODE_FUNC(Pooling);
+        nodeParseFuncMap["Slice"]            = PARSE_NODE_FUNC(Slice);
+        nodeParseFuncMap["Cast"]             = PARSE_NODE_FUNC(Identity);
+        nodeParseFuncMap["NonZero"]          = PARSE_NODE_FUNC(NonZero);
+        nodeParseFuncMap["Shape"]            = PARSE_NODE_FUNC(Shape);
+        nodeParseFuncMap["Gather"]           = PARSE_NODE_FUNC(Gather);
+        nodeParseFuncMap["Unsqueeze"]        = PARSE_NODE_FUNC(Unsqueeze);
+        nodeParseFuncMap["Concat"]           = PARSE_NODE_FUNC(Concatenation);
+        nodeParseFuncMap["Gemm"]             = PARSE_NODE_FUNC(Gemm);
     }
     NodeParse* NodeParse::instance = new NodeParse;
-
-   
-    PARSE_NODE_FUNC(Conv2d)
-    PARSE_NODE_FUNC(ElementWise)
-    PARSE_NODE_FUNC(Activation)
-    PARSE_NODE_FUNC(Shuffle)
-    PARSE_NODE_FUNC(Padding)
-    PARSE_NODE_FUNC(Unary)
-    PARSE_NODE_FUNC(Softmax)
-    PARSE_NODE_FUNC(Reduce)
-    PARSE_NODE_FUNC(Pooling)
-    PARSE_NODE_FUNC(Slice)
-    PARSE_NODE_FUNC(Identity)
-    PARSE_NODE_FUNC(NonZero)
-    PARSE_NODE_FUNC(Shape)
-    PARSE_NODE_FUNC(Gather)
-    PARSE_NODE_FUNC(Unsqueeze)
-    PARSE_NODE_FUNC(Concatenation)
 
 
     nodeParseFunc getNodeParseFuncMap(std::string onnxNodeType)
     {
-        std::string tensorrtNodeType;
         auto instance = NodeParse::getInstance();
         if(instance != nullptr)
             return instance->getNodeParseFunc(onnxNodeType);

@@ -120,7 +120,6 @@ namespace tensorrtInference
 
     bool weightsAndGraphParse::extractNodeInfo(Json::Value &root)
     {
-        
         for (auto elem : root.getMemberNames()) {
             if(root[elem]["op_type"].isString())
             {

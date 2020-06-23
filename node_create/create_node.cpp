@@ -15,6 +15,7 @@
 #include "create_gather_node.hpp"
 #include "create_unsqueeze_node.hpp"
 #include "create_concatenation_node.hpp"
+#include "create_gemm_node.hpp"
 
 namespace tensorrtInference
 {
@@ -43,7 +44,8 @@ namespace tensorrtInference
             createNodeFuncMap["Shape"]          = tensorrtInference::createShapeNode;
             createNodeFuncMap["Gather"]         = tensorrtInference::createGatherNode;
             createNodeFuncMap["Unsqueeze"]      = tensorrtInference::createUnsqueezeNode;
-            createNodeFuncMap["Concatenation"]  = tensorrtInference::createConcatenationNode; 
+            createNodeFuncMap["Concatenation"]  = tensorrtInference::createConcatenationNode;
+            createNodeFuncMap["Gemm"]           = tensorrtInference::createGemmNode;
         }
         auto inputs = nodeConfInfo->getInputs();
         for(int i = 0; i < inputs.size(); i++)

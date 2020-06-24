@@ -8,9 +8,15 @@ coding ...
 
 3 python 3.5+
 
-# verified models
-1 lenet ./example/lenet/lenet.onnx    ------- not ready
+4 pytorch 1.5(cpu/gpu version)
 
+
+# verified models
+1 lenet        ./example/lenet/lenet_simplify.onnx              ------- verified(fp32)
+
+2 mobilenet_v2 ./example/mobilenet_v2_simplify.onnx             ------- verified(fp32)
+
+3 vgg          ./example/vgg/vgg_simplify.onnx                  ------- verified(fp32)
 
 # limitations
 1 only support batch size 1

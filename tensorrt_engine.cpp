@@ -26,6 +26,7 @@ namespace tensorrtInference
     }
     tensorrtEngine::tensorrtEngine(std::string engineFile)
     {
+        builder = nullptr;
         char *trtModelStream = nullptr;
         size_t size = 0;
         std::ifstream file(engineFile.c_str(), std::ios::binary);
@@ -243,7 +244,7 @@ namespace tensorrtInference
         
         // Build engine
         builder->setMaxBatchSize(maxBatchSize);
-        builder->setMaxWorkspaceSize(1 << 20);
+        builder->setMaxWorkspaceSize(1 << 30);
         builder->setFp16Mode(fp16Flag);
         cudaEngine = builder->buildCudaEngine(*network);
         CHECK_ASSERT(cudaEngine != nullptr, "createEngine fail!\n");

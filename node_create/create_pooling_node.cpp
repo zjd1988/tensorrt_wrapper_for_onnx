@@ -11,6 +11,10 @@ namespace tensorrtInference
     void getKernelParams(PoolingNodeInfo* nodeInfo, nvinfer1::Dims* kernelSize, nvinfer1::Dims* strides, nvinfer1::Dims* begPadding, 
     nvinfer1::Dims* endPadding, nvinfer1::PaddingMode& paddingMode, bool& countExcludePadding, const bool poolingCeilMode)
     {
+        kernelSize->nbDims = 0;
+        strides->nbDims = 0;
+        begPadding->nbDims = 0;
+        endPadding->nbDims = 0;
         auto onnxKernelShape      = nodeInfo->getKernelShape();
         auto onnxPads             = nodeInfo->getPads();
         auto onnxStrides          = nodeInfo->getStrides();

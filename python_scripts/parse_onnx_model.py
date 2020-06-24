@@ -6,7 +6,7 @@ import numpy as np
 
 node_func = {}
 onnx_data_type = {}
-onnx_data_type["DEFAULT"] = 0
+onnx_data_type["UNDEFINED"] = 0
 onnx_data_type["FLOAT"] = 1
 onnx_data_type["UINT8"] = 2
 onnx_data_type["INT8"] = 3
@@ -52,6 +52,23 @@ def get_node_attribute(node_attr, attributes):
             attributes[node_attr[i].name] = list(node_attr[i].floats)            
         else:
             pass
+
+def get_node_raw_data(node_ele):
+    count = 0
+    raw_data = []
+    if len(node_ele.raw_data) == 0:
+        if node_ele.data_type == onnx_data_type["FLOAT"]:
+            raw_data = np.array(node_ele.float_data).astype(np.float32)
+            raw_data = raw_data.tobytes()
+            count = len(raw_data)
+        elif node_ele.data_type == onnx_data_type["FLOAT16"]:
+            raw_data = np.array(node_ele.float_data).astype(np.float16)
+            raw_data = raw_data.tobytes()
+            count = len(raw_data)
+    else:
+        count = len(node_ele.raw_data)
+        raw_data = node_ele.raw_data
+    return count, raw_data
 
 # conv op 
 def conv_node_func(node_info, weights_info):
@@ -235,8 +252,9 @@ def transpose_node_func(node_info, weights_info):
     op_type = node_info.op_type
     attributes = {}
     node_attr = node_info.attribute
-    for i in range(len(node_attr)):
-        attributes[node_attr[i].name] = list(node_attr[i].ints)
+    get_node_attribute(node_attr, attributes)
+    # for i in range(len(node_attr)):
+    #     attributes[node_attr[i].name] = list(node_attr[i].ints)
 
     node["inputs"] = inputs
     node["outputs"] = outputs
@@ -275,8 +293,9 @@ def maxpool_node_func(node_info, weights_info):
     op_type = node_info.op_type
     attributes = {}
     node_attr = node_info.attribute
-    for i in range(len(node_attr)):
-        attributes[node_attr[i].name] = list(node_attr[i].ints)
+    get_node_attribute(node_attr, attributes)
+    # for i in range(len(node_attr)):
+    #     attributes[node_attr[i].name] = list(node_attr[i].ints)
 
     node["inputs"] = inputs
     node["outputs"] = outputs
@@ -302,6 +321,18 @@ def averagepool_node_func(node_info, weights_info):
     return node
 node_func["AveragePool"] = averagepool_node_func
 
+#GlobalAveragePool
+def globalaveragepool_node_func(node_info, weights_info):
+    node = {}
+    inputs = list(node_info.input)
+    outputs = list(node_info.output)
+    op_type = node_info.op_type
+
+    node["inputs"] = inputs
+    node["outputs"] = outputs
+    node["op_type"] = op_type
+    return node
+node_func["GlobalAveragePool"] = globalaveragepool_node_func
 
 #Gemm op
 def gemm_node_func(node_info, weights_info):
@@ -336,6 +367,23 @@ def cast_node_func(node_info, weights_info):
     node["attributes"] = attributes
     return node
 node_func["Cast"] = cast_node_func
+
+#Flatten op
+def flatten_node_func(node_info, weights_info):
+    node = {}
+    inputs = list(node_info.input)
+    outputs = list(node_info.output)
+    op_type = node_info.op_type
+    attributes = {}
+    node_attr = node_info.attribute
+    get_node_attribute(node_attr, attributes)
+
+    node["inputs"] = inputs
+    node["outputs"] = outputs
+    node["op_type"] = op_type
+    node["attributes"] = attributes
+    return node
+node_func["Flatten"] = flatten_node_func
 
 #Abs op
 def abs_node_func(node_info, weights_info):
@@ -495,15 +543,16 @@ def get_graph_weights(graph):
 
     for ele in weights:
         temp = {}
-        temp["count"] = len(ele.raw_data)
         temp["offset"] = offset
         temp["data_type"] = ele.data_type
         shape = list(ele.dims)
         if shape == []:
             shape = [1]
         temp["tensor_shape"] = shape
-        temp["raw_data"] = ele.raw_data
-        offset = offset + len(ele.raw_data)
+        count, raw_data = get_node_raw_data(ele)
+        temp["count"] = count
+        temp["raw_data"] = raw_data
+        offset = offset + count
         weights_info[ele.name] = temp
 
     weights_info["net_output"] = output_tensor
@@ -577,6 +626,7 @@ def generate_depend_nodes(topo_order, simply_graph):
 if __name__ == "__main__":
     
     #-------------- 1 load onnx model ---------------------
+    # onnx_file_name = "/home/xj-zjd/桌面/qiantai_map/test_onnxruntime/tensorrt_wrapper_for_onnx/example/mobilenet_v2/mobilenet_v2_simplify.onnx"
     onnx_file_name = sys.argv[1]
     onnx_model = onnx.load(onnx_file_name)
     json_file_prefix = os.path.dirname(onnx_file_name) + "/net"
@@ -601,5 +651,5 @@ if __name__ == "__main__":
     simply_graph["weights_info"] = weights_info
     simply_graph["fp16_flag"] = fp16_flag
     save_simplify_graph(simply_graph, json_file_prefix)
-    
+
     print("convert success!!!")

@@ -8,10 +8,13 @@ namespace tensorrtInference
     {
         setNodeType("Shuffle");
         setSubNodeType("");
+        axis = 1;
+        perm.clear();
     }
     ShuffleNodeInfo::~ShuffleNodeInfo()
     {  
-
+        axis = 1;
+        perm.clear();
     }
     bool ShuffleNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
@@ -40,6 +43,12 @@ namespace tensorrtInference
                     perm.push_back(attr[elem][i].asInt());
                 }
             }
+            if(elem.compare("axis") == 0)
+            {
+                auto size = attr[elem].size();
+                CHECK_ASSERT(size == 1, "Shuffle(Flatten) node's axis must have 1 element\n");
+                axis = attr[elem][0].asInt();
+            }            
             else
             {
                 LOG("current Shuffle node not support %s \n", elem.c_str());

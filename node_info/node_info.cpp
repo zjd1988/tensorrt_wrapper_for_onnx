@@ -95,34 +95,36 @@ namespace tensorrtInference
     }
     void NodeParse::registerNodeParseFunc()
     {
-        nodeParseFuncMap["Conv"]             = PARSE_NODE_FUNC(Conv2d);
-        nodeParseFuncMap["Add"]              = PARSE_NODE_FUNC(ElementWise);
-        nodeParseFuncMap["Sub"]              = PARSE_NODE_FUNC(ElementWise);
-        nodeParseFuncMap["Mul"]              = PARSE_NODE_FUNC(ElementWise);
-        nodeParseFuncMap["Div"]              = PARSE_NODE_FUNC(ElementWise);
-        nodeParseFuncMap["Max"]              = PARSE_NODE_FUNC(ElementWise);
-        nodeParseFuncMap["Equal"]            = PARSE_NODE_FUNC(ElementWise);
-        nodeParseFuncMap["Greater"]          = PARSE_NODE_FUNC(ElementWise);
-        nodeParseFuncMap["Clip"]             = PARSE_NODE_FUNC(Activation);
-        nodeParseFuncMap["Relu"]             = PARSE_NODE_FUNC(Activation);
-        nodeParseFuncMap["Reshape"]          = PARSE_NODE_FUNC(Shuffle);
-        nodeParseFuncMap["Transpose"]        = PARSE_NODE_FUNC(Shuffle);
-        nodeParseFuncMap["Pad"]              = PARSE_NODE_FUNC(Padding);
-        nodeParseFuncMap["Sqrt"]             = PARSE_NODE_FUNC(Unary);
-        nodeParseFuncMap["Reciprocal"]       = PARSE_NODE_FUNC(Unary);
-        nodeParseFuncMap["Abs"]              = PARSE_NODE_FUNC(Unary);
-        nodeParseFuncMap["Softmax"]          = PARSE_NODE_FUNC(Softmax);
-        nodeParseFuncMap["ReduceSum"]        = PARSE_NODE_FUNC(Reduce);
-        nodeParseFuncMap["MaxPool"]          = PARSE_NODE_FUNC(Pooling);
-        nodeParseFuncMap["AveragePool"]      = PARSE_NODE_FUNC(Pooling);
-        nodeParseFuncMap["Slice"]            = PARSE_NODE_FUNC(Slice);
-        nodeParseFuncMap["Cast"]             = PARSE_NODE_FUNC(Identity);
-        nodeParseFuncMap["NonZero"]          = PARSE_NODE_FUNC(NonZero);
-        nodeParseFuncMap["Shape"]            = PARSE_NODE_FUNC(Shape);
-        nodeParseFuncMap["Gather"]           = PARSE_NODE_FUNC(Gather);
-        nodeParseFuncMap["Unsqueeze"]        = PARSE_NODE_FUNC(Unsqueeze);
-        nodeParseFuncMap["Concat"]           = PARSE_NODE_FUNC(Concatenation);
-        nodeParseFuncMap["Gemm"]             = PARSE_NODE_FUNC(Gemm);
+        nodeParseFuncMap["Conv"]                      = PARSE_NODE_FUNC(Conv2d);
+        nodeParseFuncMap["Add"]                       = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Sub"]                       = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Mul"]                       = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Div"]                       = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Max"]                       = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Equal"]                     = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Greater"]                   = PARSE_NODE_FUNC(ElementWise);
+        nodeParseFuncMap["Clip"]                      = PARSE_NODE_FUNC(Activation);
+        nodeParseFuncMap["Relu"]                      = PARSE_NODE_FUNC(Activation);
+        nodeParseFuncMap["Reshape"]                   = PARSE_NODE_FUNC(Shuffle);
+        nodeParseFuncMap["Transpose"]                 = PARSE_NODE_FUNC(Shuffle);
+        nodeParseFuncMap["Flatten"]                   = PARSE_NODE_FUNC(Shuffle);
+        nodeParseFuncMap["Pad"]                       = PARSE_NODE_FUNC(Padding);
+        nodeParseFuncMap["Sqrt"]                      = PARSE_NODE_FUNC(Unary);
+        nodeParseFuncMap["Reciprocal"]                = PARSE_NODE_FUNC(Unary);
+        nodeParseFuncMap["Abs"]                       = PARSE_NODE_FUNC(Unary);
+        nodeParseFuncMap["Softmax"]                   = PARSE_NODE_FUNC(Softmax);
+        nodeParseFuncMap["ReduceSum"]                 = PARSE_NODE_FUNC(Reduce);
+        nodeParseFuncMap["GlobalAveragePool"]         = PARSE_NODE_FUNC(Reduce);
+        nodeParseFuncMap["MaxPool"]                   = PARSE_NODE_FUNC(Pooling);
+        nodeParseFuncMap["AveragePool"]               = PARSE_NODE_FUNC(Pooling);
+        nodeParseFuncMap["Slice"]                     = PARSE_NODE_FUNC(Slice);
+        nodeParseFuncMap["Cast"]                      = PARSE_NODE_FUNC(Identity);
+        nodeParseFuncMap["NonZero"]                   = PARSE_NODE_FUNC(NonZero);
+        nodeParseFuncMap["Shape"]                     = PARSE_NODE_FUNC(Shape);
+        nodeParseFuncMap["Gather"]                    = PARSE_NODE_FUNC(Gather);
+        nodeParseFuncMap["Unsqueeze"]                 = PARSE_NODE_FUNC(Unsqueeze);
+        nodeParseFuncMap["Concat"]                    = PARSE_NODE_FUNC(Concatenation);
+        nodeParseFuncMap["Gemm"]                      = PARSE_NODE_FUNC(Gemm);
     }
     NodeParse* NodeParse::instance = new NodeParse;
 

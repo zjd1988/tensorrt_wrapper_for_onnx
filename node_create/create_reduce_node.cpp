@@ -11,9 +11,13 @@ namespace tensorrtInference
         auto reduceNodeInfo = (ReduceNodeInfo*)nodeConfInfo;
         auto subType = reduceNodeInfo->getSubNodeType();
         nvinfer1::ReduceOperation operation;
+        nvinfer1::IReduceLayer* reduce = nullptr;
         //ReduceSum
         if(subType.compare("ReduceSum") == 0) {
             operation = nvinfer1::ReduceOperation::kSUM;
+        }
+        else if(subType.compare("GlobalAveragePool") == 0) {
+            operation = nvinfer1::ReduceOperation::kAVG;
         }
         else {
             LOG("Current not support unary operation(%s) \n", subType);
@@ -28,7 +32,15 @@ namespace tensorrtInference
             axes |= (1 << axesNodeConfig[i]);
         }
         bool keepdims = reduceNodeInfo->getKeepdims();
-        nvinfer1::IReduceLayer* reduce = network->addReduce(*inputTensors, operation, axes, keepdims);
+        if(subType.compare("GlobalAveragePool") == 0){
+            keepdims = true;
+            nvinfer1::Dims dims = inputTensors->getDimensions();
+            // Generate a bitmask of all 1s except the last 2 bits (N and C axes)
+            axes = ((1 << dims.nbDims) - 1) & ~0b11;
+            reduce = network->addReduce(*inputTensors, operation, axes, keepdims);
+        }
+        else
+            reduce = network->addReduce(*inputTensors, operation, axes, keepdims);
         CHECK_ASSERT(reduce, "create reduce node fail\n");
         return reduce;
     }

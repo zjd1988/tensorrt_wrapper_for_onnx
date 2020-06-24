@@ -14,8 +14,10 @@ namespace tensorrtInference
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
         std::vector<int> getPerm() { return perm; }
+        int getAxis() { return axis; }
     private:
         std::vector<int> perm;
+        int axis; //Flatten
     };
 } // tensorrtInference
 #endif // __SHUFFLE_NODE_INFO_HPP__

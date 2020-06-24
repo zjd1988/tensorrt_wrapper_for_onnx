@@ -172,9 +172,7 @@ namespace tensorrtInference
         {
             auto nodeType = it.second->getNodeType();
             auto subNodeType = it.second->getSubNodeType();
-            // LOG("node type: %s , sub node type: %s\n", nodeType.c_str(), subNodeType.c_str());
-            // if(nodeType.compare("ElementWise") == 0 || subNodeType.compare("Reshape") == 0)
-            if(nodeType.compare("ElementWise") == 0)
+            if(nodeType.compare("ElementWise") == 0 || nodeType.compare("Gemm") == 0)
             {
                 auto inputs = it.second->getInputs();
                 int size = inputs.size();

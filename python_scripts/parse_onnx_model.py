@@ -1,6 +1,7 @@
 import onnx
 import json
 import os
+import sys
 import numpy as np
 
 node_func = {}
@@ -574,29 +575,31 @@ def generate_depend_nodes(topo_order, simply_graph):
 
 
 if __name__ == "__main__":
-    #1 load onnx model
-    onnx_file_name = "../example/lenet/lenet_simplify.onnx"
+    
+    #-------------- 1 load onnx model ---------------------
+    onnx_file_name = sys.argv[1]
     onnx_model = onnx.load(onnx_file_name)
     json_file_prefix = os.path.dirname(onnx_file_name) + "/net"
     weight_file_prefix = json_file_prefix
-    #2 check onnx model
+
+    #-------------- 2 check onnx model -------------- 
     # onnx.checker.check_model(onnx_model)
-    #3 parse onnx graph
+
+    #-------------- 3 parse onnx graph -------------- 
     graph = onnx_model.graph
     weights_info, fp16_flag = get_graph_weights(graph)
     simply_graph = parse_onnx_graph(graph, weights_info)
-    #4 update weights info offset and save to file
-    update_weights_offset_and_save(weights_info, weight_file_prefix)
-    #5 generate topology order from simply graph
-    topo_order = generate_topo_order(simply_graph["nodes_info"], weights_info)
-    #6 generate depend nodes from topo order
-    # depend_nodes = generate_depend_nodes(topo_order, simply_graph["nodes_info"])
 
-    
-    #7 save weights and simplify graph to files used for tensorrt
+    #-------------- 4 update weights info offset and save to file -------------- 
+    update_weights_offset_and_save(weights_info, weight_file_prefix)
+
+    #-------------- 5 generate topology order from simply graph -------------- 
+    topo_order = generate_topo_order(simply_graph["nodes_info"], weights_info)
+
+    #-------------- 6 save weights and simplify graph to files used for tensorrt -------------- 
     simply_graph["topo_order"] = topo_order
     simply_graph["weights_info"] = weights_info
     simply_graph["fp16_flag"] = fp16_flag
     save_simplify_graph(simply_graph, json_file_prefix)
-
+    
     print("convert success!!!")

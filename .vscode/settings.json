@@ -57,7 +57,8 @@
         "string": "cpp",
         "*.cuh": "cpp",
         "*.ipp": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "csignal": "cpp"
     },
     "python.pythonPath": "/home/xj-zjd/anaconda3/envs/tensorrt_wrapper/bin/python"
 }

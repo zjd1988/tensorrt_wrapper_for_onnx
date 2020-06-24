@@ -45,8 +45,11 @@ namespace tensorrtInference
         context = cudaEngine->createExecutionContext();
         CHECK_ASSERT(context != nullptr, "create context fail!\n");
         bool ret = mallocEngineMem();
-        CHECK_ASSERT(ret != true, "malloc engine host/device mem fail!\n");
+        CHECK_ASSERT(ret == true, "malloc engine host/device mem fail!\n");
         delete[] trtModelStream;
+        inferenceFlag = true;
+        cudaError_t cudastatus = cudaStreamCreate(&engineStream);
+        CHECK_ASSERT(cudastatus == cudaSuccess, "create cuda stream fail: %s\n", cudaGetErrorString(cudastatus));
     }
     tensorrtEngine::~tensorrtEngine()
     {
@@ -70,7 +73,8 @@ namespace tensorrtInference
         hostMemMap.clear();
         deviceMemMap.clear();
         deviceFp16MemMap.clear();
-        cudaStreamDestroy(stream);
+        if(inferenceFlag == true)
+            cudaStreamDestroy(engineStream);
     }
     bool tensorrtEngine::mallocEngineMem()
     {
@@ -82,9 +86,9 @@ namespace tensorrtInference
             nvinfer1::DataType dataType = engine.getBindingDataType(i);
             void *buffer = nullptr;
             if(dataType == nvinfer1::DataType::kHALF)
-                buffer = malloc(byteCount[i]);
-            else
                 buffer = malloc(byteCount[i] * 2);
+            else
+                buffer = malloc(byteCount[i]);
             CHECK_ASSERT(buffer != nullptr, "malloc %s host mem fail\n", engine.getBindingName(i));
             hostMemMap[i] = buffer;
 
@@ -148,48 +152,8 @@ namespace tensorrtInference
                                 nvinfer1::DataType::kFLOAT : nvinfer1::DataType::kHALF;
             nvinfer1::Weights weights{dataType, weightsInfo[constWeightTensors[i]].data, count};
             nvinfer1::ILayer* constLayer = nullptr;
-            if(shape.size() == 4 && shape[0] == 1)
-            {
-                nvinfer1::Dims dims;
-                dims.nbDims = 4;
-                dims.d[0] = shape[0];
-                dims.d[1] = shape[1];
-                dims.d[2] = shape[2];
-                dims.d[3] = shape[3];
-                constLayer = network->addConstant(dims, weights);
-            }
-            else if(shape.size() == 3)
-            {
-                nvinfer1::Dims dims;
-                dims.nbDims = 4;
-                dims.d[0] = 1;
-                dims.d[1] = shape[0];
-                dims.d[2] = shape[1];
-                dims.d[3] = shape[2];
-                constLayer = network->addConstant(dims, weights);
-            }
-            else if(shape.size() == 2)
-            {
-                nvinfer1::Dims dims;
-                dims.nbDims = 4;
-                dims.d[0] = 1;
-                dims.d[1] = 1;
-                dims.d[2] = shape[0];
-                dims.d[3] = shape[1];
-                constLayer = network->addConstant(dims, weights);
-            }
-            else if(shape.size() == 1)
-            {
-                nvinfer1::Dims dims;
-                dims.nbDims = 4;
-                dims.d[0] = 1;
-                dims.d[1] = 1;
-                dims.d[2] = 1;
-                dims.d[3] = shape[0];
-                constLayer = network->addConstant(dims, weights);
-            }
-            else
-                LOG("const tensor shape size is %d (%d %d %d %d), \n", shape.size(), shape[0], shape[1], shape[2], shape[3]);
+            nvinfer1::Dims dims = vectorToDims(shape);
+            constLayer = network->addConstant(dims, weights);
             CHECK_ASSERT(constLayer, "create const tensor (%s) fail\n");
             tensors[constWeightTensors[i]] = constLayer->getOutput(0);
         }
@@ -254,7 +218,7 @@ namespace tensorrtInference
             }
         }
     }
-    void tensorrtEngine::createEngine(unsigned int maxBatchSize)
+    void tensorrtEngine::createEngine(unsigned int maxBatchSize, bool fp16Flag)
     {
         bool ret = true;
         std::map<std::string, nvinfer1::ITensor*> tensors;
@@ -280,7 +244,7 @@ namespace tensorrtInference
         // Build engine
         builder->setMaxBatchSize(maxBatchSize);
         builder->setMaxWorkspaceSize(1 << 20);
-        builder->setFp16Mode(true);
+        builder->setFp16Mode(fp16Flag);
         cudaEngine = builder->buildCudaEngine(*network);
         CHECK_ASSERT(cudaEngine != nullptr, "createEngine fail!\n");
         LOG("createEngine success!\n");
@@ -289,7 +253,7 @@ namespace tensorrtInference
         network->destroy();
     }
 
-    std::map<std::string, void*> tensorrtEngine::getBindingNamesBufferMap()
+    std::map<std::string, void*> tensorrtEngine::getBindingNamesHostMemMap()
     {
         std::map<std::string, void*> bindingNamesBufferMap;
         if(cudaEngine == nullptr)
@@ -348,13 +312,13 @@ namespace tensorrtInference
             int count = bindingByteCount[bufferIndex];
             if(dataType == nvinfer1::DataType::kHALF)
             {
-                CudaImpl::ConvertFp16ToFp32CudaImpl(deviceFp16MemMap[bufferIndex], count, deviceMemMap[bufferIndex], stream);
+                CudaImpl::ConvertFp16ToFp32CudaImpl(deviceFp16MemMap[bufferIndex], count, deviceMemMap[bufferIndex], engineStream);
                 cudastatus = cudaGetLastError();
                 CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s launch fp16->fp32 fail: %s\n", engine.getBindingName(bufferIndex),
                         cudaGetErrorString(cudastatus));
                 count *= 2;
             }
-            cudastatus = cudaMemcpyAsync(hostMemMap[bufferIndex], deviceMemMap[bufferIndex], count, cudaMemcpyDeviceToHost, stream);
+            cudastatus = cudaMemcpyAsync(hostMemMap[bufferIndex], deviceMemMap[bufferIndex], count, cudaMemcpyDeviceToHost, engineStream);
             CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s copy to host from device fail: %s\n", engine.getBindingName(bufferIndex),
                         cudaGetErrorString(cudastatus));
         }
@@ -372,12 +336,12 @@ namespace tensorrtInference
             nvinfer1::DataType dataType = engine.getBindingDataType(i);
             int bufferIndex = i;
             int count = (dataType == nvinfer1::DataType::kHALF) ? bindingByteCount[bufferIndex] * 2: bindingByteCount[bufferIndex];
-            cudaError_t cudastatus = cudaMemcpyAsync(deviceMemMap[bufferIndex], hostMemMap[bufferIndex], count, cudaMemcpyHostToDevice, stream);
+            cudaError_t cudastatus = cudaMemcpyAsync(deviceMemMap[bufferIndex], hostMemMap[bufferIndex], count, cudaMemcpyHostToDevice, engineStream);
             CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s copy frome host to device fail: %s\n", engine.getBindingName(bufferIndex),
                         cudaGetErrorString(cudastatus));
             if(dataType == nvinfer1::DataType::kHALF)
             {
-                CudaImpl::ConvertFp32ToFp16CudaImpl(deviceMemMap[bufferIndex], count / 2, deviceFp16MemMap[bufferIndex], stream);
+                CudaImpl::ConvertFp32ToFp16CudaImpl(deviceMemMap[bufferIndex], count / 2, deviceFp16MemMap[bufferIndex], engineStream);
                 cudastatus = cudaGetLastError();
                 CHECK_ASSERT(cudastatus == cudaSuccess, "tensor %s fp32->fp16 fail: %s\n", engine.getBindingName(i),
                             cudaGetErrorString(cudastatus));
@@ -399,9 +363,9 @@ namespace tensorrtInference
             else
                 bufferArr.push_back(deviceMemMap[i]);
         }
-        context->enqueue(batchSize, &bufferArr[0], stream, nullptr);
+        context->enqueue(batchSize, &bufferArr[0], engineStream, nullptr);
         postprocessOutputData();
         if(syncFlag)
-            cudaStreamSynchronize(stream);
+            cudaStreamSynchronize(engineStream);
     }
 }

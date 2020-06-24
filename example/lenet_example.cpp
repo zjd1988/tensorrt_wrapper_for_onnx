@@ -13,19 +13,25 @@ using namespace tensorrtInference;
 #define GRAPH_JSON_FILE(net)    net "/net_graph.json"
 #define GRAPH_WEIGHTS_FILE(net) net "/net_weights.bin"
 #define GRAPH_ENGINE_FILE(net)  net "/net.engine"
-#define SAVE_ENGINE 1
+#define SAVE_ENGINE 0
 
 
-void initLenetInputData(std::map<std::string, void*> bufferNameMap)
+
+void initInputData(std::map<std::string, void*> hostMemMap)
 {
-
+    auto input = (float*)(hostMemMap["input"]);
+    for(int i = 0; i < 32 * 32; i++)
+    {
+        input[i] = 1.0f;
+    }
 }
-void initInputData(std::string netName, std::map<std::string, void*> bufferNameMap)
+void printOutputData(std::map<std::string, void*> hostMemMap)
 {
-    if(netName.compare("lenet") == 0)
-        initLenetInputData(bufferNameMap);
-    else
-        printf("not support %s!\n", netName.c_str());
+    auto output = (float*)(hostMemMap["output"]);
+    for(int i = 0; i < 10; i++)
+    {
+        std::cout << output[i] << std::endl;
+    }
 }
 
 int main()
@@ -34,7 +40,7 @@ int main()
     std::string weightsFileName = GRAPH_WEIGHTS_FILE(NET_NAME);
     std::string engineFileName  = GRAPH_ENGINE_FILE(NET_NAME);
     // save engine file
-#ifdef SAVE_ENGINE
+#if SAVE_ENGINE
     tensorrtEngine engine(jsonFileName, weightsFileName);
     engine.saveEnginePlanFile(engineFileName);
 #else
@@ -49,17 +55,17 @@ int main()
     // cv::Mat inputFloatBmp( 721, 1281, CV_32FC1, cv::Scalar(0));
     // inputBmp.convertTo(inputFloatBmp, CV_32F);
     tensorrtEngine engine(engineFileName);
-    auto bindingNamesMap = engine.getBindingNamesIndexMap();
-    initInputData(NET_NAME, bindingNamesMap);
+    auto hostMem = engine.getBindingNamesHostMemMap();
+    initInputData(hostMem);
     
-    std::vector<void*> data(bindingNamesIndexMap.size());
     for (int i = 0; i < 100; i++) {
         auto start = std::chrono::system_clock::now();
         engine.doInference(true);
         auto end = std::chrono::system_clock::now();
         std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
     }
-    getBindingNamesBufferMap["output"]
+    printOutputData(hostMem);
 #endif
+
     std::cout << "test weights and graph parser !!!" << std::endl;
 }

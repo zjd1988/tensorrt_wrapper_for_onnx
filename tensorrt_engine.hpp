@@ -22,9 +22,8 @@ namespace tensorrtInference
         ~tensorrtEngine();
         bool saveEnginePlanFile(std::string saveFile);
         void doInference(bool syncFlag);
-        void createEngine(unsigned int maxBatchSize);
-        // std::map<std::string, int> getBindingNamesIndexMap();
-        std::map<std::string, void*> getBindingNamesBufferMap();
+        void createEngine(unsigned int maxBatchSize, bool fp16Flag = false);
+        std::map<std::string, void*> getBindingNamesHostMemMap();
     private:
         void initConstTensors(std::map<std::string, nvinfer1::ITensor*>& tensors, nvinfer1::INetworkDefinition* network);
         void setNetInput(std::map<std::string, nvinfer1::ITensor*>& tensors, nvinfer1::INetworkDefinition* network);
@@ -45,7 +44,8 @@ namespace tensorrtInference
         std::map<int, void*> deviceMemMap;
         std::map<int, void*> deviceFp16MemMap;
         //cuda stream
-        cudaStream_t stream;
+        bool inferenceFlag = false;
+        cudaStream_t engineStream;
     };
 }
 

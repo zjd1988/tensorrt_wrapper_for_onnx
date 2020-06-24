@@ -5,6 +5,7 @@
 #include "create_gemm_node.hpp"
 #include "gemm_node_info.hpp"
 
+
 namespace tensorrtInference
 {
     nvinfer1::MatrixOperation getMatrixOperation(const nvinfer1::ITensor& input, bool transpose) {
@@ -82,7 +83,6 @@ namespace tensorrtInference
         nvinfer1::IMatrixMultiplyLayer* matmul = network->addMatrixMultiply(*inputTensorA, opA, *inputTensorB, opB);
         nvinfer1::ITensor* matmulTensor = matmul->getOutput(0);
 
-        return matmul;
         // if (alpha != 1.f)
         // {
         //     nvinfer1::IConstantLayer* alphaConstant = addConstantScalar(ctx, alpha, ::ONNX_NAMESPACE::TensorProto_DataType_FLOAT);
@@ -91,26 +91,26 @@ namespace tensorrtInference
         //     nvinfer1::IElementWiseLayer* scaledMatmul = network->addElementWise(*alphaConstantTensor, *matmulTensor, nvinfer1::ElementWiseOperation::kPROD);
         //     matmulTensor = scaledMatmul->getOutput(0);
         // }
-        // if (inputs.size() == 3)
-        // {
-        //     nvinfer1::ITensor* biasTensor = &convertToTensor(inputs.at(2), ctx);
-
-        //     // Scale C if needed
-        //     if (beta != 1.f)
-        //     {
-        //         nvinfer1::IConstantLayer* betaConstant 
-        //             = addConstantScalar(ctx, beta, ::ONNX_NAMESPACE::TensorProto_DataType_FLOAT);
-        //         nvinfer1::ITensor* betaConstantTensor = betaConstant->getOutput(0);
-        //         broadcastTensors(ctx, betaConstantTensor, biasTensor);
-        //         nvinfer1::IElementWiseLayer* scaledBias = ctx->network()->addElementWise(
-        //             *betaConstantTensor, *biasTensor, nvinfer1::ElementWiseOperation::kPROD);
-        //         biasTensor = scaledBias->getOutput(0);
-        //     }
-        //     // A*B may be lower rank than C in TRT, so need to squeeze C.
-        //     broadcastTensors(ctx, matmulTensor, biasTensor);
-        //     nvinfer1::IElementWiseLayer* biasAdd = network->addElementWise(*matmulTensor, *biasTensor, nvinfer1::ElementWiseOperation::kSUM);
-        //     return biasAdd;
-        // }
+        if (inputs.size() == 3)
+        {
+            // nvinfer1::ITensor* biasTensor = &convertToTensor(inputs.at(2), ctx);
+            // // Scale C if needed
+            // if (beta != 1.f)
+            // {
+            //     nvinfer1::IConstantLayer* betaConstant 
+            //         = addConstantScalar(ctx, beta, ::ONNX_NAMESPACE::TensorProto_DataType_FLOAT);
+            //     nvinfer1::ITensor* betaConstantTensor = betaConstant->getOutput(0);
+            //     broadcastTensors(ctx, betaConstantTensor, biasTensor);
+            //     nvinfer1::IElementWiseLayer* scaledBias = ctx->network()->addElementWise(
+            //         *betaConstantTensor, *biasTensor, nvinfer1::ElementWiseOperation::kPROD);
+            //     biasTensor = scaledBias->getOutput(0);
+            // }
+            // A*B may be lower rank than C in TRT, so need to squeeze C.
+            broadcastTensors(network, matmulTensor, inputTensorC);
+            nvinfer1::IElementWiseLayer* biasAdd = network->addElementWise(*matmulTensor, *inputTensorC, nvinfer1::ElementWiseOperation::kSUM);
+            return biasAdd;
+        }
+        return matmul;
         // if (alpha != 1.f)
         //     return scaledMatmul;
         // else

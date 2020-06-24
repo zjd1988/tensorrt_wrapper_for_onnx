@@ -5,6 +5,7 @@
 #include "node_info.hpp"
 #include "weights_graph_parse.hpp"
 #include "utils.hpp"
+#include "common.hpp"
 #include <iostream>
 #include <numeric>
 #include <algorithm>

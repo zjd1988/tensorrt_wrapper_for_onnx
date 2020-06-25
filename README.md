@@ -12,7 +12,8 @@ coding ...
 
 
 # verified models
-nvidia-gpu  GTX1060(3GB)
+* nvidia-gpu  GTX1060(3GB)
+
 1 lenet        ./example/lenet/lenet_simplify.onnx              ------- verified(fp16/fp32)
 
 2 mobilenet_v2 ./example/mobilenet_v2_simplify.onnx             ------- verified(fp32)

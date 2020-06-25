@@ -9,7 +9,7 @@ using namespace std;
 
 namespace tensorrtInference 
 {
-    tensorrtEngine::tensorrtEngine(std::string jsonFile, std::string weightsFile)
+    tensorrtEngine::tensorrtEngine(std::string jsonFile, std::string weightsFile, bool fp16Flag)
     {
         builder = nullptr;
         cudaEngine = nullptr;
@@ -22,7 +22,7 @@ namespace tensorrtInference
         CHECK_ASSERT(builder != nullptr, "create builder fail!\n");
         weightsAndGraph.reset(new weightsAndGraphParse(jsonFile, weightsFile));
         CHECK_ASSERT((weightsAndGraph.get()->getInitFlag() != false), "init jsonFile and weightsFile fail!!\n");
-        createEngine(1);
+        createEngine(1, fp16Flag);
     }
     tensorrtEngine::tensorrtEngine(std::string engineFile)
     {
@@ -39,7 +39,7 @@ namespace tensorrtInference
             file.read(trtModelStream, size);
             file.close();
         }
-        IRuntime* runtime = createInferRuntime(mLogger);
+        runtime = createInferRuntime(mLogger);
         CHECK_ASSERT(runtime != nullptr, "create runtime fail!\n");
         cudaEngine = runtime->deserializeCudaEngine(trtModelStream, size, nullptr);
         CHECK_ASSERT(cudaEngine != nullptr, "create engine fail!\n");
@@ -245,7 +245,11 @@ namespace tensorrtInference
         // Build engine
         builder->setMaxBatchSize(maxBatchSize);
         builder->setMaxWorkspaceSize(1 << 30);
-        builder->setFp16Mode(fp16Flag);
+        if(fp16Flag)
+        {
+            builder->setFp16Mode(fp16Flag);
+            LOG("enable fp16!!!!\n");
+        }
         cudaEngine = builder->buildCudaEngine(*network);
         CHECK_ASSERT(cudaEngine != nullptr, "createEngine fail!\n");
         LOG("createEngine success!\n");

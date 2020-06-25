@@ -105,6 +105,7 @@ namespace tensorrtInference
         nodeParseFuncMap["Greater"]                   = PARSE_NODE_FUNC(ElementWise);
         nodeParseFuncMap["Clip"]                      = PARSE_NODE_FUNC(Activation);
         nodeParseFuncMap["Relu"]                      = PARSE_NODE_FUNC(Activation);
+        nodeParseFuncMap["LeakyRelu"]                 = PARSE_NODE_FUNC(Activation);
         nodeParseFuncMap["Reshape"]                   = PARSE_NODE_FUNC(Shuffle);
         nodeParseFuncMap["Transpose"]                 = PARSE_NODE_FUNC(Shuffle);
         nodeParseFuncMap["Flatten"]                   = PARSE_NODE_FUNC(Shuffle);

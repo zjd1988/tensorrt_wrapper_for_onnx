@@ -29,6 +29,26 @@ namespace tensorrtInference
         {
             addOutput(root["outputs"][i].asString());
         }
+        auto attr = root["attributes"];
+        for (auto elem : attr.getMemberNames())
+        {
+            if(elem.compare("alpha") == 0)
+            {
+                auto size = attr[elem].size();
+                CHECK_ASSERT(size == 1, "Activation node's alpha must have 1 element\n");
+                alpha = attr[elem][0].asFloat();
+            }
+            else if(elem.compare("beta") == 0)
+            {
+                auto size = attr[elem].size();
+                CHECK_ASSERT(size == 1, "Activation node's beta must have 1 element\n");
+                beta = attr[elem][0].asFloat();
+            }            
+            else
+            {
+                LOG("currnet Activation node not support %s \n", elem.c_str());
+            }
+        }        
         return true;
     }
 }

@@ -12,6 +12,11 @@ namespace tensorrtInference
         ActivationNodeInfo();
         ~ActivationNodeInfo();
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
+        float getAlpha() { return alpha; }
+        float getBeta() { return alpha; }
+    private:
+        float alpha;
+        float beta;
     };
 } // tensorrtInference
 #endif // __CLIP_NODE_INFO_HPP__

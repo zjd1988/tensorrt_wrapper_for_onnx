@@ -3,11 +3,11 @@
 
 namespace tensorrtInference
 {
-    // Concat Node
+    // Concatenation Node
     ConcatenationNodeInfo::ConcatenationNodeInfo()
     {
         axis = 0;
-        setNodeType("Concat");
+        setNodeType("Concatenation");
         setSubNodeType("");
     }
     ConcatenationNodeInfo::~ConcatenationNodeInfo()
@@ -18,7 +18,7 @@ namespace tensorrtInference
     {
         setSubNodeType(type);
         auto inputSize = root["inputs"].size();
-        CHECK_ASSERT(inputSize == 1, "Concatenation node must have 1 inputs\n");
+        CHECK_ASSERT(inputSize >= 1, "Concatenation node must have larger than 1 inputs\n");
         for(int i = 0; i < inputSize; i++)
         {
             addInput(root["inputs"][i].asString());

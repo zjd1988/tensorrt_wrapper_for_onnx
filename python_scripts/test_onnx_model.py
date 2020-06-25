@@ -1,19 +1,12 @@
 import onnxruntime
 import numpy as np
 import time
-import cv2 as cv
 devices = onnxruntime.get_device()
-session = onnxruntime.InferenceSession("./hfnet_github.onnx")
+session = onnxruntime.InferenceSession("../example/lenet/lenet.onnx")
 session.get_modelmeta()
 first_input_name = session.get_inputs()[0].name
-print("hfnet input is {}\n".format(first_input_name))
 
-indata1 = np.ones((1,721,1281,1)).astype(np.float32)
-indata1 = indata1 * 128
-img = cv.imread("gray_test.bmp")
-img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-img_gray = img_gray.reshape((1,720,1280,1)).astype(np.float32)
-indata1[:,0:720,0:1280,:] = img_gray
+indata1 = np.ones((1,1,32,32)).astype(np.float32)
 results = session.run([], {first_input_name : indata1})
 
 starttime = time.time()
@@ -22,4 +15,5 @@ for i in range(1):
 
 endtime = time.time()
 print((endtime - starttime))
+print(results[0])
 

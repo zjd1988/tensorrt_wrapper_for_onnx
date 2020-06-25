@@ -156,6 +156,19 @@ def mul_node_func(node_info, weights_info):
     return node    
 node_func["Mul"] = mul_node_func
 
+#Exp op
+def exp_node_func(node_info, weights_info):
+    node = {}
+    inputs = list(node_info.input)
+    outputs = list(node_info.output)
+    op_type = node_info.op_type
+
+    node["inputs"] = inputs
+    node["outputs"] = outputs
+    node["op_type"] = op_type
+    return node
+node_func["Exp"] = exp_node_func
+
 #Div op
 def div_node_func(node_info, weights_info):
     node = {}
@@ -243,6 +256,23 @@ def reducesum_node_func(node_info, weights_info):
     node["attributes"] = attributes
     return node
 node_func["ReduceSum"] = reducesum_node_func
+
+#Concat op
+def concat_node_func(node_info, weights_info):
+    node = {}
+    inputs = list(node_info.input)
+    outputs = list(node_info.output)
+    op_type = node_info.op_type
+    attributes = {}
+    node_attr = node_info.attribute
+    get_node_attribute(node_attr, attributes)
+
+    node["inputs"] = inputs
+    node["outputs"] = outputs
+    node["op_type"] = op_type
+    node["attributes"] = attributes
+    return node
+node_func["Concat"] = concat_node_func
 
 #Transpose op
 def transpose_node_func(node_info, weights_info):
@@ -461,6 +491,36 @@ def relu_node_func(node_info, weights_info):
     node["op_type"] = op_type
     return node
 node_func["Relu"] = relu_node_func
+
+#Sigmoid op
+def sigmoid_node_func(node_info, weights_info):
+    node = {}
+    inputs = list(node_info.input)
+    outputs = list(node_info.output)
+    op_type = node_info.op_type
+
+    node["inputs"] = inputs
+    node["outputs"] = outputs
+    node["op_type"] = op_type
+    return node
+node_func["Sigmoid"] = sigmoid_node_func
+
+#LeakyRelu op
+def leakyrelu_node_func(node_info, weights_info):
+    node = {}
+    inputs = list(node_info.input)
+    outputs = list(node_info.output)
+    op_type = node_info.op_type
+    attributes = {}
+    node_attr = node_info.attribute
+    get_node_attribute(node_attr, attributes)
+
+    node["inputs"] = inputs
+    node["outputs"] = outputs
+    node["op_type"] = op_type
+    node["attributes"] = attributes
+    return node
+node_func["LeakyRelu"] = leakyrelu_node_func
 
 #NonZero op
 def nonzero_node_func(node_info, weights_info):

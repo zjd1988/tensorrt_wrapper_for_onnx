@@ -17,12 +17,12 @@ namespace tensorrtInference
     class tensorrtEngine
     {
     public:
-        tensorrtEngine(std::string jsonFile, std::string weightsFile);
+        tensorrtEngine(std::string jsonFile, std::string weightsFile, bool fp16Flag = false);
         tensorrtEngine(std::string engineFile);
         ~tensorrtEngine();
         bool saveEnginePlanFile(std::string saveFile);
         void doInference(bool syncFlag);
-        void createEngine(unsigned int maxBatchSize, bool fp16Flag = false);
+        void createEngine(unsigned int maxBatchSize, bool fp16Flag);
         std::map<std::string, void*> getBindingNamesHostMemMap();
     private:
         void initConstTensors(std::map<std::string, nvinfer1::ITensor*>& tensors, nvinfer1::INetworkDefinition* network);

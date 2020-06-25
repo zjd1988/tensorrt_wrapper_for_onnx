@@ -15,7 +15,7 @@ namespace tensorrtInference
         auto axis   = concatenationNodeInfo->getAxis();
         std::vector<nvinfer1::ITensor*> inputTensors;
         for(int i = 0; i < inputs.size(); i++) {
-            nvinfer1::ITensor* inputTensor = (tensors.count(inputs[0]) != 0) ? tensors[inputs[0]] : nullptr;
+            nvinfer1::ITensor* inputTensor = (tensors.count(inputs[i]) != 0) ? tensors[inputs[i]] : nullptr;
             CHECK_ASSERT(inputTensor != nullptr, "get concatenation input %d tensor fail, topo order error\n", i);
             inputTensors.push_back(inputTensor);
         }

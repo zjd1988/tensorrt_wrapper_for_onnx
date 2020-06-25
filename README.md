@@ -14,13 +14,13 @@ coding ...
 # verified models
 * nvidia-gpu  GTX1060(3GB)
 
-1. lenet        ./example/lenet/lenet_simplify.onnx              ------- verified(fp16/fp32)
+1. lenet  ----------- ./example/lenet/lenet_simplify.onnx ---------------------- verified(fp16/fp32)
 
-2. mobilenet_v2 ./example/mobilenet_v2_simplify.onnx             ------- verified(fp32)
+2. mobilenet_v2 ----- ./example/mobilenet_v2_simplify.onnx --------------------- verified(fp32)
 
-3. vgg          ./example/vgg/vgg_simplify.onnx                  ------- verified(fp32)
+3. vgg -------------- ./example/vgg/vgg_simplify.onnx -------------------------- verified(fp32)
 
-4. squeezenet   ./example/squeezenet/squeeze_simplify.onnx       ------- verified(fp32)
+4. squeezenet ------- ./example/squeezenet/squeeze_simplify.onnx --------------- verified(fp32)
 
 # step 1
 1 cd tesensorrt_wrapper_for_onnx

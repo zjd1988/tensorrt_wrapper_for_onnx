@@ -24,9 +24,9 @@ coding ...
 
 5. yolov3 ------------- ./example/yolov3/yolov3_simplify.onnx --------------------- verified(fp32)
 
-6. yolov3-tiny -------- ./example/yolov3/yolov3-tiny_simplify.onnx ---------------- verified(fp32)
+6. yolov3-tiny -------- ./example/yolov3-tiny/yolov3-tiny_simplify.onnx ----------- verified(fp32)
 
-7. yolov3-spp --------- ./example/yolov3/yolov3-spp_simplify.onnx ----------------- verified(fp32)
+7. yolov3-spp --------- ./example/yolov3-spp/yolov3-spp_simplify.onnx ------------- verified(fp32)
 
 # step 1
 1. cd tesensorrt_wrapper_for_onnx

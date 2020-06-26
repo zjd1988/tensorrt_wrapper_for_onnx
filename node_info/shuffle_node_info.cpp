@@ -43,7 +43,7 @@ namespace tensorrtInference
                     perm.push_back(attr[elem][i].asInt());
                 }
             }
-            if(elem.compare("axis") == 0)
+            else if(elem.compare("axis") == 0)
             {
                 auto size = attr[elem].size();
                 CHECK_ASSERT(size == 1, "Shuffle(Flatten) node's axis must have 1 element\n");

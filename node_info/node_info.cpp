@@ -16,6 +16,7 @@
 #include "unsqueeze_node_info.hpp"
 #include "concatenation_node_info.hpp"
 #include "gemm_node_info.hpp"
+#include "resize_node_info.hpp"
 
 #define PARSE_NODE_FUNC_DEF(nodeType)                                      \
 nodeInfo* parse##nodeType##NodeInfo(std::string type, Json::Value& root)   \
@@ -82,6 +83,7 @@ namespace tensorrtInference
     PARSE_NODE_FUNC_DEF(Unsqueeze)
     PARSE_NODE_FUNC_DEF(Concatenation)
     PARSE_NODE_FUNC_DEF(Gemm)
+    PARSE_NODE_FUNC_DEF(Resize)
 
     //nodeParseFunc member function def
     nodeParseFunc NodeParse::getNodeParseFunc(std::string onnxNodeType)
@@ -106,6 +108,7 @@ namespace tensorrtInference
         nodeParseFuncMap["Clip"]                      = PARSE_NODE_FUNC(Activation);
         nodeParseFuncMap["Relu"]                      = PARSE_NODE_FUNC(Activation);
         nodeParseFuncMap["LeakyRelu"]                 = PARSE_NODE_FUNC(Activation);
+        nodeParseFuncMap["Sigmoid"]                   = PARSE_NODE_FUNC(Activation);
         nodeParseFuncMap["Reshape"]                   = PARSE_NODE_FUNC(Shuffle);
         nodeParseFuncMap["Transpose"]                 = PARSE_NODE_FUNC(Shuffle);
         nodeParseFuncMap["Flatten"]                   = PARSE_NODE_FUNC(Shuffle);
@@ -113,6 +116,7 @@ namespace tensorrtInference
         nodeParseFuncMap["Sqrt"]                      = PARSE_NODE_FUNC(Unary);
         nodeParseFuncMap["Reciprocal"]                = PARSE_NODE_FUNC(Unary);
         nodeParseFuncMap["Abs"]                       = PARSE_NODE_FUNC(Unary);
+        nodeParseFuncMap["Exp"]                       = PARSE_NODE_FUNC(Unary);
         nodeParseFuncMap["Softmax"]                   = PARSE_NODE_FUNC(Softmax);
         nodeParseFuncMap["ReduceSum"]                 = PARSE_NODE_FUNC(Reduce);
         nodeParseFuncMap["GlobalAveragePool"]         = PARSE_NODE_FUNC(Reduce);
@@ -126,6 +130,7 @@ namespace tensorrtInference
         nodeParseFuncMap["Unsqueeze"]                 = PARSE_NODE_FUNC(Unsqueeze);
         nodeParseFuncMap["Concat"]                    = PARSE_NODE_FUNC(Concatenation);
         nodeParseFuncMap["Gemm"]                      = PARSE_NODE_FUNC(Gemm);
+        nodeParseFuncMap["Resize"]                    = PARSE_NODE_FUNC(Resize);
     }
     NodeParse* NodeParse::instance = new NodeParse;
 

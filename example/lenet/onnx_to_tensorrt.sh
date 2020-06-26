@@ -1,1 +1,1 @@
-python ../../python_scripts/parse_onnx_model.py ./lenet_simplify.onnx
+python ../../python_scripts/parse_onnx_model_new.py ./lenet_simplify.onnx

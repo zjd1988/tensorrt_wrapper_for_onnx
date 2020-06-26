@@ -13,7 +13,8 @@ using namespace tensorrtInference;
 #define GRAPH_JSON_FILE(net)    net "/net_graph.json"
 #define GRAPH_WEIGHTS_FILE(net) net "/net_weights.bin"
 #define GRAPH_ENGINE_FILE(net)  net "/net.engine"
-#define SAVE_ENGINE 0
+#define SAVE_ENGINE 1
+#define FP16_FLAG false
 
 
 
@@ -41,7 +42,7 @@ int main()
     std::string engineFileName  = GRAPH_ENGINE_FILE(NET_NAME);
     // save engine file
 #if SAVE_ENGINE
-    tensorrtEngine engine(jsonFileName, weightsFileName);
+    tensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
     engine.saveEnginePlanFile(engineFileName);
 #else
     //engine inference
@@ -67,5 +68,4 @@ int main()
     printOutputData(hostMem);
 #endif
 
-    std::cout << "test weights and graph parser !!!" << std::endl;
 }

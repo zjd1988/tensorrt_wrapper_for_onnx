@@ -1,7 +1,6 @@
 import torch
 import torchvision
 import os
-import struct
 import onnx
 import onnxmltools
 from onnxsim import simplify

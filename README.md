@@ -2,13 +2,13 @@
 coding ...
 
 # requiemets
-1 cuda 10.x
+* cuda 10.x
 
-2 tensorrt 7.x
+* tensorrt 7.x
 
-3 python 3.5+
+* python 3.5+
 
-4 pytorch 1.5(cpu/gpu version)
+* pytorch 1.5(cpu/gpu version)
 
 
 # verified models
@@ -22,45 +22,47 @@ coding ...
 
 4. squeezenet ------- ./example/squeezenet/squeeze_simplify.onnx --------------- verified(fp32)
 
+5. yolov3 ---------- ./example/yolov3/yolov3_simplify.onnx --------------------- verified(fp32)
+
 # step 1
-1 cd tesensorrt_wrapper_for_onnx
+1. cd tesensorrt_wrapper_for_onnx
 
-2 (optional) download jsoncpp-00.11.0 from https://github.com/open-source-parsers/jsoncpp/releases  
+2. (optional) download jsoncpp-00.11.0 from https://github.com/open-source-parsers/jsoncpp/releases  
 
-3 compile jsoncpp-00.11.0 follow https://github.com/open-source-parsers/jsoncpp/wiki/Building
+3. compile jsoncpp-00.11.0 follow https://github.com/open-source-parsers/jsoncpp/wiki/Building
 
-4 mkdir build && cd build
+4. mkdir build && cd build
 
-5 cmake .. && make -j4
+5. cmake .. && make -j4
 
 # step 2
-1 cd ./example/lenet
+1. cd ./example/lenet
 
-2 run generate_lenet5_onnx.py, generate lenet_simplify.onnx
+2. run generate_lenet5_onnx.py, generate lenet_simplify.onnx
 
-3 run sh onnx_to_tensorrt.sh , generate net_graph.json(contains network's node info) / net_weights.bin(contains network weights)
+3. run sh onnx_to_tensorrt.sh , generate net_graph.json(contains network's node info) / net_weights.bin(contains network weights)
 
-4 run ./build/lenet_example 0 , generate net.engine file(used for tensorrt inference)
+4. run ./build/lenet_example 0 , generate net.engine file(used for tensorrt inference)
 
-5 run ./build/lenet_example 1 , run tensorrt inference wiht net.engine
+5. run ./build/lenet_example 1 , run tensorrt inference wiht net.engine
 
 # how to add new ops
 
 
 
 # limitations
-1 only support batch size 1
+1. only support batch size 1
 
-2 only support fp32/fp16 model
+2. only support fp32/fp16 model
 
-3 onnx model supports op version 11+
+3. onnx model supports op version 11+
 
 
 # reference
-1 https://github.com/saurabh-shandilya/onnx-utils.git
+1. https://github.com/saurabh-shandilya/onnx-utils.git
 
-2 https://github.com/wang-xinyu/tensorrtx.git
+2. https://github.com/wang-xinyu/tensorrtx.git
 
-3 https://github.com/onnx/onnx-tensorrt.git
+3. https://github.com/onnx/onnx-tensorrt.git
 
-4 https://github.com/microsoft/onnxruntime.git
+4. https://github.com/microsoft/onnxruntime.git

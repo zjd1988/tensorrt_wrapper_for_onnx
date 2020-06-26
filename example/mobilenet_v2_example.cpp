@@ -73,5 +73,4 @@ int main()
     printOutputData(hostMem);
 #endif
 
-    std::cout << "test weights and graph parser !!!" << std::endl;
 }

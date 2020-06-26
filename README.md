@@ -14,19 +14,19 @@ coding ...
 # verified models
 * nvidia-gpu  GTX1060(3GB)
 
-1. lenet  ------------- ./example/lenet/lenet_simplify.onnx ---------------------- verified(fp16/fp32)
+1. lenet  --------- ./example/lenet/lenet_simplify.onnx ---------------------- verified(fp16/fp32)
 
-2. mobilenet_v2 ------- ./example/mobilenet_v2_simplify.onnx --------------------- verified(fp32)
+2. mobilenet_v2 --------- ./example/mobilenet_v2_simplify.onnx ---------------------- verified(fp16/fp32)
 
-3. vgg ---------------- ./example/vgg/vgg_simplify.onnx -------------------------- verified(fp32)
+3. vgg --------- ./example/vgg/vgg_simplify.onnx ---------------------- verified(fp16/fp32)
 
-4. squeezenet --------- ./example/squeezenet/squeeze_simplify.onnx --------------- verified(fp32)
+4. squeezenet --------- ./example/squeezenet/squeeze_simplify.onnx ---------------------- verified(fp16/fp32)
 
-5. yolov3 ------------- ./example/yolov3/yolov3_simplify.onnx --------------------- verified(fp32)
+5. yolov3 --------- ./example/yolov3/yolov3_simplify.onnx ---------------------- verified(fp16/fp32)
 
-6. yolov3-tiny -------- ./example/yolov3-tiny/yolov3-tiny_simplify.onnx ----------- verified(fp32)
+6. yolov3-tiny --------- ./example/yolov3-tiny/yolov3-tiny_simplify.onnx ---------------------- verified(fp16/fp32)
 
-7. yolov3-spp --------- ./example/yolov3-spp/yolov3-spp_simplify.onnx ------------- verified(fp32)
+7. yolov3-spp --------- ./example/yolov3-spp/yolov3-spp_simplify.onnx ---------------------- verified(fp16/fp32)
 
 # step 1
 1. cd tesensorrt_wrapper_for_onnx
@@ -46,9 +46,11 @@ coding ...
 
 3. run sh onnx_to_tensorrt.sh , generate net_graph.json(contains network's node info) / net_weights.bin(contains network weights)
 
-4. run ./build/lenet_example 0 , generate net.engine file(used for tensorrt inference)
+4. run ./build/lenet_example (modify #define SAVE_ENGINE 1, in lenet_example.cpp) , generate net.engine file(used for tensorrt inference)
 
-5. run ./build/lenet_example 1 , run tensorrt inference wiht net.engine
+5. run ./build/lenet_example (modify #define SAVE_ENGINE 0, in lenet_example.cpp), run tensorrt inference wiht net.engine
+
+6. if you want to use fp16, then modify #define FP16_FLAG true, in lenet_example.cpp
 
 # how to add new ops
 

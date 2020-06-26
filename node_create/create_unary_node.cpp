@@ -20,6 +20,9 @@ namespace tensorrtInference
         }
         else if(subType.compare("Abs") == 0) {
             operation = nvinfer1::UnaryOperation::kABS;
+        }
+        else if(subType.compare("Exp") == 0) {
+            operation = nvinfer1::UnaryOperation::kEXP;
         }        
         else {
             LOG("Current not support unary operation(%s) \n", subType);

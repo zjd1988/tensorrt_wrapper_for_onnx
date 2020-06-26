@@ -44,6 +44,12 @@ namespace tensorrtInference
             CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", subType.c_str());
             activation->setAlpha(alpha);
         }
+        else if(subType.compare("Sigmoid") == 0)
+        {
+            type = nvinfer1::ActivationType::kSIGMOID;
+            activation = network->addActivation(*inputTensors, type);
+            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", subType.c_str());
+        }
         else {
             LOG("Current not support activation type(%s) \n", subType);
             return nullptr;

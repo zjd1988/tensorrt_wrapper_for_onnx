@@ -16,6 +16,7 @@
 #include "create_unsqueeze_node.hpp"
 #include "create_concatenation_node.hpp"
 #include "create_gemm_node.hpp"
+#include "create_resize_node.hpp"
 
 namespace tensorrtInference
 {
@@ -46,6 +47,7 @@ namespace tensorrtInference
             createNodeFuncMap["Unsqueeze"]      = tensorrtInference::createUnsqueezeNode;
             createNodeFuncMap["Concatenation"]  = tensorrtInference::createConcatenationNode;
             createNodeFuncMap["Gemm"]           = tensorrtInference::createGemmNode;
+            createNodeFuncMap["Resize"]         = tensorrtInference::createResizeNode;
         }
         auto inputs = nodeConfInfo->getInputs();
         for(int i = 0; i < inputs.size(); i++)

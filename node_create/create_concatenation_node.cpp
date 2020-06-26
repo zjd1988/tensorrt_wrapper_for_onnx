@@ -27,6 +27,7 @@ namespace tensorrtInference
         }
         nvinfer1::IConcatenationLayer* concat = network->addConcatenation(inputTensors.data(), inputTensors.size());
         CHECK_ASSERT(concat, "create concatenation node fail\n");
+        concat->setAxis(axis);
         return concat;
     }
 } //tensorrtInference

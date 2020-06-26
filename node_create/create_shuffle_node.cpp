@@ -18,13 +18,25 @@ namespace tensorrtInference
             auto perm = shuffleNodeInfo->getPerm();
             shuffle = network->addShuffle(*inputTensor);
             CHECK_ASSERT(shuffle, "create shuffle node fail\n");
-            CHECK_ASSERT(perm.size() == 4, "perm dims must equal to 4\n");
+            // CHECK_ASSERT(perm.size() == 4, "perm dims must equal to 4\n");
             nvinfer1::Dims dims = inputTensor->getDimensions();
-            shuffle->setFirstTranspose(nvinfer1::Permutation{perm[0], perm[1], perm[2], perm[3]});
-            if(dims.nbDims == 4)
-                shuffle->setReshapeDimensions(nvinfer1::Dims4(dims.d[perm[0]], dims.d[perm[1]], dims.d[perm[2]], dims.d[perm[3]]));
-            else
-                CHECK_ASSERT(0, "current only support 4 dims in transpose\n");
+            CHECK_ASSERT(perm.size() == dims.nbDims, "perm dims must equal to input tensors dim\n");
+            nvinfer1::Permutation permutation;
+            for(int i = 0; i < perm.size(); i++) {
+                permutation.order[i] = perm[i];
+            }
+            shuffle->setFirstTranspose(permutation);
+            nvinfer1::Dims newDims;
+            newDims.nbDims = dims.nbDims;
+            for(int i = 0; i < dims.nbDims; i++) {
+                newDims.d[i] = dims.d[perm[i]];
+            }
+            shuffle->setReshapeDimensions(newDims);
+            // shuffle->setFirstTranspose(nvinfer1::Permutation{perm[0], perm[1], perm[2], perm[3]});
+            // if(dims.nbDims == 4)
+            //     shuffle->setReshapeDimensions(nvinfer1::Dims4(dims.d[perm[0]], dims.d[perm[1]], dims.d[perm[2]], dims.d[perm[3]]));
+            // else
+            //     CHECK_ASSERT(0, "current only support 4 dims in transpose\n");
         }
         else if(inputs.size() == 2 && subType.compare("Reshape") == 0)
         {

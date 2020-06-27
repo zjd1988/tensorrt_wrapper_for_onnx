@@ -56,6 +56,15 @@ coding ...
 
 
 
+# todo lists
+* add GPU allocator to manage device memory
+
+* add common plugin implement(NMS mish ...)
+
+* add new models(alexnet shufflenet ...)
+
+* add custom network pre/post process interfaces
+
 # limitations
 1. only support batch size 1
 

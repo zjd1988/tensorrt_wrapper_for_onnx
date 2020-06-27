@@ -14,5 +14,5 @@
 
 4. python3 simplify_yolov3_onnx.py to get yolov3_simplify.onnx
 
-5. run sh onnx_to_tensorrt.sh, generate net_graph.json net_weights.bin for c++ code.
+5. cd yolov3, and run sh onnx_to_tensorrt.sh, generate net_graph.json net_weights.bin for c++ code.
 

@@ -23,9 +23,9 @@ namespace tensorrtInference
             nvinfer1::Weights w{};
             w.values = data;
             auto type = tensorrtInference::getTensorrtDataType((tensorrtInference::OnnxDataType)dataType);
-            CHECK_ASSERT(type == -1, "not supported type !!\n");
+            CHECK_ASSERT(type != -1, "not supported type !!\n");
             w.type = (nvinfer1::DataType)type;
-            w.count = byteCount;
+            w.count = byteCount / onnxDataTypeEleCount[dataType];
             return w;
         }
         nvinfer1::Dims getTensorrtDims()

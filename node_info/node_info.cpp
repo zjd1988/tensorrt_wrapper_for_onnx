@@ -17,6 +17,7 @@
 #include "concatenation_node_info.hpp"
 #include "gemm_node_info.hpp"
 #include "resize_node_info.hpp"
+#include "batchnormalization_node_info.hpp"
 
 #define PARSE_NODE_FUNC_DEF(nodeType)                                      \
 nodeInfo* parse##nodeType##NodeInfo(std::string type, Json::Value& root)   \
@@ -84,6 +85,7 @@ namespace tensorrtInference
     PARSE_NODE_FUNC_DEF(Concatenation)
     PARSE_NODE_FUNC_DEF(Gemm)
     PARSE_NODE_FUNC_DEF(Resize)
+    PARSE_NODE_FUNC_DEF(BatchNormalization)
 
     //nodeParseFunc member function def
     nodeParseFunc NodeParse::getNodeParseFunc(std::string onnxNodeType)
@@ -131,6 +133,7 @@ namespace tensorrtInference
         nodeParseFuncMap["Concat"]                    = PARSE_NODE_FUNC(Concatenation);
         nodeParseFuncMap["Gemm"]                      = PARSE_NODE_FUNC(Gemm);
         nodeParseFuncMap["Resize"]                    = PARSE_NODE_FUNC(Resize);
+        nodeParseFuncMap["BatchNormalization"]        = PARSE_NODE_FUNC(BatchNormalization);
     }
     NodeParse* NodeParse::instance = new NodeParse;
 

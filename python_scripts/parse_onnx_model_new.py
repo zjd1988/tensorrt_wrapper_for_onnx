@@ -48,7 +48,9 @@ def get_node_attribute(node_attr, attributes):
         elif node_attr[i].type == attr_type["FLOAT"]:
             attributes[node_attr[i].name] = [node_attr[i].f]
         elif node_attr[i].type == attr_type["FLOATS"]:
-            attributes[node_attr[i].name] = list(node_attr[i].floats)            
+            attributes[node_attr[i].name] = list(node_attr[i].floats)
+        elif node_attr[i].type == attr_type["STRING"]:
+            attributes[node_attr[i].name] = [str(node_attr[i].s, encoding = "utf-8")]
         else:
             pass
 
@@ -119,7 +121,10 @@ def init_node_without_attr():
     NODE_WITHOUT_ATTRIBUTE.add("NonZero")
     NODE_WITHOUT_ATTRIBUTE.add("Relu")
     NODE_WITHOUT_ATTRIBUTE.add("Sigmoid")
+    NODE_WITHOUT_ATTRIBUTE.add("Softplus")
+    NODE_WITHOUT_ATTRIBUTE.add("Tanh")
     NODE_WITHOUT_ATTRIBUTE.add("Slice")
+    NODE_WITHOUT_ATTRIBUTE.add("Shape")
 
 def init_node_with_attr():
     NODE_WITH_ATTRIBUTE.add("Conv")
@@ -134,6 +139,8 @@ def init_node_with_attr():
     NODE_WITH_ATTRIBUTE.add("Flatten")
     NODE_WITH_ATTRIBUTE.add("Pad")
     NODE_WITH_ATTRIBUTE.add("LeakyRelu")
+    NODE_WITH_ATTRIBUTE.add("Resize")
+    NODE_WITH_ATTRIBUTE.add("BatchNormalization")
 
 def get_node_parse_type(op_type):
     if len(NODE_WITHOUT_ATTRIBUTE) == 0 or len(NODE_WITH_ATTRIBUTE) == 0:
@@ -277,7 +284,7 @@ def generate_depend_nodes(topo_order, simply_graph):
 if __name__ == "__main__":
     
     #-------------- 1 load onnx model ---------------------
-    # onnx_file_name = "/home/xj-zjd/桌面/qiantai_map/test_onnxruntime/tensorrt_wrapper_for_onnx/example/lenet/lenet_simplify.onnx"
+    # onnx_file_name = "/home/xj-zjd/桌面/qiantai_map/test_onnxruntime/tensorrt_wrapper_for_onnx/example/yolov3/yolov3_simplify.onnx"
     onnx_file_name = sys.argv[1]
     onnx_model = onnx.load(onnx_file_name)
     json_file_prefix = os.path.dirname(onnx_file_name) + "/net"

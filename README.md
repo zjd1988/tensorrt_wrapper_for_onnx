@@ -1,5 +1,12 @@
 # tensorrt_wrapper_for_onnx
-coding ...
+
+* easily modifying and converting onnx models to tensorrt engine files
+
+* easily adding new ops
+
+* easily infering the engine files
+
+* easily integrating with your own projects
 
 # requiemets
 * cuda 10.x
@@ -8,7 +15,7 @@ coding ...
 
 * python 3.5+
 
-* pytorch 1.5(cpu/gpu version)
+* pytorch 1.4+(cpu/gpu version)
 
 
 # verified models

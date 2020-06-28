@@ -50,6 +50,22 @@ namespace tensorrtInference
             activation = network->addActivation(*inputTensors, type);
             CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", subType.c_str());
         }
+        else if(subType.compare("Softplus") == 0)
+        {
+            float alpha = 1.0f;
+            float beta = 1.0f;
+            type = nvinfer1::ActivationType::kSOFTPLUS;
+            activation = network->addActivation(*inputTensors, type);
+            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", subType.c_str());
+            activation->setAlpha(alpha);
+            activation->setBeta(beta);
+        }
+        else if(subType.compare("Tanh") == 0)
+        {
+            type = nvinfer1::ActivationType::kTANH;
+            activation = network->addActivation(*inputTensors, type);
+            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", subType.c_str());
+        }                
         else {
             LOG("Current not support activation type(%s) \n", subType);
             return nullptr;

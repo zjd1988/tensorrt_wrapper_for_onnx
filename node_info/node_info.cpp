@@ -111,6 +111,8 @@ namespace tensorrtInference
         nodeParseFuncMap["Relu"]                      = PARSE_NODE_FUNC(Activation);
         nodeParseFuncMap["LeakyRelu"]                 = PARSE_NODE_FUNC(Activation);
         nodeParseFuncMap["Sigmoid"]                   = PARSE_NODE_FUNC(Activation);
+        nodeParseFuncMap["Softplus"]                  = PARSE_NODE_FUNC(Activation);
+        nodeParseFuncMap["Tanh"]                      = PARSE_NODE_FUNC(Activation);
         nodeParseFuncMap["Reshape"]                   = PARSE_NODE_FUNC(Shuffle);
         nodeParseFuncMap["Transpose"]                 = PARSE_NODE_FUNC(Shuffle);
         nodeParseFuncMap["Flatten"]                   = PARSE_NODE_FUNC(Shuffle);

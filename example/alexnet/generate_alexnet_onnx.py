@@ -10,15 +10,15 @@ def main():
     net = net.eval()
     tmp = torch.ones(1, 3, 224, 224)
     execute_path = os.path.dirname(os.path.realpath(__file__))
-    onnx_file = os.path.join(execute_path, "alex.onnx")
-    torch.onnx.export(net, tmp, onnx_file, export_params=True, opset_version=11, input_names = ['input'], output_names = ['output'])    
+    onnx_file = os.path.join(execute_path, "alexnet.onnx")
+    torch.onnx.export(net, tmp, onnx_file, export_params=True, opset_version=11, input_names = ['input'], output_names = ['output'])
     out = net(tmp)
-    print('alex out shape:', out.shape)
-    print('alex out:', out)
+    print('alexnet out shape:', out.shape)
+    print('alexnet out:', out)
 
     model = onnx.load(onnx_file)
     model_simp, check = simplify(model)
-    onnx_simplify_file = os.path.join(execute_path, "alex_simplify.onnx")
+    onnx_simplify_file = os.path.join(execute_path, "alexnet_simplify.onnx")
     onnxmltools.utils.save_model(model_simp, onnx_simplify_file)
 
 if __name__ == '__main__':

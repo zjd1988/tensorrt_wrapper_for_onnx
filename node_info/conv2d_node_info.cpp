@@ -26,7 +26,7 @@ namespace tensorrtInference
     {
         setSubNodeType(type);
         auto inputSize = root["inputs"].size();
-        CHECK_ASSERT(inputSize == 3, "conv2d node must have 3 inputs\n");
+        CHECK_ASSERT(inputSize >= 2, "conv2d node inputs size must larger than 2\n");
         for(int i = 0; i < inputSize; i++)
         {
             addInput(root["inputs"][i].asString());

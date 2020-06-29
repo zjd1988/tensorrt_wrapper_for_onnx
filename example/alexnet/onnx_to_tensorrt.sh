@@ -1,0 +1,1 @@
+python ../../python_scripts/parse_onnx_model_new.py ./alex_simplify.onnx

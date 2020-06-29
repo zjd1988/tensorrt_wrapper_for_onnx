@@ -35,6 +35,10 @@
 
 7. yolov3-spp --------- ./example/yolov3-spp/yolov3-spp_simplify.onnx ---------------------- verified(fp16/fp32)
 
+8. yolov4 --------- ./example/yolov4/yolov4_simplify.onnx ---------------------- verified(fp16/fp32)
+
+8. yolov5 --------- ./example/yolov5/yolov5_simplify.onnx ---------------------- verified(fp16/fp32)
+
 # step 1
 1. cd tesensorrt_wrapper_for_onnx
 
@@ -77,7 +81,7 @@
 
 2. only support fp32/fp16 model
 
-3. onnx model supports op version 11+
+3. onnx model supports op version 10+
 
 
 # reference

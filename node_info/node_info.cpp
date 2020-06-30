@@ -95,7 +95,7 @@ namespace tensorrtInference
         if(nodeParseFuncMap.count(onnxNodeType) != 0)
             return nodeParseFuncMap[onnxNodeType];
         else
-            (nodeParseFunc)nullptr;
+            return (nodeParseFunc)nullptr;
     }
     void NodeParse::registerNodeParseFunc()
     {

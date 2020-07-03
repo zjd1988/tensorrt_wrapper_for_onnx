@@ -3,7 +3,7 @@
 
 * git clone https://github.com/ultralytics/yolov3.git
 
-* download yolov3.pt from https://drive.google.com/drive/folders/1LezFG5g3BCW6iYaV89B2i64cqEUZD7e0 , and place to yolov3/weights dir
+* download yolov3.pt/yolov3-tiny.pt/yolov3-spp.pt from https://drive.google.com/drive/folders/1LezFG5g3BCW6iYaV89B2i64cqEUZD7e0 , and place to yolov3/weights dir
 
 # convert model to onnx
 1. cd yolov3(https://github.com/ultralytics/yolov3.git)
@@ -12,7 +12,7 @@
 
 3. modify torch.onnx.export(xxxxx, opset_version=10, xxxxx) in detect.py
 
-4. python3 detect.py --cfg cfg/yolov3.cfg --weights weights/yolov3.pt, you will get a yolov3.onnx
+4. python3 detect.py --cfg cfg/yolov3.cfg --weights weights/yolov3.pt, you will get a yolov3.onnx (same as yolov3-tiny/yolov3-spp)
 
 5. cd xxx/example/yolov3/
 

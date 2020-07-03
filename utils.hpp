@@ -10,7 +10,7 @@
 
 
 #define CHECK_ASSERT(x, format, args...) do {   \
-    if(!(x)) {                                    \
+    if(!(x)) {                                  \
         printf(format, ##args);                 \
         assert(0);                              \
     }                                           \
@@ -20,6 +20,35 @@
         printf(format, ##args);                 \
 } while(0)
 
+
+#define CUDA_CHECK(_x)                                       \
+    do {                                                     \
+        cudaError_t _err = (_x);                             \
+        if (_err != cudaSuccess) {                           \
+            CHECK_ASSERT(_err, #_x);                         \
+        }                                                    \
+    } while (0)
+
+#define CUBLAS_CHECK(_x)                                     \
+    do {                                                     \
+        cublasStatus_t _err = (_x);                          \
+        if (_err != CUBLAS_STATUS_SUCCESS) {                 \
+            CHECK_ASSERT(_err, #_x);                         \
+        }                                                    \
+    } while (0)
+
+#define CUSOLVER_CHECK(_x)                                   \
+    do {                                                     \
+        cusolverStatus_t _err = (_x);                        \
+        if (_err != CUSOLVER_STATUS_SUCCESS) {               \
+            CHECK_ASSERT(_err, #_x);                         \
+        }                                                    \
+    } while (0)
+
+#define AFTER_KERNEL_LAUNCH()                                \
+    do {                                                     \
+        CUDA_CHECK(cudaGetLastError());                      \
+    } while (0)
 
 namespace tensorrtInference
 {
@@ -52,7 +81,7 @@ namespace tensorrtInference
     };
 
     enum OnnxDataType {
-        DEFAULT,
+        UNDEFINED,
         FLOAT,
         UINT8,
         INT8,

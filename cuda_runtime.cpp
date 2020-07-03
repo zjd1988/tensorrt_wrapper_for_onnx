@@ -153,7 +153,7 @@ bool CUDARuntime::onAcquireBuffer(Buffer* buffer, StorageType storageType) {
 }
 
 bool CUDARuntime::onReleaseBuffer(Buffer* buffer, StorageType storageType) {
-    auto bufferPtr = buffer->device();
+    auto bufferPtr = buffer->device<void>();
     if (storageType == DYNAMIC) {
         mBufferPool->recycle((void*)bufferPtr);
     }
@@ -181,25 +181,25 @@ bool CUDARuntime::onWaitFinish() {
 void CUDARuntime::copyFromDevice(Buffer* srcBuffer, Buffer* dstBuffer) {
     auto dstSize = dstBuffer->getSize();
     auto srcSize = srcBuffer->getSize();
-    CHECK_ASSERT(srcSize == dstSize, "src buffer size must be equal to dst buffer size!\n");
-    auto hostPtr = dstBuffer->host();
-    auto devicePtr = (void*)srcBuffer->device();
-    memcpy(hostPtr, devicePtr, dstSize, CudaRuntimeMemcpyDeviceToHost, true);
+    CHECK_ASSERT(srcSize <= dstSize, "src buffer size must less than dst buffer size!\n");
+    auto hostPtr = dstBuffer->host<void>();
+    auto devicePtr = srcBuffer->device<void>();
+    memcpy(hostPtr, devicePtr, srcSize, CudaRuntimeMemcpyDeviceToHost, true);
 }
 
 void CUDARuntime::copyToDevice(Buffer* srcBuffer, Buffer* dstBuffer) {
     auto dstSize = dstBuffer->getSize();
     auto srcSize = srcBuffer->getSize();
     CHECK_ASSERT(srcSize == dstSize, "src buffer size must be equal to dst buffer size!\n");
-    auto hostPtr = srcBuffer->host();
-    auto devicePtr = (void*)dstBuffer->device();
+    auto hostPtr = srcBuffer->host<void>();
+    auto devicePtr = dstBuffer->device<void>();
     memcpy(devicePtr, hostPtr, dstSize, CudaRuntimeMemcpyHostToDevice);
 }
 
 void CUDARuntime::onCopyBuffer(Buffer* srcBuffer, Buffer* dstBuffer) {
-    if (srcBuffer->device() == 0 && dstBuffer->device() != 0) {
+    if (srcBuffer->device<void>() == nullptr && dstBuffer->device<void>() != nullptr) {
         copyToDevice(srcBuffer, dstBuffer);
-    }else if(srcBuffer->device() != 0 && dstBuffer->device() == 0){
+    }else if(srcBuffer->device<void>() != nullptr && dstBuffer->device<void>() == nullptr){
         copyFromDevice(srcBuffer, dstBuffer);
     }else{
         LOG("onCopyBuffer float error !!! \n");

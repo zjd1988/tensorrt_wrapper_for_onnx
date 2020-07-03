@@ -57,6 +57,20 @@ namespace tensorrtInference {
         }
     }
 
+    Buffer::Buffer(int size, OnnxDataType dataType, bool mallocFlag)
+    {
+        bufferShape.clear();
+        hostPtr = nullptr;
+        devicePtr = nullptr;
+        this->dataType = dataType;
+        bufferShape.push_back(size);
+        if(mallocFlag)
+        {
+            hostPtr = bufferMemoryAllocAlign(getSize(), MEMORY_ALIGN_DEFAULT);
+            ownHost = true;            
+        }
+    }    
+
     Buffer* Buffer::create(std::vector<int> shape, OnnxDataType dataType, void* userData)
     {
         bool ownData = userData == nullptr;
@@ -91,12 +105,14 @@ namespace tensorrtInference {
         return count;
     }
 
-    void* Buffer::host(){
-        return hostPtr;
-    }
-
-    void* Buffer::device(){
-        return devicePtr;
+    int Buffer::getElementCount(){
+        int count = 1;
+        if(bufferShape.size() <= 0)
+            return 0;
+        for(int i = 0; i < bufferShape.size(); i++){
+            count *= bufferShape[i];
+        }
+        return count;
     }
 
     void Buffer::setDevice(void* ptr) {

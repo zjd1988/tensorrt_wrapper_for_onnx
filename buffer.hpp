@@ -32,6 +32,7 @@ namespace tensorrtInference {
     {
     public:
         Buffer(std::vector<int> shape, OnnxDataType dataType, bool mallocFlag = false);
+        Buffer(int size, OnnxDataType dataType, bool mallocFlag = false);
         ~Buffer();
         Buffer(const Buffer&)  = delete;
         Buffer(const Buffer&&) = delete;
@@ -41,10 +42,14 @@ namespace tensorrtInference {
         std::vector<int> getShape();
         OnnxDataType getDataType();
         int getSize();
-        void* host();
-        void* device();
+        int getElementCount();
         void setDevice(void* ptr);
         void setHost(void* ptr);
+        template <typename T>
+        T* host() { return (T*)hostPtr;}
+        template <typename T>
+        T* device() { return (T*)devicePtr;}
+
 
     private:
         OnnxDataType dataType;

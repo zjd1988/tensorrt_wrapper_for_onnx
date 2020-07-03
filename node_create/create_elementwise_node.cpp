@@ -38,9 +38,38 @@ namespace tensorrtInference
             return nullptr;
         }
         auto inputs = nodeConfInfo->getInputs();
-        nvinfer1::ITensor* inputTensors1 = tensors[inputs[0]];
-        nvinfer1::ITensor* inputTensors2 = tensors[inputs[1]];
-        nvinfer1::IElementWiseLayer* ew = network->addElementWise(*inputTensors1, *inputTensors2, operation);
+        nvinfer1::ITensor* inputTensor1 = tensors[inputs[0]];
+        nvinfer1::ITensor* inputTensor2 = tensors[inputs[1]];
+        int maxNbDims1 = inputTensor1->getDimensions().nbDims;
+        int maxNbDims2 = inputTensor2->getDimensions().nbDims;
+        int maxNbDims = maxNbDims1 >= maxNbDims2 ? maxNbDims1 : maxNbDims2;
+
+        std::vector<nvinfer1::ITensor*> inputTensors;
+        for(int i = 0; i < inputs.size(); i++)
+        {
+            nvinfer1::ITensor* inputTensor = tensors[inputs[i]];
+            auto dims = inputTensor->getDimensions();
+            if(inputTensor->getDimensions().nbDims < maxNbDims)
+            {
+                std::vector<int> reshapeDims;
+                int offset = maxNbDims - dims.nbDims;
+                for(int j = 0; j < maxNbDims; j++) {
+                    if(j < offset)
+                        reshapeDims.push_back(1);
+                    else
+                        reshapeDims.push_back(dims.d[j - offset]);
+                }
+                nvinfer1::IShuffleLayer* reshape = network->addShuffle(*inputTensor);
+                reshape->setReshapeDimensions(vectorToDims(reshapeDims));
+                nvinfer1::ITensor* tensor = reshape->getOutput(0);
+                inputTensors.push_back(tensor);
+            }
+            else
+            {
+                inputTensors.push_back(inputTensor);
+            }
+        }
+        nvinfer1::IElementWiseLayer* ew = network->addElementWise(*inputTensors[0], *inputTensors[1], operation);
         CHECK_ASSERT(ew, "create ElementWise node fail\n");
         if(subType.compare("Greater") == 0)
         {

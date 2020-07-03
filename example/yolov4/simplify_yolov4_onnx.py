@@ -8,7 +8,7 @@ from torchsummary import summary
 
 def main():
     torch.manual_seed(1234)
-    tmp = torch.ones(1, 3, 320, 192)
+    tmp = torch.ones(1, 3, 512, 384)
     execute_path = os.path.dirname(os.path.realpath(__file__))
     onnx_file = os.path.join(execute_path, "yolov4.onnx")
 

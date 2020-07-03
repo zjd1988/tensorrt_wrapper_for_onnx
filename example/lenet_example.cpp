@@ -47,11 +47,13 @@ int main()
     std::string jsonFileName    = GRAPH_JSON_FILE(NET_NAME);
     std::string weightsFileName = GRAPH_WEIGHTS_FILE(NET_NAME);
     std::string engineFileName  = GRAPH_ENGINE_FILE(NET_NAME);
-    // save engine file
+    
 #if SAVE_ENGINE
+    // save engine file
     tensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
     engine.saveEnginePlanFile(engineFileName);
 #else
+    //engine inference
     unsigned char* data = (unsigned char*)malloc(BACTCH_SIZE * CHANNEL_SIZE * HEIGHT_SIZE * WIDTH_SIZE);
     tensorrtEngine engine(engineFileName);
     auto hostMemIndex = engine.getBindingNamesIndexMap();

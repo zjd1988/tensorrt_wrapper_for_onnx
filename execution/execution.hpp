@@ -5,6 +5,7 @@
 #include "buffer.hpp"
 #include "utils.hpp"
 
+
 namespace tensorrtInference {
 
     class Execution {
@@ -23,12 +24,15 @@ namespace tensorrtInference {
         void addOutput(Buffer* buffer);
         void setExecutionType(std::string type);
         void setSubExecutionType(std::string subType);
+        void copyToDebugBuffer(Buffer* srcBuffer);
+        Buffer* getDebugBuffer();
     private:
         CUDARuntime* cudaRuntime;
         std::string executionType;
         std::string subExecutionType;
         std::vector<Buffer*> inputs;
         std::vector<Buffer*> outputs;
+        Buffer* debugBuffer;
     };
 
     typedef Execution* (*constructExecutionFunc)(CUDARuntime *runtime, std::string subType);

@@ -2,9 +2,14 @@
 #include <map>
 #include "execution.hpp"
 #include "utils.hpp"
-#include "convert_execution.hpp"
+#include "data_convert_execution.hpp"
+#include "format_convert_execution.hpp"
 #include "datamovement_execution.hpp"
+#include "normalization_execution.hpp"
+#include "transpose_execution.hpp"
+#include "yolo_nms_execution.hpp"
 using namespace std;
+#define DEBUG_BUFFER_SIZE 4096000
 
 #define CONSTUCT_EXECUTION_FUNC_DEF(type)                                          \
 Execution* construct##type##Execution(CUDARuntime *runtime, std::string subType)   \
@@ -22,6 +27,7 @@ namespace tensorrtInference {
         inputs.clear();
         outputs.clear();
         cudaRuntime = runtime;
+        debugBuffer = new Buffer(DEBUG_BUFFER_SIZE, OnnxDataType::UINT8, true);
     }
     Execution::~Execution()
     {
@@ -29,11 +35,19 @@ namespace tensorrtInference {
             delete outputs[i];
             outputs[i] = nullptr;
         }
+        delete debugBuffer;
+        debugBuffer = nullptr;
         inputs.clear();
         outputs.clear();
         cudaRuntime = nullptr;
         executionType = "";
-    }    
+    }
+    void Execution::copyToDebugBuffer(Buffer* srcBuffer)
+    {
+        auto runtime = getCudaRuntime();
+        runtime->copyFromDevice(srcBuffer, debugBuffer);
+    }
+    Buffer* Execution::getDebugBuffer(){return debugBuffer;}
     std::vector<Buffer*> Execution::getInputs() {return inputs;}
     std::vector<Buffer*> Execution::getOutputs() {return outputs;}
     std::string Execution::getExecutionType() {return executionType;}
@@ -52,8 +66,12 @@ namespace tensorrtInference {
         LOG("Output tensor size is %d\n", output.size());
     }    
 
-    CONSTUCT_EXECUTION_FUNC_DEF(Convert)
+    CONSTUCT_EXECUTION_FUNC_DEF(DataConvert)
+    CONSTUCT_EXECUTION_FUNC_DEF(FormatConvert)
     CONSTUCT_EXECUTION_FUNC_DEF(DataMovement)
+    CONSTUCT_EXECUTION_FUNC_DEF(Normalization)
+    CONSTUCT_EXECUTION_FUNC_DEF(Transpose)
+    CONSTUCT_EXECUTION_FUNC_DEF(YoloNMS)
 
     constructExecutionFunc ConstructExecution::getConstructExecutionFunc(std::string executionType)
     {
@@ -67,8 +85,14 @@ namespace tensorrtInference {
 
     void ConstructExecution::registerConstructExecutionFunc()
     {
-        constructExecutionFuncMap["ConvertToFloat"]            = CONSTUCT_EXECUTION_FUNC(Convert);
-        constructExecutionFuncMap["CopyFromDevice"]            = CONSTUCT_EXECUTION_FUNC(DataMovement);
+        constructExecutionFuncMap["ConvertUint8ToFloat32"]            = CONSTUCT_EXECUTION_FUNC(DataConvert);
+        constructExecutionFuncMap["Scale_0_1"]                        = CONSTUCT_EXECUTION_FUNC(Normalization);
+        constructExecutionFuncMap["CopyFromDevice"]                   = CONSTUCT_EXECUTION_FUNC(DataMovement);
+        constructExecutionFuncMap["CopyToDevice"]                     = CONSTUCT_EXECUTION_FUNC(DataMovement);
+        constructExecutionFuncMap["NHWC2NCHW"]                        = CONSTUCT_EXECUTION_FUNC(Transpose);
+        constructExecutionFuncMap["BGR2RGB"]                          = CONSTUCT_EXECUTION_FUNC(FormatConvert);
+        constructExecutionFuncMap["RGB2BGR"]                          = CONSTUCT_EXECUTION_FUNC(FormatConvert);
+        constructExecutionFuncMap["YOLO_NMS"]                         = CONSTUCT_EXECUTION_FUNC(YoloNMS);
     }
 
     ConstructExecution* ConstructExecution::instance = new ConstructExecution;

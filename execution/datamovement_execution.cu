@@ -21,8 +21,8 @@ namespace tensorrtInference
             Buffer *outBuffer = nullptr;
             if(type.compare("CopyFromDevice") == 0)
             {
-                auto hostPtr = inputBuffers[i]->host();
-                auto devicePtr = inputBuffers[i]->device();
+                auto hostPtr = inputBuffers[i]->host<void>();
+                auto devicePtr = inputBuffers[i]->device<void>();
                 CHECK_ASSERT(hostPtr == nullptr && devicePtr != nullptr, "device ptr should not be null!\n");
                 auto shape = inputBuffers[i]->getShape();
                 OnnxDataType dataType = inputBuffers[i]->getDataType();
@@ -31,8 +31,8 @@ namespace tensorrtInference
             }
             else if(type.compare("CopyToDevice") == 0)
             {
-                auto hostPtr = inputBuffers[i]->host();
-                auto devicePtr = inputBuffers[i]->device();
+                auto hostPtr = inputBuffers[i]->host<void>();
+                auto devicePtr = inputBuffers[i]->device<void>();
                 CHECK_ASSERT(hostPtr != nullptr && devicePtr == nullptr, "host ptr should not be null!\n");
                 auto shape = inputBuffers[i]->getShape();
                 OnnxDataType dataType = inputBuffers[i]->getDataType();

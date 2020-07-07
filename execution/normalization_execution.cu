@@ -35,8 +35,8 @@ namespace tensorrtInference
             runtime->onAcquireBuffer(inputBuffers[0], StorageType::STATIC);
             needMemCpy = true;
         }
-        runtime->onAcquireBuffer(outBuffer, StorageType::STATIC);
-        // runtime->onReleaseBuffer(outBuffer, StorageType::DYNAMIC);
+        runtime->onAcquireBuffer(outBuffer, StorageType::DYNAMIC);
+        recycleBuffers();
         return true;
     }
 

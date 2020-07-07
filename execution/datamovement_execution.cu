@@ -45,6 +45,7 @@ namespace tensorrtInference
             addOutput(outBuffer);
             addInput(inputBuffers[i]);
         }
+        recycleBuffers();
         return true;
     }
 

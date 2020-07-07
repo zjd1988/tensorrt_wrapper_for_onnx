@@ -182,17 +182,7 @@ namespace tensorrtInference
         auto stream = runtime->stream();
         
         // {
-        //     copyToDebugBuffer(classesPorbBuffer);
-        //     auto debugBuffer = getDebugBuffer();
-        //     // int *debugData = debugBuffer->host<int>();
-        //     float *debugData = debugBuffer->host<float>();
-        //     int start = 0;
-        //     int end = start + 10;
-        //     for(int i = start; i < end; i++)
-        //     {
-        //         // printf("%d \n", debugData[i]);
-        //         printf("%e \n", debugData[i]);
-        //     }
+        //      printBuffer<float>(classesPorbBuffer);
         // }
 
         getMaxPorb<<<gridSize, blockSize, 0, stream>>>(size, classesPorbBuffer->device<float>(), classesNumber,
@@ -247,7 +237,6 @@ namespace tensorrtInference
         keep = nullptr;
         cubBuffer = nullptr;
         boxesOut = nullptr;
-        // detectBoxesNum = nullptr;
 
         boxesNum = 0;
         classesNum = 0;
@@ -266,6 +255,20 @@ namespace tensorrtInference
         delete mask;
         delete cubBuffer;
         delete maskRemove;
+    }
+
+
+    void YoloNMSExecution::recycleBuffers()
+    {
+        auto runtime = getCudaRuntime();
+        Execution::recycleBuffers();
+        runtime->onReleaseBuffer(getIdx(), StorageType::DYNAMIC);
+        runtime->onReleaseBuffer(getSortIdx(), StorageType::DYNAMIC);
+        runtime->onReleaseBuffer(getProb(), StorageType::DYNAMIC);
+        runtime->onReleaseBuffer(getSortProb(), StorageType::DYNAMIC);
+        runtime->onReleaseBuffer(getMask(), StorageType::DYNAMIC);
+        runtime->onReleaseBuffer(getCubBuffer(), StorageType::DYNAMIC);
+        runtime->onReleaseBuffer(getMaskRemove(), StorageType::DYNAMIC);
     }
 
     bool YoloNMSExecution::init(std::vector<Buffer*> inputBuffers)
@@ -336,13 +339,14 @@ namespace tensorrtInference
         addInput(inputBuffers[0]);
         addInput(inputBuffers[1]);
 
-        runtime->onReleaseBuffer(idxBuffer, StorageType::DYNAMIC);
-        runtime->onReleaseBuffer(sortIdxBuffer, StorageType::DYNAMIC);
-        runtime->onReleaseBuffer(probBuffer, StorageType::DYNAMIC);
-        runtime->onReleaseBuffer(sortProbBuffer, StorageType::DYNAMIC);
-        runtime->onReleaseBuffer(maskBuffer, StorageType::DYNAMIC);
-        runtime->onReleaseBuffer(cubTempBuffer, StorageType::DYNAMIC);
-        runtime->onReleaseBuffer(maskRemoveBuffer, StorageType::DYNAMIC);
+        // runtime->onReleaseBuffer(idxBuffer, StorageType::DYNAMIC);
+        // runtime->onReleaseBuffer(sortIdxBuffer, StorageType::DYNAMIC);
+        // runtime->onReleaseBuffer(probBuffer, StorageType::DYNAMIC);
+        // runtime->onReleaseBuffer(sortProbBuffer, StorageType::DYNAMIC);
+        // runtime->onReleaseBuffer(maskBuffer, StorageType::DYNAMIC);
+        // runtime->onReleaseBuffer(cubTempBuffer, StorageType::DYNAMIC);
+        // runtime->onReleaseBuffer(maskRemoveBuffer, StorageType::DYNAMIC);
+        recycleBuffers();
                 
         return true;
     }

@@ -42,12 +42,6 @@ namespace tensorrtInference {
         cudaRuntime = nullptr;
         executionType = "";
     }
-    void Execution::copyToDebugBuffer(Buffer* srcBuffer)
-    {
-        auto runtime = getCudaRuntime();
-        runtime->copyFromDevice(srcBuffer, debugBuffer);
-    }
-    Buffer* Execution::getDebugBuffer(){return debugBuffer;}
     std::vector<Buffer*> Execution::getInputs() {return inputs;}
     std::vector<Buffer*> Execution::getOutputs() {return outputs;}
     std::string Execution::getExecutionType() {return executionType;}
@@ -64,7 +58,36 @@ namespace tensorrtInference {
         LOG("Input tensor size is %d\n", input.size());
         auto output = getOutputs();
         LOG("Output tensor size is %d\n", output.size());
-    }    
+    }
+    template<typename T>
+    void Execution::printBuffer(Buffer* buffer, int start, int end)
+    {
+        CHECK_ASSERT(buffer != nullptr, "buffer must not be none!\n");
+        CHECK_ASSERT(start >= 0, "start index must greater than 1!\n");
+        auto runtime = getCudaRuntime();
+        runtime->copyFromDevice(buffer, debugBuffer);
+        auto debugData = debugBuffer->host<T>();
+        int count = debugBuffer->getElementCount();
+        int printStart = (start > count) ? 0 : start;
+        int printEnd   = ((end - start) > count) ? (start + count) : end;
+        std::cout << "buffer data is :" << std::endl;
+        for(int i = printStart; i < printEnd; i++)
+        {
+            std::cout << debugData[i] << " " << std::endl;
+        }
+    }
+    void Execution::recycleBuffers()
+    {
+        auto runtime = getCudaRuntime();
+        for(int i = 0; i < inputs.size(); i++)
+        {
+            if(inputs[i]->getStorageType() == StorageType::DYNAMIC 
+                && inputs[i]->device<void>() != nullptr)
+            {
+                runtime->onReleaseBuffer(inputs[i], StorageType::DYNAMIC);
+            }
+        }
+    }
 
     CONSTUCT_EXECUTION_FUNC_DEF(DataConvert)
     CONSTUCT_EXECUTION_FUNC_DEF(FormatConvert)

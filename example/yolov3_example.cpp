@@ -185,7 +185,20 @@ void drawDetectBox(cv::Mat mat, std::vector<Buffer*> buffer, bool saveFlag = fal
         printf("index(%d) %f %f %f %f \n", keep[i], currentBoxes[0], currentBoxes[1], currentBoxes[2], currentBoxes[3]);
     }
     if(saveFlag)
+    {
+        for(int i = 1; i <= num_to_keep; i++)
+        {
+            float *currentBoxes = boxes + keep[i] * BOXES_SIZE;
+            float topLeftX = currentBoxes[0];
+            float topLeftY = currentBoxes[1];
+            float width = currentBoxes[2] - currentBoxes[0];
+            float height = currentBoxes[3] - currentBoxes[1];
+            cv::Rect rect(topLeftX, topLeftY, width, height);
+            cv::rectangle(mat, rect, cv::Scalar(0, 0, 255), 1, cv::LINE_8, 0);
+            // printf("index(%d) %f %f %f %f \n", keep[i], currentBoxes[0], currentBoxes[1], currentBoxes[2], currentBoxes[3]);
+        }
         cv::imwrite(SAVE_DETECT_RESULT(NET_NAME), mat);
+    }
 }
 
 int main()

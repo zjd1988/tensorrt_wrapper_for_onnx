@@ -21,7 +21,6 @@ namespace tensorrtInference
         inline Buffer* getClassIdx() {return classIdx;}
         inline Buffer* getCubBuffer() {return cubBuffer;}
         inline Buffer* getBoxesOut() { return boxesOut;}
-        // inline Buffer* getDetectBoxesNum() {return detectBoxesNum;}
         inline Buffer* getMaskRemove() { return maskRemove;}
         inline int getCubBufferSize() {return cubBufferSize;}
         inline void setSortIdx(Buffer* buffer) { sortIdx = buffer; }
@@ -33,7 +32,6 @@ namespace tensorrtInference
         inline void setClassIdx(Buffer* buffer) {classIdx = buffer;}
         inline void setCubBuffer(Buffer* buffer) {cubBuffer = buffer;}
         inline void setBoxesOut(Buffer* buffer) {boxesOut = buffer;}
-        // inline void setDetectBoxesNum(Buffer* buffer) { detectBoxesNum = buffer;}
         inline void setMaskRemove(Buffer* buffer) { maskRemove = buffer;}
         inline int getClassesNum() {return classesNum;}
         inline int getBoxesNum() {return boxesNum;}
@@ -48,7 +46,7 @@ namespace tensorrtInference
         inline int getImgWidth() {return imgWidth;}
         inline void setInputBoxesIndex(int index) {inputBoxesIndex = index;}
         inline int getInputBoxesIndex() { return inputBoxesIndex;}
-        
+        void recycleBuffers();
     private:
         Buffer *classIdx;
         Buffer *sortIdx;
@@ -59,7 +57,6 @@ namespace tensorrtInference
         Buffer *keep;
         Buffer *cubBuffer;
         Buffer *boxesOut;
-        // Buffer *detectBoxesNum;
         Buffer *maskRemove;
         int inputBoxesIndex;
         int boxesNum;

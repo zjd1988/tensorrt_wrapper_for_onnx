@@ -83,8 +83,11 @@ namespace tensorrtInference {
 
     Buffer::~Buffer() {
         bufferShape.clear();
-        if(ownHost)
+        if(ownHost && hostPtr != nullptr)
+        {
             bufferMemoryFreeAlign(hostPtr);
+            hostPtr = nullptr;
+        }
     }
 
     std::vector<int> Buffer::getShape(){

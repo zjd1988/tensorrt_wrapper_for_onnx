@@ -30,20 +30,6 @@ namespace tensorrtInference
         {
             CHECK_ASSERT(false, "current not support (%s) \n", convertType.c_str());
         }
-        // {
-        //     copyToDebugBuffer(src);
-        //     auto debugBuffer = getDebugBuffer();
-        //     // int *debugData = debugBuffer->host<int>();
-        //     // float *debugData = debugBuffer->host<float>();
-        //     unsigned char *debugData = debugBuffer->host<unsigned char>();
-        //     int start = 0;
-        //     int end = start + 10;
-        //     for(int i = start; i < end; i++)
-        //     {
-        //         printf("%d \n", debugData[i]);
-        //         // printf("%e \n", debugData[i]);
-        //     }
-        // }
         cudaError_t cudastatus = cudaGetLastError();
         CHECK_ASSERT(cudastatus == cudaSuccess, "run format convert kernel(%s) fail: %s\n", convertType.c_str(),
             cudaGetErrorString(cudastatus));
@@ -76,8 +62,8 @@ namespace tensorrtInference
             runtime->onAcquireBuffer(inputBuffers[0], StorageType::STATIC);
             needMemCpy = true;
         }
-        runtime->onAcquireBuffer(outBuffer, StorageType::STATIC);
-        
+        runtime->onAcquireBuffer(outBuffer, StorageType::DYNAMIC);
+        recycleBuffers();
         return true;
     }
 

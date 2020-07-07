@@ -38,12 +38,10 @@ namespace tensorrtInference
         if(inputBuffers[0]->device<void>() == nullptr)
         {
             runtime->onAcquireBuffer(inputBuffers[0], StorageType::STATIC);
-            runtime->onAcquireBuffer(outBuffer, StorageType::STATIC);
             needMemCpy = true;
         }
-        else
-            runtime->onAcquireBuffer(outBuffer, StorageType::DYNAMIC);
-        
+        runtime->onAcquireBuffer(outBuffer, StorageType::DYNAMIC);
+        recycleBuffers();
         return true;
     }
 

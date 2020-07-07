@@ -49,7 +49,8 @@ namespace tensorrtInference {
         T* host() { return (T*)hostPtr;}
         template <typename T>
         T* device() { return (T*)devicePtr;}
-
+        void setStorageType(StorageType type) {storageType = type;}
+        StorageType getStorageType() { return storageType; }
 
     private:
         OnnxDataType dataType;
@@ -57,6 +58,7 @@ namespace tensorrtInference {
         void* devicePtr;
         std::vector<int> bufferShape;
         bool ownHost = false;
+        StorageType storageType;
     };
 } // namespace tensorrtInference
 #endif

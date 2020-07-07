@@ -24,8 +24,9 @@ namespace tensorrtInference {
         void addOutput(Buffer* buffer);
         void setExecutionType(std::string type);
         void setSubExecutionType(std::string subType);
-        void copyToDebugBuffer(Buffer* srcBuffer);
-        Buffer* getDebugBuffer();
+        template<typename T>
+        void printBuffer(Buffer* buffer, int size, int end = 10);
+        void recycleBuffers();
     private:
         CUDARuntime* cudaRuntime;
         std::string executionType;

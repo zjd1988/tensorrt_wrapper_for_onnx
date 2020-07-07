@@ -71,12 +71,12 @@ namespace tensorrtInference
         }
         nvinfer1::IElementWiseLayer* ew = network->addElementWise(*inputTensors[0], *inputTensors[1], operation);
         CHECK_ASSERT(ew, "create ElementWise node fail\n");
-        if(subType.compare("Greater") == 0)
-        {
-            auto dataType = ew->getOutputType(0);
-            auto tensorFormat = ew->getOutput(0)->getAllowedFormats();
-            printf("run here!\n");
-        }
+        // if(subType.compare("Greater") == 0)
+        // {
+        //     auto dataType = ew->getOutputType(0);
+        //     auto tensorFormat = ew->getOutput(0)->getAllowedFormats();
+        //     // printf("run here!\n");
+        // }
         return ew;
     }
 }

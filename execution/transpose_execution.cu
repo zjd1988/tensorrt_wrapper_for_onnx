@@ -55,7 +55,8 @@ namespace tensorrtInference
     void callTransposeExecutionKernel(Buffer* src, Buffer* dst, std::string &convertType, CUDARuntime *runtime)
     {
         int size = src->getElementCount();
-        int blockSize = 256;
+        // int blockSize = 256;
+        int blockSize = runtime->threads_num();
         int gridSize = size / blockSize + 1;
         auto stream = runtime->stream();
         auto shape = src->getShape();

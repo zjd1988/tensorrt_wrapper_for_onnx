@@ -18,7 +18,8 @@ namespace tensorrtInference
         void* srcPtr = src->device<void>();
         void* dstPtr = dst->device<void>();
         int size = src->getElementCount();
-        int blockSize = 256;
+        // int blockSize = 256;
+        int blockSize = runtime->threads_num();
         int gridSize = size / blockSize + 1;
         auto stream = runtime->stream();
         if(convertType.compare("RGB2BGR") == 0 || convertType.compare("BGR2RGB") == 0)

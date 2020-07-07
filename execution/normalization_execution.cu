@@ -50,7 +50,8 @@ namespace tensorrtInference
         if(needMemCpy)
             runtime->copyToDevice(inputBuffers[0], inputBuffers[0]);
 
-        int blockSize = 256;
+        // int blockSize = 256;
+        int blockSize = runtime->threads_num();
         int gridSize = size / blockSize + 1;
         auto stream = runtime->stream();
         float alpha = 0.0f;

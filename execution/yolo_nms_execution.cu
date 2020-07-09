@@ -6,7 +6,7 @@
 #define STRIDE 32
 
 #define DIVUP(m,n) (((m)+(n)-1) / (n))
-int const threadsPerBlock = sizeof(unsigned long long) * 8;
+static int const threadsPerBlock = sizeof(unsigned long long) * 8;
 namespace tensorrtInference
 {
 
@@ -140,20 +140,6 @@ namespace tensorrtInference
         }
     }
 
-    Buffer* YoloNMSExecution::mallocBuffer(int size, OnnxDataType dataType, bool mallocHost, bool mallocDevice, StorageType type)
-    {
-        auto runtime = getCudaRuntime();
-        Buffer* buffer = nullptr;
-        if(mallocHost)
-            buffer = new Buffer(size, dataType, true);
-        else
-            buffer = new Buffer(size, dataType);
-        CHECK_ASSERT(buffer != nullptr, "new Buffer fail\n");
-        if(mallocDevice)
-            runtime->onAcquireBuffer(buffer, type);
-        return buffer;
-    }
-
     void YoloNMSExecution::callYoloNMSExecutionKernel()
     {
         auto inputBuffers = getInputs();
@@ -182,13 +168,22 @@ namespace tensorrtInference
         auto stream = runtime->stream();
         
         // {
-        //      printBuffer<float>(classesPorbBuffer);
+        //     printBuffer<float>(boxesBuffer, 0, 10);
+        //     cudastatus = cudaGetLastError();
+        //     CHECK_ASSERT(cudastatus == cudaSuccess, "launch debug print kernel fail: %s\n",cudaGetErrorString(cudastatus));            
         // }
 
         getMaxPorb<<<gridSize, blockSize, 0, stream>>>(size, classesPorbBuffer->device<float>(), classesNumber,
             probBuffer->device<float>(), idxBuffer->device<int>(), classIdxBuffer->device<int>());
         cudastatus = cudaGetLastError();
         CHECK_ASSERT(cudastatus == cudaSuccess, "launch getMaxPorb kernel fail: %s\n",cudaGetErrorString(cudastatus));
+
+        // {
+        //     // printBuffer<int>(idxBuffer, 0, 10);
+        //     printBuffer<float>(probBuffer, 0, 10);
+        //     cudastatus = cudaGetLastError();
+        //     CHECK_ASSERT(cudastatus == cudaSuccess, "launch debug print kernel fail: %s\n",cudaGetErrorString(cudastatus));            
+        // }
 
         int stridex = getImgWidth() / STRIDE;
         int stridey = getImgHeight() / STRIDE;
@@ -205,7 +200,15 @@ namespace tensorrtInference
         size_t tempBufferSize = getCubBufferSize();
         cudaMemsetAsync(cubBuffer->device<void>(), 0, cubBuffer->getSize(), stream);
         cub::DeviceRadixSort::SortPairsDescending(tempBuffer, tempBufferSize, keyIn, keyOut, valueIn, valueOut, boxesNumber,
-            0, sizeof(unsigned int) * 8, stream);       
+            0, sizeof(unsigned int) * 8, stream);
+
+
+        // {
+        //     // printBuffer<int>(idxBuffer, 0, 10);
+        //     printBuffer<float>(sortProbBuffer, 0, 10);
+        //     cudastatus = cudaGetLastError();
+        //     CHECK_ASSERT(cudastatus == cudaSuccess, "launch debug print kernel fail: %s\n",cudaGetErrorString(cudastatus));            
+        // }            
 
         dim3 blocks(DIVUP(boxesNumber, threadsPerBlock), DIVUP(boxesNumber, threadsPerBlock));
         dim3 threads(threadsPerBlock);
@@ -339,15 +342,7 @@ namespace tensorrtInference
         addInput(inputBuffers[0]);
         addInput(inputBuffers[1]);
 
-        // runtime->onReleaseBuffer(idxBuffer, StorageType::DYNAMIC);
-        // runtime->onReleaseBuffer(sortIdxBuffer, StorageType::DYNAMIC);
-        // runtime->onReleaseBuffer(probBuffer, StorageType::DYNAMIC);
-        // runtime->onReleaseBuffer(sortProbBuffer, StorageType::DYNAMIC);
-        // runtime->onReleaseBuffer(maskBuffer, StorageType::DYNAMIC);
-        // runtime->onReleaseBuffer(cubTempBuffer, StorageType::DYNAMIC);
-        // runtime->onReleaseBuffer(maskRemoveBuffer, StorageType::DYNAMIC);
         recycleBuffers();
-                
         return true;
     }
 

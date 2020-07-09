@@ -38,7 +38,6 @@ namespace tensorrtInference
         inline void setClassesNum(int num) { classesNum = num;}
         inline void setBoxesNum(int num) { boxesNum = num;}
         inline void setCubBufferSize(int num) {cubBufferSize = num;}
-        Buffer* mallocBuffer(int size, OnnxDataType dataType, bool mallocHost, bool mallocDevice, StorageType type = StorageType::DYNAMIC);
         void callYoloNMSExecutionKernel();
         inline void setImgHeight(int height) { imgHeight = height;}
         inline void setImgWidth(int width) { imgWidth = width;}

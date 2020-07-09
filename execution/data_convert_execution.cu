@@ -2,11 +2,12 @@
 
 namespace tensorrtInference
 {
-    __global__ void DataConvertExecutionKernel(const unsigned char* src, float* dst, const int size)
+    template <typename SRC_T, typename DST_T>
+    __global__ void DataConvertExecutionKernel(const SRC_T* src, DST_T* dst, const int size)
     {
         int index = blockIdx.x * blockDim.x + threadIdx.x;
         if(index < size){
-            dst[index] = (float)src[index];
+            dst[index] = (DST_T)src[index];
         }
     }
 
@@ -29,6 +30,8 @@ namespace tensorrtInference
         Buffer *outBuffer = nullptr;
         if(subType.compare("ConvertUint8ToFloat32") == 0)
             outBuffer = new Buffer(shape, OnnxDataType::FLOAT);
+        else if(subType.compare("ConvertUint8ToFloat16") == 0)
+            outBuffer = new Buffer(shape, OnnxDataType::FLOAT16);
         else
             LOG("current not support %s\n", subType.c_str());
         CHECK_ASSERT(outBuffer != nullptr, "new Buffer fail\n");
@@ -51,17 +54,21 @@ namespace tensorrtInference
         auto outputBuffers = getOutputs();
         auto runtime = getCudaRuntime();
         auto stream = runtime->stream();
-        int size = inputBuffers[0]->getElementCount();
+        const int size = inputBuffers[0]->getElementCount();
         auto subType = getSubExecutionType();
         if(needMemCpy)
             runtime->copyToDevice(inputBuffers[0], inputBuffers[0]);
 
-        // int blockSize = 256;
         int blockSize = runtime->threads_num();
         int gridSize = size / blockSize + 1;
         if(subType.compare("ConvertUint8ToFloat32") == 0)
         {
-            DataConvertExecutionKernel<<<gridSize, blockSize, 0, stream>>>(inputBuffers[0]->device<unsigned char>(),
+            DataConvertExecutionKernel<<<gridSize, blockSize, 0, stream>>>(inputBuffers[0]->device<const unsigned char>(),
+                outputBuffers[0]->device<float>(), size);
+        }
+        else if(subType.compare("ConvertUint8ToFloat16") == 0)
+        {
+            DataConvertExecutionKernel<<<gridSize, blockSize, 0, stream>>>(inputBuffers[0]->device<const unsigned char>(),
                 outputBuffers[0]->device<float>(), size);
         }
         else

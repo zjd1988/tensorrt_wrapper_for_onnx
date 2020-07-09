@@ -27,8 +27,8 @@ namespace tensorrtInference
         std::map<std::string, void*> getBindingNamesHostMemMap();
         std::map<std::string, int> getBindingNamesIndexMap();
         void prepareData(std::map<int, unsigned char*> dataMap);
-        void prepareData(std::map<int, unsigned char*> dataMap, std::vector<std::string> preExecution, 
-                std::vector<std::string> postExecution);
+        void prepareData(std::map<int, unsigned char*> dataMap, std::map<int, std::vector<int>> dataShape, 
+            std::vector<std::string> preExecution, std::vector<std::string> postExecution);
         std::map<std::string, void*> getInferenceResult();
         std::vector<Buffer*> getPreProcessResult();
         std::vector<Buffer*> getPostProcessResult();

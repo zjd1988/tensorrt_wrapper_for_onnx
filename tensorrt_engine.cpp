@@ -323,10 +323,11 @@ namespace tensorrtInference
     {
         std::vector<std::string> preExecution;
         std::vector<std::string> postExecution;
-        prepareData(dataMap, preExecution, postExecution);
+        std::map<int, std::vector<int>> dataShape;
+        prepareData(dataMap, dataShape, preExecution, postExecution);
     }
-    void tensorrtEngine::prepareData(std::map<int, unsigned char*> dataMap, std::vector<std::string> preExecution, 
-                std::vector<std::string> postExecution)
+    void tensorrtEngine::prepareData(std::map<int, unsigned char*> dataMap, std::map<int, std::vector<int>> dataShape, 
+        std::vector<std::string> preExecution, std::vector<std::string> postExecution)
     {
         const nvinfer1::ICudaEngine& engine = context->getEngine();
         int nbBinds = engine.getNbBindings();
@@ -337,8 +338,16 @@ namespace tensorrtInference
             if(engine.bindingIsInput(i) == true)
             {
                 CHECK_ASSERT(dataMap.count(i) != 0, "index(%d) is not network input!\n");
-                nvinfer1::Dims dims = engine.getBindingDimensions(i);
-                auto shape = dimsToVector(dims);
+                std::vector<int> shape;
+                if(dataShape.count(i) != 0)
+                {
+                    shape = dataShape[i];
+                }
+                else
+                {
+                    nvinfer1::Dims dims = engine.getBindingDimensions(i);
+                    auto shape = dimsToVector(dims);
+                }
                 std::shared_ptr<Buffer> buffer;
                 buffer.reset(Buffer::create(shape, OnnxDataType::UINT8, dataMap[i]));
                 hostNetworkInputBuffers[i] = buffer;

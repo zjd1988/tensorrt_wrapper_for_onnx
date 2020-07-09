@@ -39,11 +39,27 @@ vector<size_t> sort_indexes_e(vector<T> &v)
     return idx;
 }
 
-std::map<int, unsigned char*> initInputData(std::map<std::string, int> hostMemIndexMap, unsigned char* data)
+std::map<int, unsigned char*> initInputDataMap(std::map<std::string, int> hostMemIndexMap, cv::Mat& mat)
 {
     std::map<int, unsigned char*> inputs;
     auto inputIndex = hostMemIndexMap["input"];
-    inputs[inputIndex] = data;
+    inputs[inputIndex] = mat.data;
+    return inputs;
+}
+
+std::map<int, std::vector<int>> initInputDataShapeMap(std::map<std::string, int> hostMemIndexMap, cv::Mat& mat)
+{
+    std::map<int, std::vector<int>> inputs;
+    auto inputIndex = hostMemIndexMap["input"];
+    int width = mat.cols;
+    int height = mat.rows;
+    int channels = mat.channels();
+    std::vector<int> shape(4);
+    shape[0] = 1;
+    shape[1] = height;
+    shape[2] = width;
+    shape[3] = channels;
+    inputs[inputIndex] = shape;
     return inputs;
 }
 
@@ -219,7 +235,8 @@ int main()
     
     tensorrtEngine engine(engineFileName);
     auto hostMemIndex = engine.getBindingNamesIndexMap();
-    auto inputs = initInputData(hostMemIndex, colorJpg.data);
+    auto inputsDataMap = initInputDataMap(hostMemIndex, colorJpg);
+    auto inputsDataShape = initInputDataShapeMap(hostMemIndex, colorJpg);
     std::vector<std::string> preProcess;
     std::vector<std::string> postProcess;
     preProcess.push_back("BGR2RGB");
@@ -227,7 +244,7 @@ int main()
     preProcess.push_back("Scale_0_1");
     postProcess.push_back("YOLO_NMS");
     postProcess.push_back("CopyFromDevice");
-    engine.prepareData(inputs, preProcess, postProcess);
+    engine.prepareData(inputsDataMap, inputsDataShape, preProcess, postProcess);
     
     for (int i = 0; i < 10; i++) {
         auto start = std::chrono::system_clock::now();

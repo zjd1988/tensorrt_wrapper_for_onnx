@@ -62,9 +62,8 @@ namespace tensorrtInference
         auto shape = src->getShape();
         if(convertType.compare("NHWC2NCHW") == 0) {
             auto dataType = src->getDataType();
-            CHECK_ASSERT(shape.size() == 4, "NHWC_TO_NCHW need input buffer dims(%d) != 4!\n", shape.size());
-            int channle = shape[1];
-            int stride = shape[2] * shape[3];
+            int channle = shape[3];
+            int stride = shape[1] * shape[2];
             if(dataType == OnnxDataType::FLOAT)
             {
                 TransposeNHWCToNCHWKernel<float><<<gridSize, blockSize, 0, stream>>>(size, channle, stride,
@@ -105,7 +104,25 @@ namespace tensorrtInference
         CHECK_ASSERT(inputBuffers.size() == 1, "input buffer vector size must be 1\n");
         auto shape = inputBuffers[0]->getShape();
         auto dataType = inputBuffers[0]->getDataType();
-        auto outBuffer = new Buffer(shape, dataType);
+        auto subType = getSubExecutionType();
+        std::vector<int> outShape(shape.size());
+        if(subType.compare("NHWC2NCHW") == 0 && shape.size() == 4)
+        {
+            outShape[0] = shape[0];
+            outShape[1] = shape[3];
+            outShape[2] = shape[1];
+            outShape[3] = shape[2];
+        }
+        else if(subType.compare("NCHW2NHWC") == 0 && shape.size() == 4)
+        {
+            outShape[0] = shape[0];
+            outShape[1] = shape[2];
+            outShape[2] = shape[3];
+            outShape[3] = shape[1];
+        }
+        else
+            CHECK_ASSERT(false, "current not support %s!\n", subType.c_str());
+        Buffer* outBuffer = new Buffer(outShape, dataType);
         CHECK_ASSERT(outBuffer != nullptr, "new Buffer fail\n");
         addOutput(outBuffer);
         addInput(inputBuffers[0]);
@@ -116,7 +133,7 @@ namespace tensorrtInference
             needMemCpy = true;
         }
         runtime->onAcquireBuffer(outBuffer, StorageType::DYNAMIC);
-        recycleBuffers();        
+        recycleBuffers();
         return true;
     }
 
@@ -131,6 +148,11 @@ namespace tensorrtInference
             runtime->copyToDevice(inputBuffers[0], inputBuffers[0]);
 
         callTransposeExecutionKernel(inputBuffers[0], outputBuffers[0], subType, runtime);
+        // {
+        //     printBuffer<unsigned char>(outputBuffers[0], 0, 10);
+        //     cudaError_t cudastatus = cudaGetLastError();
+        //     CHECK_ASSERT(cudastatus == cudaSuccess, "launch debug print kernel fail: %s\n",cudaGetErrorString(cudastatus));            
+        // }
         if(sync)
             runtime->onWaitFinish();
         return;

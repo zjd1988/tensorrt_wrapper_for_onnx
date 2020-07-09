@@ -59,23 +59,6 @@ namespace tensorrtInference {
         auto output = getOutputs();
         LOG("Output tensor size is %d\n", output.size());
     }
-    template<typename T>
-    void Execution::printBuffer(Buffer* buffer, int start, int end)
-    {
-        CHECK_ASSERT(buffer != nullptr, "buffer must not be none!\n");
-        CHECK_ASSERT(start >= 0, "start index must greater than 1!\n");
-        auto runtime = getCudaRuntime();
-        runtime->copyFromDevice(buffer, debugBuffer);
-        auto debugData = debugBuffer->host<T>();
-        int count = debugBuffer->getElementCount();
-        int printStart = (start > count) ? 0 : start;
-        int printEnd   = ((end - start) > count) ? (start + count) : end;
-        std::cout << "buffer data is :" << std::endl;
-        for(int i = printStart; i < printEnd; i++)
-        {
-            std::cout << debugData[i] << " " << std::endl;
-        }
-    }
     void Execution::recycleBuffers()
     {
         auto runtime = getCudaRuntime();
@@ -88,6 +71,28 @@ namespace tensorrtInference {
             }
         }
     }
+    Buffer* Execution::mallocBuffer(int size, OnnxDataType dataType, bool mallocHost, 
+        bool mallocDevice, StorageType type)
+    {
+        auto runtime = getCudaRuntime();
+        Buffer* buffer = nullptr;
+        buffer = new Buffer(size, dataType, mallocHost);
+        CHECK_ASSERT(buffer != nullptr, "new Buffer fail\n");
+        if(mallocDevice)
+            runtime->onAcquireBuffer(buffer, type);
+        return buffer;
+    }
+    Buffer* Execution::mallocBuffer(std::vector<int> shape, OnnxDataType dataType, bool mallocHost, 
+        bool mallocDevice, StorageType type)
+    {
+        auto runtime = getCudaRuntime();
+        Buffer* buffer = nullptr;
+        buffer = new Buffer(shape, dataType, mallocHost);
+        CHECK_ASSERT(buffer != nullptr, "new Buffer fail\n");
+        if(mallocDevice)
+            runtime->onAcquireBuffer(buffer, type);
+        return buffer;
+    }        
 
     CONSTUCT_EXECUTION_FUNC_DEF(DataConvert)
     CONSTUCT_EXECUTION_FUNC_DEF(FormatConvert)

@@ -25,8 +25,37 @@ namespace tensorrtInference {
         void setExecutionType(std::string type);
         void setSubExecutionType(std::string subType);
         template<typename T>
-        void printBuffer(Buffer* buffer, int size, int end = 10);
+        void printBuffer(Buffer* buffer, int start, int end)
+        {
+            CHECK_ASSERT(buffer != nullptr, "buffer must not be none!\n");
+            CHECK_ASSERT(start >= 0, "start index must greater than 1!\n");
+            auto runtime = getCudaRuntime();
+            runtime->copyFromDevice(buffer, debugBuffer);
+            auto debugData = debugBuffer->host<T>();
+            int count = debugBuffer->getElementCount();
+            int printStart = (start > count) ? 0 : start;
+            int printEnd   = ((end - start) > count) ? (start + count) : end;
+            std::cout << "buffer data is :" << std::endl;
+            if(onnxDataTypeEleCount[buffer->getDataType()] != 1)
+            {
+                for(int i = printStart; i < printEnd; i++)
+                {
+                    std::cout << debugData[i] << " " << std::endl;
+                }
+            }
+            else
+            {
+                for(int i = printStart; i < printEnd; i++)
+                {
+                    printf("%d \n", debugData[i]);
+                }
+            }
+        }
         void recycleBuffers();
+        Buffer* mallocBuffer(int size, OnnxDataType dataType, bool mallocHost, bool mallocDevice, 
+            StorageType type = StorageType::DYNAMIC);
+        Buffer* mallocBuffer(std::vector<int> shape, OnnxDataType dataType, bool mallocHost, 
+            bool mallocDevice, StorageType type = StorageType::DYNAMIC);
     private:
         CUDARuntime* cudaRuntime;
         std::string executionType;

@@ -15,7 +15,7 @@ using namespace tensorrtInference;
 #define GRAPH_WEIGHTS_FILE(net) net "net_weights.bin"
 #define GRAPH_ENGINE_FILE(net)  net "net.engine"
 #define SAVE_DETECT_RESULT(net) net "detect_result.jpg"
-#define SAVE_ENGINE 0
+#define SAVE_ENGINE 1
 #define FP16_FLAG false
 
 #define NMS_THRESH 0.3

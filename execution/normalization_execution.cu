@@ -73,6 +73,11 @@ namespace tensorrtInference
         cudaError_t cudastatus = cudaGetLastError();
         CHECK_ASSERT(cudastatus == cudaSuccess, "run convert kernel(%s) fail: %s\n", getSubExecutionType().c_str(),
             cudaGetErrorString(cudastatus));
+        // {
+        //     printBuffer<unsigned char>(inputBuffers[0], 0, 10);
+        //     cudastatus = cudaGetLastError();
+        //     CHECK_ASSERT(cudastatus == cudaSuccess, "launch debug print kernel fail: %s\n",cudaGetErrorString(cudastatus));            
+        // }
         if(sync)
             runtime->onWaitFinish();
         return;

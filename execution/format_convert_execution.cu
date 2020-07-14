@@ -78,6 +78,12 @@ namespace tensorrtInference
             runtime->copyToDevice(inputBuffers[0], inputBuffers[0]);
 
         callFormatConvertExecutionKernel(inputBuffers[0], outputBuffers[0], subType, runtime);
+
+        // {
+        //     printBuffer<unsigned char>(outputBuffers[0], 0, 10);
+        //     cudaError_t cudastatus = cudaGetLastError();
+        //     CHECK_ASSERT(cudastatus == cudaSuccess, "launch debug print kernel fail: %s\n",cudaGetErrorString(cudastatus));            
+        // }        
         if(sync)
             runtime->onWaitFinish();
         return;

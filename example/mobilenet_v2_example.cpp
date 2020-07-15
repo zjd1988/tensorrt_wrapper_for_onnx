@@ -13,7 +13,8 @@ using namespace tensorrtInference;
 #define GRAPH_JSON_FILE(net)    net "net_graph.json"
 #define GRAPH_WEIGHTS_FILE(net) net "net_weights.bin"
 #define GRAPH_ENGINE_FILE(net)  net "net.engine"
-#define SAVE_ENGINE 1
+#define SAVE_ENGINE 0
+#define FP16_FLAG false
 
 #define BACTCH_SIZE 1
 #define CHANNEL_SIZE 3
@@ -22,15 +23,18 @@ using namespace tensorrtInference;
 
 #define OUTPUT_SIZE 1000
 
-void initInputData(std::map<std::string, void*> hostMemMap)
+std::map<int, unsigned char*> initInputData(std::map<std::string, int> hostMemIndexMap, unsigned char* data)
 {
-    int size = BACTCH_SIZE * CHANNEL_SIZE * HEIGHT_SIZE * WIDTH_SIZE;
-    auto input = (float*)(hostMemMap["input"]);
-    for(int i = 0; i < size; i++)
+    std::map<int, unsigned char*> inputs;
+    auto inputIndex = hostMemIndexMap["input"];
+    inputs[inputIndex] = data;
+    for(int i = 0; i < BACTCH_SIZE * CHANNEL_SIZE * HEIGHT_SIZE * WIDTH_SIZE; i++)
     {
-        input[i] = 1.0f;
+        data[i] = 1;
     }
+    return inputs;
 }
+
 void printOutputData(std::map<std::string, void*> hostMemMap)
 {
     auto output = (float*)(hostMemMap["output"]);
@@ -45,24 +49,18 @@ int main()
     std::string jsonFileName    = GRAPH_JSON_FILE(NET_NAME);
     std::string weightsFileName = GRAPH_WEIGHTS_FILE(NET_NAME);
     std::string engineFileName  = GRAPH_ENGINE_FILE(NET_NAME);
-    // save engine file
+    
 #if SAVE_ENGINE
-    tensorrtEngine engine(jsonFileName, weightsFileName);
+    // save engine file
+    tensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
     engine.saveEnginePlanFile(engineFileName);
 #else
     //engine inference
-    // std::string bmpFile = "gray_test.bmp";
-    // cv::Mat colorBmp = cv::imread(bmpFile.c_str());
-    // cv::Mat grayBmp;
-    // cv::Mat inputBmp( 721, 1281, CV_8UC1, cv::Scalar(0));
-    // cv::Rect rect(0, 0, 1280, 720);
-    // cv::cvtColor(colorBmp, grayBmp, cv::COLOR_BGR2GRAY);
-    // grayBmp.copyTo(inputBmp(rect));
-    // cv::Mat inputFloatBmp( 721, 1281, CV_32FC1, cv::Scalar(0));
-    // inputBmp.convertTo(inputFloatBmp, CV_32F);
+    unsigned char* data = (unsigned char*)malloc(BACTCH_SIZE * CHANNEL_SIZE * HEIGHT_SIZE * WIDTH_SIZE);
     tensorrtEngine engine(engineFileName);
-    auto hostMem = engine.getBindingNamesHostMemMap();
-    initInputData(hostMem);
+    auto hostMemIndex = engine.getBindingNamesIndexMap();
+    auto inputs = initInputData(hostMemIndex, data);
+    engine.prepareData(inputs);
     
     for (int i = 0; i < 100; i++) {
         auto start = std::chrono::system_clock::now();
@@ -70,7 +68,9 @@ int main()
         auto end = std::chrono::system_clock::now();
         std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
     }
-    printOutputData(hostMem);
+    auto result = engine.getInferenceResult();
+    free(data);
+    printOutputData(result);
 #endif
 
 }

@@ -7,6 +7,7 @@
 #include "utils.hpp"
 #include "json/json.h"
 #include "node_info.hpp"
+// #include "create_node.hpp"
 
 
 namespace tensorrtInference
@@ -46,17 +47,16 @@ namespace tensorrtInference
 
     class weightsAndGraphParse {
     public:
-        weightsAndGraphParse(std::string &jsonFile, std::string &weightsFile);
+        weightsAndGraphParse(std::string &jsonFile, std::string &weightsFile, bool fp16Flag);
         ~weightsAndGraphParse();
-        std::vector<std::string>& getNetInputBlobNames();
-        std::vector<std::string>& getNetOutputBlobNames();
-        const std::vector<std::string>& getTopoNodeOrder();
-        const std::map<std::string, weightInfo>& getWeightsInfo();
-        const std::map<std::string, std::shared_ptr<nodeInfo>>& getNodeInfoMap();
-        std::vector<std::string> getConstWeightTensorNames();
         bool getInitFlag() {return initFlag;}
-        bool getFp16Flag() {return fp16Flag;}
+        bool saveEnginePlanFile(std::string saveFile);
     private:
+        std::vector<std::string> getConstWeightTensorNames();
+        void initConstTensors(std::map<std::string, nvinfer1::ITensor*>& tensors, nvinfer1::INetworkDefinition* network);
+        void setNetInput(std::map<std::string, nvinfer1::ITensor*>& tensors, nvinfer1::INetworkDefinition* network);
+        void createNetBackbone(std::map<std::string, nvinfer1::ITensor*>& tensors, nvinfer1::INetworkDefinition* network);        
+        void createEngine(unsigned int maxBatchSize, bool fp16Flag);
         bool extractNodeInfo(Json::Value &root);
         std::map<std::string, char*> weightsData;
         std::vector<std::string> topoNodeOrder;
@@ -65,7 +65,11 @@ namespace tensorrtInference
         std::vector<std::string> inputTensorNames;
         std::vector<std::string> outputTensorNames;
         bool initFlag = false;
-        bool fp16Flag = false;
+        
+        // create/save engine 
+        Logger mLogger;
+        nvinfer1::IBuilder* builder;
+        nvinfer1::ICudaEngine* cudaEngine;
     };
 } //tensorrtInference
 

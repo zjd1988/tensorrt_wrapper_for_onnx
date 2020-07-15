@@ -1,0 +1,1 @@
+python ../../python_scripts/parse_onnx_model_new.py ./yolov4_simplify.onnx

@@ -6,7 +6,6 @@
 #include <vector>
 #include "json/json.h"
 #include "utils.hpp"
-#include "node_info.hpp"
 using namespace std;
 
 namespace tensorrtInference

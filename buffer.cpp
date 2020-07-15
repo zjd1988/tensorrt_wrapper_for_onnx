@@ -79,8 +79,8 @@ namespace tensorrtInference {
             result->setHost(userData);
         }
         return result;
-    }    
-
+    }
+    
     Buffer::~Buffer() {
         bufferShape.clear();
         if(ownHost && hostPtr != nullptr)

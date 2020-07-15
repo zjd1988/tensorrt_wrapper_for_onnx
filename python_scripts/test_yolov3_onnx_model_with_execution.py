@@ -46,12 +46,12 @@ if __name__ == "__main__":
     # 5 onnx model 
     inputs = normalization_node.get_outputs()
     onnx_file = "../example/yolov3/yolov3-tiny.onnx"
-    onnx_node = execution.OnnxExecution(onnx_file, inputs, ["classes", "boxes"])
+    onnx_node = execution.OnnxModelExecution(onnx_file, inputs, ["classes", "boxes"])
     network.insert_node(onnx_node)
 
     # 6 yolo nms
     inputs = onnx_node.get_outputs()
-    nms_node = execution.YoloNMSExecution(inputs, ["nms_boxes", "nms_classes"])
+    nms_node = execution.YoloNMSExecution(inputs, ["nms_number", "nms_boxes", "nms_classes"])
     network.insert_node(nms_node)
 
     # 7 inference network

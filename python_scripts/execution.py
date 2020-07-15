@@ -7,6 +7,25 @@ import numpy as np
 import cv2
 import copy
 
+onnx_data_type = {}
+onnx_data_type["UNDEFINED"] = 0
+onnx_data_type["FLOAT32"] = 1
+onnx_data_type["UINT8"] = 2
+onnx_data_type["INT8"] = 3
+onnx_data_type["UINT16"] = 4
+onnx_data_type["INT16"] = 5
+onnx_data_type["INT32"] = 6
+onnx_data_type["INT64"] = 7
+onnx_data_type["STRING"] = 8
+onnx_data_type["BOOL"] = 9
+onnx_data_type["FLOAT16"] = 10
+onnx_data_type["DOUBLE"] = 11
+onnx_data_type["UINT32"] = 12
+onnx_data_type["UINT64"] = 13
+onnx_data_type["COMPLEX64"] = 14
+onnx_data_type["COMPLEX128"] = 15
+onnx_data_type["BFLOAT16"] = 16
+
 class Execution:
     execution_index = 0
     def __init__(self, execution_name, execution_input_name, execution_output_name):
@@ -18,6 +37,8 @@ class Execution:
         Execution.execution_index += 1
         self.set_inputs(execution_input_name)
         self.set_outputs(execution_output_name)
+        self.tensor_info = {}
+
     def get_inputs(self):
         return self.input_name
     def get_outputs(self):
@@ -26,17 +47,43 @@ class Execution:
         self.input_name = names
     def set_outputs(self, names):
         self.output_name = names
+    def update_tensor_info(self, blobs, inputs, outputs):
+        for i in range(len(self.input_name)):
+            input_tensor_info = {}
+            tensor_name = self.input_name[i]
+            input_tensor_info["shape"] = list(blobs[tensor_name].shape)
+            input_tensor_info["data_type"] = onnx_data_type[str(blobs[tensor_name].dtype).upper()]
+            input_tensor_info["malloc_host"] = False
+            input_tensor_info["malloc_type"] = "DYNAMIC"
+            if tensor_name in inputs:
+                input_tensor_info["malloc_type"] = "STATIC"
+                input_tensor_info["memcpy_dir"] = "host_to_device"
+            self.tensor_info[tensor_name] = input_tensor_info
+        for i in range(len(self.output_name)):
+            output_tensor_info = {}
+            tensor_name = self.output_name[i]
+            output_tensor_info["shape"] = list(blobs[tensor_name].shape)
+            output_tensor_info["data_type"] = onnx_data_type[str(blobs[tensor_name].dtype).upper()]
+            output_tensor_info["malloc_host"] = False
+            output_tensor_info["malloc_type"] = "DYNAMIC"
+            if tensor_name in outputs:
+                output_tensor_info["malloc_host"] = True
+                output_tensor_info["malloc_type"] = "STATIC"
+                output_tensor_info["memcpy_dir"] = "device_to_host"
+            self.tensor_info[tensor_name] = output_tensor_info
+
     def get_execution_info(self):
         info = {}
         info["type"] = self.type
         info["attr"] = self.attr
         info["inputs"] = self.input_name
         info["outputs"] = self.output_name
+        info["tensor_info"] = self.tensor_info
         return info
 
 class DataTypeConvertExecution(Execution):
     def __init__(self, execution_input_name, execution_output_name):
-        Execution.__init__(self, "DataTypeConvertExecution", execution_input_name, execution_output_name)
+        Execution.__init__(self, "DataTypeConvert", execution_input_name, execution_output_name)
 
     def init_attr(self, attr):
         self.attr["convert_type"] = attr["convert_type"]
@@ -56,7 +103,7 @@ class DataTypeConvertExecution(Execution):
 
 class DataFormatConvertExecution(Execution):
     def __init__(self, execution_input_name, execution_output_name):
-        Execution.__init__(self, "DataFormatConvertExecution", execution_input_name, execution_output_name)
+        Execution.__init__(self, "DataFormatConvert", execution_input_name, execution_output_name)
 
     def init_attr(self, attr):
         self.attr["convert_type"] = attr["convert_type"]
@@ -80,7 +127,7 @@ class DataFormatConvertExecution(Execution):
 
 class ReshapeExecution(Execution):
     def __init__(self, execution_input_name, execution_output_name):
-        Execution.__init__(self, "ReshapeExecution", execution_input_name, execution_output_name)
+        Execution.__init__(self, "Reshape", execution_input_name, execution_output_name)
 
     def init_attr(self, attr):
         self.attr["shape"] = attr["shape"]
@@ -115,7 +162,7 @@ class TransposeExecution(Execution):
 
 class NormalizationExecution(Execution):
     def __init__(self, execution_input_name, execution_output_name):
-        Execution.__init__(self, "NormalizationExecution", execution_input_name, execution_output_name)
+        Execution.__init__(self, "Normalization", execution_input_name, execution_output_name)
         self.attr["alpha"] = 0.0
         self.attr["beta"] = 1.0
 
@@ -137,9 +184,9 @@ class NormalizationExecution(Execution):
         output_name = self.get_outputs()
         return dict(zip(output_name,result_data))
 
-class OnnxExecution(Execution):
+class OnnxModelExecution(Execution):
     def __init__(self, onnx_file, execution_input_name, execution_output_name):
-        Execution.__init__(self, "OnnxExecution", execution_input_name, execution_output_name)
+        Execution.__init__(self, "OnnxModel", execution_input_name, execution_output_name)
         self.session = onnxruntime.InferenceSession(onnx_file)
         self.attr["onnx_file"] = onnx_file
 
@@ -156,7 +203,7 @@ class OnnxExecution(Execution):
 
 class YoloNMSExecution(Execution):
     def __init__(self, execution_input_name, execution_output_name):
-        Execution.__init__(self, "YoloNMSExecution", execution_input_name, execution_output_name)
+        Execution.__init__(self, "YoloNMS", execution_input_name, execution_output_name)
         self.attr["img_height"]  = 512
         self.attr["img_width"]   = 384
         self.attr["conf_thresh"] = 0.3
@@ -223,11 +270,29 @@ class YoloNMSExecution(Execution):
                 order = order[inds + 1]
         
         results = []
-        if keep != []:
-            results.append(valid_boxes[keep,:])
-            results.append(class_index[keep])
+        number_nms = 0
+        topk = self.attr["topk"]
+        if len(keep) > topk:
+            number_nms = topk
         else:
-            results = [[], []]
+            number_nms = len(keep)
+        
+        temp_num = np.zeros((1)).astype(np.int32)
+        temp_num[0] = number_nms
+        results.append(temp_num)
+        if number_nms > 0:
+            temp_boxes = np.zeros((topk,4)).astype(np.float32)
+            temp_boxes[0:number_nms, :] = valid_boxes[keep[0:number_nms],:]
+            results.append(temp_boxes)
+
+            temp_class = np.zeros((topk)).astype(np.float32)
+            temp_class[0:number_nms] = class_index[keep[0:number_nms]]
+            results.append(temp_class)
+        else:
+            temp_boxes = np.zeros((topk,4)).astype(np.float32)
+            results.append(temp_boxes)
+            temp_class = np.zeros((topk)).astype(np.float32)
+            results.append(temp_class)
         return results
 
         
@@ -248,6 +313,8 @@ class Network:
             self.nodes_names = set()
             self.topo_order = []
             self.blobs = {}
+            self.output_tensor_names = []
+            self.input_tensor_names = []
 
     def insert_node(self, node):
         self.nodes[node.name] = node
@@ -289,6 +356,12 @@ class Network:
                 assert topo_flag
 
     def inference(self, inputs_data, outputs_data):
+        if len(self.output_tensor_names) == 0:
+            self.output_tensor_names.extend(outputs_data)
+        if len(self.input_tensor_names) == 0:
+            for name, data in inputs_data.items():
+                self.input_tensor_names.append(name)
+        
         self.set_blob_data(inputs_data)
         for index in range(len(self.topo_order)):
             curr_node = self.nodes[self.topo_order[index]]
@@ -305,12 +378,15 @@ class Network:
         execution_node_info = {}
         for i in range(len(self.topo_order)):
             node = self.nodes[self.topo_order[i]]
+            node.update_tensor_info(self.blobs, self.input_tensor_names, self.output_tensor_names)
             execution_node_info[self.topo_order[i]] = node.get_execution_info()
 
         if file_name == "":
             file_name = "net_inference.json"
-        json_result["node_info"] = execution_node_info
+        json_result["execution_info"] = execution_node_info
         json_result["topo_order"] = self.topo_order
+        json_result["input_tensor_names"] = self.input_tensor_names
+        json_result["output_tensor_names"] = self.output_tensor_names
         json_str = json.dumps(json_result)
         with open(file_name, 'w') as f:
             f.write(json_str)

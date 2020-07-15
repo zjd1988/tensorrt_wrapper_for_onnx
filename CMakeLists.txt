@@ -26,7 +26,7 @@ file(GLOB COMMON_FILES ${PROJECT_BINARY_DIR}/../*.cpp)
 file(GLOB NODE_CREATE_FILES ${PROJECT_BINARY_DIR}/../node_create/*.cpp)
 file(GLOB NODE_INFO_FILES ${PROJECT_BINARY_DIR}/../node_info/*.cpp)
 # file(GLOB EXECUTION_FILES ${PROJECT_BINARY_DIR}/../execution/*.c*)
-file(GLOB EXECUTION_FILES ${PROJECT_BINARY_DIR}/../execution_info/*.cpp)
+file(GLOB EXECUTION_FILES ${PROJECT_BINARY_DIR}/../execution_info/*.c*)
 
 cuda_add_library(tensorrtWrapper SHARED ${COMMON_FILES} ${NODE_CREATE_FILES} ${NODE_INFO_FILES} ${CUDA_SRC_FILES} ${EXECUTION_FILES})
 

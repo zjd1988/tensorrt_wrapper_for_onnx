@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <cassert>
 #include <iostream>
+#include <vector>
 #include "utils.hpp"
 #include <cub/cub.cuh>
 #include "nonzero_cuda_impl.hpp"

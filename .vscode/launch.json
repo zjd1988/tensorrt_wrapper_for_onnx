@@ -8,7 +8,7 @@
             "name": "g++ - 生成和调试活动文件",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/xj-zjd/桌面/qiantai_map/test_onnxruntime/tensorrt_wrapper_for_onnx/build/vgg_example",
+            "program": "/home/xj-zjd/tensorrt_wrapper_github/tensorrt_wrapper_for_onnx/build/lenet_example",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

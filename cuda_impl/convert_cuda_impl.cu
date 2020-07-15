@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <cassert>
 #include <iostream>
+#include <vector>
 #include "utils.hpp"
 #include <cuda_fp16.h>
 #include "convert_cuda_impl.hpp"

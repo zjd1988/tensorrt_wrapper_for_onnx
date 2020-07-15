@@ -14,7 +14,7 @@ using namespace tensorrtInference;
 #define GRAPH_WEIGHTS_FILE(net) net "/net_weights.bin"
 #define GRAPH_ENGINE_FILE(net)  net "/net.engine"
 #define INFERENCE_JSON_FILE(net) net "/net_inference.json"
-#define SAVE_ENGINE 1
+#define SAVE_ENGINE 0
 #define FP16_FLAG false
 
 

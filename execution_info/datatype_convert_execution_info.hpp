@@ -7,13 +7,18 @@ namespace tensorrtInference
     class DataTypeConvertExecutionInfo : public ExecutionInfo
     {
     public:
-        DataTypeConvertExecutionInfo(CUDARuntime *runtime, Json::Value& root);
+        DataTypeConvertExecutionInfo(CUDARuntime *runtime, 
+            std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root);
         ~DataTypeConvertExecutionInfo();
-        bool init(std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root) override;
-        void run(bool sync = false) override;
+        bool init(Json::Value& root) override;
+        void run() override;
     private:
-        bool needMemCpy = false;
         std::string convertType;
+        int blockSize;
+        int gridSize;
+        int totalElementSize;
+        Buffer* srcTensor;
+        Buffer* dstTensor;
     };
 } // namespace tensorrtInference 
 

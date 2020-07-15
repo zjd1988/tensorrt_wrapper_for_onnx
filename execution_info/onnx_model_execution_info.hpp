@@ -10,7 +10,8 @@ namespace tensorrtInference
     class OnnxModelExecutionInfo : public ExecutionInfo
     {
     public:
-        OnnxModelExecutionInfo(CUDARuntime *runtime, std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root);
+        OnnxModelExecutionInfo(CUDARuntime *runtime, 
+            std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root);
         ~OnnxModelExecutionInfo();
         bool init(Json::Value& root) override;
         void run() override;

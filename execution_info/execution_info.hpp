@@ -5,7 +5,7 @@
 #include "buffer.hpp"
 #include "utils.hpp"
 #include "json/json.h"
-
+#define DIVUP(m,n) (((m)+(n)-1) / (n))
 
 namespace tensorrtInference {
 

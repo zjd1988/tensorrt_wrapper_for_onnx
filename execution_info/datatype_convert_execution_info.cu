@@ -11,56 +11,64 @@ namespace tensorrtInference
         }
     }
 
-    DataTypeConvertExecutionInfo::DataTypeConvertExecutionInfo(CUDARuntime *runtime, Json::Value& root) : ExecutionInfo(runtime, root)
+    DataTypeConvertExecutionInfo::DataTypeConvertExecutionInfo(CUDARuntime *runtime,
+        std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root) : ExecutionInfo(runtime, tensorsInfo, root)
     {
+        convertType = "";
+        blockSize = 0;
+        gridSize = 0;
+        totalElementSize = 0;
+        srcTensor = nullptr;
+        dstTensor = nullptr;
     }
     
     DataTypeConvertExecutionInfo::~DataTypeConvertExecutionInfo()
     {
     }
 
-    bool DataTypeConvertExecutionInfo::init(std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root)
+    bool DataTypeConvertExecutionInfo::init(Json::Value& root)
     {
-        convertType = root["attr"]["convert_type"];
-        if(convertType.compare("ConvertUint8ToFloat32") == 0 && convertType.compare("ConvertUint8ToFloat16") == 0)
+        convertType = root["attr"]["convert_type"].asString();
+        if(convertType.compare("ConvertUint8ToFloat32") != 0 && convertType.compare("ConvertUint8ToFloat16") != 0)
             LOG("current not support %s\n", convertType.c_str());
+
+        auto runtime = getCudaRuntime();
+        auto srcTensorNames = getInputTensorNames();
+        auto dstTensorNames = getOutputTensorNames();
+        CHECK_ASSERT(srcTensorNames.size() == dstTensorNames.size(), "input tensor size should be equal to output!\n");
+        CHECK_ASSERT(srcTensorNames.size() == 1, "input tensor size should be equal to 1!\n");
+        auto tensorsInfo = getTensorsInfo();
+        srcTensor = tensorsInfo[srcTensorNames[0]];
+        dstTensor = tensorsInfo[dstTensorNames[0]];
+        totalElementSize = srcTensor->getElementCount();
+        blockSize = runtime->threads_num();
+        gridSize = DIVUP(totalElementSize, blockSize);
         return true;
     }
 
-    void DataTypeConvertExecutionInfo::run(bool sync)
+    void DataTypeConvertExecutionInfo::run()
     {
-        auto inputTensorNames = getInputTensorNames();
-        auto outputTensorNames = getOutputTensorNames();
         auto runtime = getCudaRuntime();
         auto stream = runtime->stream();
-        auto srcTensor = tensors[inputTensorNames[0]];
-        auto dstTensor = tensors[outputTensorNames[0]];
-        const int size = srcTensor->getElementCount();
-
-        if(needMemCpy)
-            runtime->copyToDevice(srcTensor.get(), srcTensor.get());
-
-        int blockSize = runtime->threads_num();
-        int gridSize = size / blockSize + 1;
+        beforeRun();
         if(convertType.compare("ConvertUint8ToFloat32") == 0)
         {
             DataTypeConvertExecutionKernel<<<gridSize, blockSize, 0, stream>>>(srcTensor->device<const unsigned char>(),
-                dstTensor->device<float>(), size);
+                dstTensor->device<float>(), totalElementSize);
         }
         else if(convertType.compare("ConvertUint8ToFloat16") == 0)
         {
             DataTypeConvertExecutionKernel<<<gridSize, blockSize, 0, stream>>>(srcTensor->device<const unsigned char>(),
-                dstTensor->device<float>(), size);
+                dstTensor->device<float>(), totalElementSize);
         }
         else
         {
-            CHECK_ASSERT(false, "current not support (%s) \n", getSubExecutionType().c_str());
+            CHECK_ASSERT(false, "current not support (%s) \n", convertType.c_str());
         }
         cudaError_t cudastatus = cudaGetLastError();
         CHECK_ASSERT(cudastatus == cudaSuccess, "launch data type convert kernel(%s) fail: %s\n", convertType.c_str(),
             cudaGetErrorString(cudastatus));
-        if(sync)
-            runtime->onWaitFinish();
+        afterRun();
         return;
     }
 }

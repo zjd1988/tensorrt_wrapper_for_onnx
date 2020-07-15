@@ -2,9 +2,9 @@
 #include <map>
 #include "execution_info.hpp"
 #include "utils.hpp"
+#include "datatype_convert_execution_info.hpp"
 #include "onnx_model_execution_info.hpp"
 using namespace std;
-#define DEBUG_BUFFER_SIZE 4096000
 
 #define CONSTUCT_EXECUTIONINFO_FUNC_DEF(type)                                                                  \
 ExecutionInfo* construct##type##ExecutionInfo(CUDARuntime *runtime,                                            \
@@ -160,7 +160,7 @@ namespace tensorrtInference {
         }        
     }
 
-    // CONSTUCT_EXECUTIONINFO_FUNC_DEF(DataTypeConvert)
+    CONSTUCT_EXECUTIONINFO_FUNC_DEF(DataTypeConvert)
     CONSTUCT_EXECUTIONINFO_FUNC_DEF(OnnxModel)
 
     constructExecutionInfoFunc ConstructExecutionInfo::getConstructExecutionInfoFunc(std::string executionType)
@@ -175,7 +175,7 @@ namespace tensorrtInference {
 
     void ConstructExecutionInfo::registerConstructExecutionInfoFunc()
     {
-        // constructExecutionFuncInfoMap["DataTypeConvert"]            = CONSTUCT_EXECUTIONINFO_FUNC(DataTypeConvert);
+        constructExecutionInfoFuncMap["DataTypeConvert"]            = CONSTUCT_EXECUTIONINFO_FUNC(DataTypeConvert);
         constructExecutionInfoFuncMap["OnnxModel"]                  = CONSTUCT_EXECUTIONINFO_FUNC(OnnxModel);
     }
 

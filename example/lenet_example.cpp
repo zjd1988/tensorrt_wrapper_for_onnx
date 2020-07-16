@@ -54,19 +54,17 @@ int main()
     float* data = (float*)malloc(BACTCH_SIZE * CHANNEL_SIZE * HEIGHT_SIZE * WIDTH_SIZE * sizeof(float));
     initInputData(data);
     tensorrtEngine engine(inferenceFileName);
-    std::cout << "run here!" << std::endl;
-    // auto hostMemIndex = engine.getBindingNamesIndexMap();
-    
+
+
     std::map<std::string, void*> inputs;
     inputs["input"] = (void*)data;
     engine.prepareData(inputs);
-    engine.doInference(true);
-    // for (int i = 0; i < 10; i++) {
-    //     auto start = std::chrono::system_clock::now();
-    //     engine.doInference(true);
-    //     auto end = std::chrono::system_clock::now();
-    //     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
-    // }
+    for (int i = 0; i < 10; i++) {
+        auto start = std::chrono::system_clock::now();
+        engine.doInference(true);
+        auto end = std::chrono::system_clock::now();
+        std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+    }
     auto result = engine.getInferenceResult();
     printOutputData(result);
     free(data);

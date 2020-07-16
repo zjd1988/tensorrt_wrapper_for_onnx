@@ -13,7 +13,7 @@ using namespace tensorrtInference;
 #define GRAPH_JSON_FILE(net)    net "net_graph.json"
 #define GRAPH_WEIGHTS_FILE(net) net "net_weights.bin"
 #define GRAPH_ENGINE_FILE(net)  net "net.engine"
-#define SAVE_ENGINE 0
+#define SAVE_ENGINE 1
 #define FP16_FLAG false
 
 #define BACTCH_SIZE 1

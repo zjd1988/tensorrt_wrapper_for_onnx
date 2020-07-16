@@ -14,8 +14,9 @@ using namespace tensorrtInference;
 #define GRAPH_JSON_FILE(net)    net "net_graph.json"
 #define GRAPH_WEIGHTS_FILE(net) net "net_weights.bin"
 #define GRAPH_ENGINE_FILE(net)  net "net.engine"
+#define INFERENCE_JSON_FILE(net) net "net_inference.json"
 #define SAVE_DETECT_RESULT(net) net "detect_result.jpg"
-#define SAVE_ENGINE 1
+#define SAVE_ENGINE 0
 #define FP16_FLAG false
 
 #define NMS_THRESH 0.3
@@ -28,7 +29,6 @@ using namespace tensorrtInference;
 #define REGION_SIZE 2880
 #define CLASSES_SIZE 80
 #define BOXES_SIZE 4
-
 
 template <typename T>
 vector<size_t> sort_indexes_e(vector<T> &v)
@@ -181,11 +181,11 @@ void nms(cv::Mat mat, std::map<std::string, void*> hostMemMap)
     // cv::waitKey(0);
 }
 
-void drawDetectBox(cv::Mat mat, std::vector<Buffer*> buffer, bool saveFlag = false)
+void drawDetectBox(cv::Mat mat, std::map<std::string, void*> buffer, bool saveFlag = false)
 {
-    auto keep = buffer[0]->host<int>();
-    auto boxes = buffer[1]->host<float>();
-    auto classes = buffer[2];
+    auto keep = (int*)buffer["nms_number"];
+    auto boxes = (float*)buffer["nms_boxes"];
+    auto classes = buffer["nms_classes"];
     int num_to_keep = keep[0];
     // save detected boxes results
     printf("keep boxes num is %d \n", num_to_keep);
@@ -222,6 +222,7 @@ int main()
     std::string jsonFileName    = GRAPH_JSON_FILE(NET_NAME);
     std::string weightsFileName = GRAPH_WEIGHTS_FILE(NET_NAME);
     std::string engineFileName  = GRAPH_ENGINE_FILE(NET_NAME);
+    std::string inferenceFileName = INFERENCE_JSON_FILE(NET_NAME);
 #if SAVE_ENGINE
     // save engine file
     tensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
@@ -233,29 +234,22 @@ int main()
     // cv::Mat rgbMat;
     // cv::cvtColor(colorJpg, rgbMat, cv::COLOR_BGR2RGB);
     
-    tensorrtEngine engine(engineFileName);
-    auto hostMemIndex = engine.getBindingNamesIndexMap();
-    auto inputsDataMap = initInputDataMap(hostMemIndex, colorJpg);
-    auto inputsDataShape = initInputDataShapeMap(hostMemIndex, colorJpg);
-    std::vector<std::string> preProcess;
-    std::vector<std::string> postProcess;
-    preProcess.push_back("BGR2RGB");
-    preProcess.push_back("NHWC2NCHW");
-    preProcess.push_back("Scale_0_1");
-    postProcess.push_back("YOLO_NMS");
-    postProcess.push_back("CopyFromDevice");
-    engine.prepareData(inputsDataMap, inputsDataShape, preProcess, postProcess);
+    tensorrtEngine engine(inferenceFileName);
+    std::map<std::string, void*> inputsData;
+    inputsData["bgr_image"] = colorJpg.data;
+
+    engine.prepareData(inputsData);
     
+    // engine.doInference(true);
     for (int i = 0; i < 10; i++) {
         auto start = std::chrono::system_clock::now();
         engine.doInference(true);
         auto end = std::chrono::system_clock::now();
         std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
-        auto result = engine.getPostProcessResult();
+        auto result = engine.getInferenceResult();
         drawDetectBox(colorJpg, result);
     }
-    // auto result = engine.getInferenceResult();
-    auto result = engine.getPostProcessResult();
+    auto result = engine.getInferenceResult();
     drawDetectBox(colorJpg, result, true);
     // nms(colorJpg, result);
 #endif

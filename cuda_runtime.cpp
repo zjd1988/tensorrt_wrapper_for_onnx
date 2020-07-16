@@ -178,33 +178,42 @@ bool CUDARuntime::onWaitFinish() {
     return true;
 }
 
-void CUDARuntime::copyFromDevice(Buffer* srcBuffer, Buffer* dstBuffer) {
+void CUDARuntime::copyFromDevice(Buffer* srcBuffer, Buffer* dstBuffer, bool sync) {
     auto dstSize = dstBuffer->getSize();
     auto srcSize = srcBuffer->getSize();
     CHECK_ASSERT(srcSize <= dstSize, "src buffer size must less than dst buffer size!\n");
     auto hostPtr = dstBuffer->host<void>();
     auto devicePtr = srcBuffer->device<void>();
-    memcpy(hostPtr, devicePtr, srcSize, CudaRuntimeMemcpyDeviceToHost, true);
+    memcpy(hostPtr, devicePtr, srcSize, CudaRuntimeMemcpyDeviceToHost, sync);
 }
 
-void CUDARuntime::copyToDevice(Buffer* srcBuffer, Buffer* dstBuffer) {
+void CUDARuntime::copyToDevice(Buffer* srcBuffer, Buffer* dstBuffer, bool sync) {
     auto dstSize = dstBuffer->getSize();
     auto srcSize = srcBuffer->getSize();
     CHECK_ASSERT(srcSize == dstSize, "src buffer size must be equal to dst buffer size!\n");
     auto hostPtr = srcBuffer->host<void>();
     auto devicePtr = dstBuffer->device<void>();
-    memcpy(devicePtr, hostPtr, dstSize, CudaRuntimeMemcpyHostToDevice);
+    memcpy(devicePtr, hostPtr, dstSize, CudaRuntimeMemcpyHostToDevice, sync);
 }
 
-void CUDARuntime::onCopyBuffer(Buffer* srcBuffer, Buffer* dstBuffer) {
-    if (srcBuffer->device<void>() == nullptr && dstBuffer->device<void>() != nullptr) {
-        copyToDevice(srcBuffer, dstBuffer);
-    }else if(srcBuffer->device<void>() != nullptr && dstBuffer->device<void>() == nullptr){
-        copyFromDevice(srcBuffer, dstBuffer);
-    }else{
-        LOG("onCopyBuffer float error !!! \n");
-    }
+void CUDARuntime::copyFromDeviceToDevice(Buffer* srcBuffer, Buffer* dstBuffer, bool sync)
+{
+    auto dstSize = dstBuffer->getSize();
+    auto srcSize = srcBuffer->getSize();
+    CHECK_ASSERT(srcSize <= dstSize, "src buffer size must less than dst buffer size!\n");
+    auto srcPtr = srcBuffer->device<void>();
+    auto dstPtr = dstBuffer->device<void>();
+    memcpy(dstPtr, srcPtr, srcSize, CudaRuntimeMemcpyDeviceToDevice, sync);
 }
 
+// void CUDARuntime::onCopyBuffer(Buffer* srcBuffer, Buffer* dstBuffer) {
+//     if (srcBuffer->device<void>() == nullptr && dstBuffer->device<void>() != nullptr) {
+//         copyToDevice(srcBuffer, dstBuffer);
+//     }else if(srcBuffer->device<void>() != nullptr && dstBuffer->device<void>() == nullptr){
+//         copyFromDevice(srcBuffer, dstBuffer);
+//     }else{
+//         LOG("onCopyBuffer float error !!! \n");
+//     }
+// }
 
 } // namespace tensorrtInference

@@ -55,9 +55,10 @@ public:
     bool onReleaseBuffer(Buffer *buffer, StorageType storageType);
     bool onClearBuffer();
     bool onWaitFinish();
-    void onCopyBuffer(Buffer *srcBuffer, Buffer *dstBuffer);
-    void copyFromDevice(Buffer* srcBuffer, Buffer* dstBuffer);
-    void copyToDevice(Buffer* srcBuffer, Buffer* dstBuffer);
+    // void onCopyBuffer(Buffer *srcBuffer, Buffer *dstBuffer);
+    void copyFromDevice(Buffer* srcBuffer, Buffer* dstBuffer, bool sync = true);
+    void copyToDevice(Buffer* srcBuffer, Buffer* dstBuffer, bool sync = false);
+    void copyFromDeviceToDevice(Buffer* srcBuffer, Buffer* dstBuffer, bool sync = false);
 private:
     void memcpy(void *dst, const void *src, size_t size_in_bytes, CudaRuntimeMemcpyKind_t kind, bool sync = false);
     void memset(void *dst, int value, size_t size_in_bytes);

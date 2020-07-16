@@ -55,6 +55,7 @@ namespace tensorrtInference {
             hostPtr = bufferMemoryAllocAlign(size, MEMORY_ALIGN_DEFAULT);
             ownHost = true;            
         }
+        storageType = StorageType::UNDEFINED_STORAGE_TYPE;
     }
 
     Buffer::Buffer(int size, OnnxDataType dataType, bool mallocFlag)
@@ -69,6 +70,7 @@ namespace tensorrtInference {
             hostPtr = bufferMemoryAllocAlign(getSize(), MEMORY_ALIGN_DEFAULT);
             ownHost = true;            
         }
+        storageType = StorageType::UNDEFINED_STORAGE_TYPE;
     }    
 
     Buffer* Buffer::create(std::vector<int> shape, OnnxDataType dataType, void* userData)

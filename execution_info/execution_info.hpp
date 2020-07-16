@@ -39,6 +39,9 @@ namespace tensorrtInference {
             auto dataType = buffer->getDataType();
             std::shared_ptr<Buffer> debugBuffer(mallocBuffer(shape, dataType, true, false));
             cudaRuntime->copyFromDevice(buffer, debugBuffer.get());
+            cudaError_t cudastatus = cudaGetLastError();
+            CHECK_ASSERT(cudastatus == cudaSuccess, "launch memcpy kernel fail: %s\n", cudaGetErrorString(cudastatus));
+            
             auto debugData = debugBuffer->host<T>();
             int count = debugBuffer->getElementCount();
             int printStart = (start > count) ? 0 : start;

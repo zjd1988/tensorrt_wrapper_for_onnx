@@ -3,7 +3,12 @@
 #include "execution_info.hpp"
 #include "utils.hpp"
 #include "datatype_convert_execution_info.hpp"
+#include "dataformat_convert_execution_info.hpp"
+#include "reshape_execution_info.hpp"
+#include "transpose_execution_info.hpp"
+#include "normalization_execution_info.hpp"
 #include "onnx_model_execution_info.hpp"
+#include "yolo_nms_execution_info.hpp"
 using namespace std;
 
 #define CONSTUCT_EXECUTIONINFO_FUNC_DEF(type)                                                                  \
@@ -47,7 +52,7 @@ namespace tensorrtInference {
         // init tensor info(malloc buffer)
         initTensorInfo(tensorsInfo, root["tensor_info"]);
         // recycle dynamic buffer
-        recycleBuffers();
+        // recycleBuffers();
     }
 
     ExecutionInfo::~ExecutionInfo()
@@ -122,7 +127,10 @@ namespace tensorrtInference {
         buffer = new Buffer(size, dataType, mallocHost);
         CHECK_ASSERT(buffer != nullptr, "new Buffer fail\n");
         if(mallocDevice)
+        {
+            buffer->setStorageType(type);
             cudaRuntime->onAcquireBuffer(buffer, type);
+        }
         return buffer;
     }
     Buffer* ExecutionInfo::mallocBuffer(std::vector<int> shape, OnnxDataType dataType, bool mallocHost, 
@@ -132,7 +140,10 @@ namespace tensorrtInference {
         buffer = new Buffer(shape, dataType, mallocHost);
         CHECK_ASSERT(buffer != nullptr, "new Buffer fail\n");
         if(mallocDevice)
+        {
+            buffer->setStorageType(type);
             cudaRuntime->onAcquireBuffer(buffer, type);
+        }
         return buffer;
     }
 
@@ -160,6 +171,11 @@ namespace tensorrtInference {
         }        
     }
 
+    CONSTUCT_EXECUTIONINFO_FUNC_DEF(YoloNMS)
+    CONSTUCT_EXECUTIONINFO_FUNC_DEF(Normalization)
+    CONSTUCT_EXECUTIONINFO_FUNC_DEF(Transpose)
+    CONSTUCT_EXECUTIONINFO_FUNC_DEF(Reshape)
+    CONSTUCT_EXECUTIONINFO_FUNC_DEF(DataFormatConvert)
     CONSTUCT_EXECUTIONINFO_FUNC_DEF(DataTypeConvert)
     CONSTUCT_EXECUTIONINFO_FUNC_DEF(OnnxModel)
 
@@ -175,6 +191,11 @@ namespace tensorrtInference {
 
     void ConstructExecutionInfo::registerConstructExecutionInfoFunc()
     {
+        constructExecutionInfoFuncMap["YoloNMS"]                    = CONSTUCT_EXECUTIONINFO_FUNC(YoloNMS);
+        constructExecutionInfoFuncMap["Normalization"]              = CONSTUCT_EXECUTIONINFO_FUNC(Normalization);
+        constructExecutionInfoFuncMap["Transpose"]                  = CONSTUCT_EXECUTIONINFO_FUNC(Transpose);
+        constructExecutionInfoFuncMap["Reshape"]                    = CONSTUCT_EXECUTIONINFO_FUNC(Reshape);
+        constructExecutionInfoFuncMap["DataFormatConvert"]          = CONSTUCT_EXECUTIONINFO_FUNC(DataFormatConvert);
         constructExecutionInfoFuncMap["DataTypeConvert"]            = CONSTUCT_EXECUTIONINFO_FUNC(DataTypeConvert);
         constructExecutionInfoFuncMap["OnnxModel"]                  = CONSTUCT_EXECUTIONINFO_FUNC(OnnxModel);
     }

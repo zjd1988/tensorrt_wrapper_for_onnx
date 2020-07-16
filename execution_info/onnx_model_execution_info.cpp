@@ -50,6 +50,7 @@ namespace tensorrtInference
             auto buffer = tensors[name]->device<void>();
             engineBufferArray.push_back(buffer);
         }
+        recycleBuffers();
         return true;
     }
 
@@ -57,16 +58,16 @@ namespace tensorrtInference
     void OnnxModelExecutionInfo::run()
     {
         beforeRun();
-        // {
-        //     auto tensorsInfo = getTensorsInfo();
-        //     printBuffer<float>(tensorsInfo["input"], 0, 10);
-        //     printf("run here!\n");
-        // }
         CUDARuntime *runtime = getCudaRuntime();
         auto engineStream = runtime->stream();
         executionContext->enqueue(batchSize, &engineBufferArray[0], engineStream, nullptr);
         cudaError_t cudastatus = cudaGetLastError();
         CHECK_ASSERT(cudastatus == cudaSuccess, "launch onnx tensorrt engine fail: %s\n", cudaGetErrorString(cudastatus));
+        // {
+        //     auto tensorsInfo = getTensorsInfo();
+        //     // printBuffer<float>(tensorsInfo["boxes"], 0, 10);
+        //     printBuffer<float>(tensorsInfo["classes"], 0, 10);
+        // }
         afterRun();
         return;
     }

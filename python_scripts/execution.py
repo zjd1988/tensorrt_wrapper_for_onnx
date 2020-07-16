@@ -142,7 +142,7 @@ class ReshapeExecution(Execution):
 
 class TransposeExecution(Execution):
     def __init__(self, execution_input_name, execution_output_name):
-        Execution.__init__(self, "TransposeExecution", execution_input_name, execution_output_name)
+        Execution.__init__(self, "Transpose", execution_input_name, execution_output_name)
 
 
     def init_attr(self, attr):
@@ -165,6 +165,7 @@ class NormalizationExecution(Execution):
         Execution.__init__(self, "Normalization", execution_input_name, execution_output_name)
         self.attr["alpha"] = 0.0
         self.attr["beta"] = 1.0
+        self.attr["bias"] = 0.0
 
 
     def init_attr(self, attr):
@@ -179,7 +180,8 @@ class NormalizationExecution(Execution):
         assert(len(input_data) == 1)
         alpha = self.attr["alpha"]
         beta = self.attr["beta"]
-        normalize_result = (input_data[0] - alpha) / beta
+        bias = self.attr["bias"]
+        normalize_result = (input_data[0] - alpha) / beta + bias
         result_data.append(normalize_result.astype(np.float32))
         output_name = self.get_outputs()
         return dict(zip(output_name,result_data))
@@ -208,7 +210,7 @@ class YoloNMSExecution(Execution):
         self.attr["img_width"]   = 384
         self.attr["conf_thresh"] = 0.3
         self.attr["iou_thresh"]  = 0.6
-        self.attr["topk"]        = 200
+        # self.attr["topk"]        = 200
 
 
     def init_attr(self, attr):
@@ -271,28 +273,37 @@ class YoloNMSExecution(Execution):
         
         results = []
         number_nms = 0
-        topk = self.attr["topk"]
-        if len(keep) > topk:
-            number_nms = topk
-        else:
-            number_nms = len(keep)
+        number_nms = len(keep)
+        # topk = self.attr["topk"]
+        # if len(keep) > topk:
+        #     number_nms = topk
+        # else:
+        #    number_nms = len(keep)
         
-        temp_num = np.zeros((1)).astype(np.int32)
+        temp_num = np.zeros((1 + boxes_size)).astype(np.int32)
         temp_num[0] = number_nms
         results.append(temp_num)
-        if number_nms > 0:
-            temp_boxes = np.zeros((topk,4)).astype(np.float32)
-            temp_boxes[0:number_nms, :] = valid_boxes[keep[0:number_nms],:]
-            results.append(temp_boxes)
 
-            temp_class = np.zeros((topk)).astype(np.float32)
-            temp_class[0:number_nms] = class_index[keep[0:number_nms]]
-            results.append(temp_class)
-        else:
-            temp_boxes = np.zeros((topk,4)).astype(np.float32)
-            results.append(temp_boxes)
-            temp_class = np.zeros((topk)).astype(np.float32)
-            results.append(temp_class)
+        temp_boxes = np.zeros((boxes_size,4)).astype(np.float32)
+        temp_boxes[0:number_nms, :] = valid_boxes[keep[0:number_nms],:]
+        results.append(temp_boxes)
+
+        temp_class = np.zeros((boxes_size)).astype(np.float32)
+        temp_class[0:number_nms] = class_index[keep[0:number_nms]]
+        results.append(temp_class)
+        # if number_nms > 0:
+        #     temp_boxes = np.zeros((topk,4)).astype(np.float32)
+        #     temp_boxes[0:number_nms, :] = valid_boxes[keep[0:number_nms],:]
+        #     results.append(temp_boxes)
+
+        #     temp_class = np.zeros((topk)).astype(np.float32)
+        #     temp_class[0:number_nms] = class_index[keep[0:number_nms]]
+        #     results.append(temp_class)
+        # else:
+        #     temp_boxes = np.zeros((topk,4)).astype(np.float32)
+        #     results.append(temp_boxes)
+        #     temp_class = np.zeros((topk)).astype(np.float32)
+        #     results.append(temp_class)
         return results
 
         

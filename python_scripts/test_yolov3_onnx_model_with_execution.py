@@ -40,6 +40,7 @@ if __name__ == "__main__":
     attr = {}
     attr["alpha"] = 0.0
     attr["beta"] = 255.0
+    attr["bias"] = 0.0
     normalization_node.init_attr(attr)
     network.insert_node(normalization_node)
 

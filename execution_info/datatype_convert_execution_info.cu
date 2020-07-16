@@ -43,6 +43,7 @@ namespace tensorrtInference
         totalElementSize = srcTensor->getElementCount();
         blockSize = runtime->threads_num();
         gridSize = DIVUP(totalElementSize, blockSize);
+        recycleBuffers();
         return true;
     }
 

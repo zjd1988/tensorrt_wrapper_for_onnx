@@ -60,7 +60,7 @@ namespace tensorrtInference
         else if(convertType.compare("ConvertUint8ToFloat16") == 0)
         {
             DataTypeConvertExecutionKernel<<<gridSize, blockSize, 0, stream>>>(srcTensor->device<const unsigned char>(),
-                dstTensor->device<float>(), totalElementSize);
+                dstTensor->device<half>(), totalElementSize);
         }
         else
         {
@@ -69,6 +69,9 @@ namespace tensorrtInference
         cudaError_t cudastatus = cudaGetLastError();
         CHECK_ASSERT(cudastatus == cudaSuccess, "launch data type convert kernel(%s) fail: %s\n", convertType.c_str(),
             cudaGetErrorString(cudastatus));
+        // {
+        //     printBuffer<float>(dstTensor, 0, 10);
+        // }
         afterRun();
         return;
     }

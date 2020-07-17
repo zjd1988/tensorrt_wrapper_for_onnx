@@ -197,7 +197,6 @@ void drawDetectBox(cv::Mat mat, std::map<std::string, void*> buffer, bool saveFl
         float width = currentBoxes[2] - currentBoxes[0];
         float height = currentBoxes[3] - currentBoxes[1];
         cv::Rect rect(topLeftX, topLeftY, width, height);
-        // cv::rectangle(mat, rect, cv::Scalar(0, 0, 255), 1, cv::LINE_8, 0);
         printf("index(%d) %f %f %f %f \n", keep[i], currentBoxes[0], currentBoxes[1], currentBoxes[2], currentBoxes[3]);
     }
     if(saveFlag)
@@ -211,7 +210,6 @@ void drawDetectBox(cv::Mat mat, std::map<std::string, void*> buffer, bool saveFl
             float height = currentBoxes[3] - currentBoxes[1];
             cv::Rect rect(topLeftX, topLeftY, width, height);
             cv::rectangle(mat, rect, cv::Scalar(0, 0, 255), 1, cv::LINE_8, 0);
-            // printf("index(%d) %f %f %f %f \n", keep[i], currentBoxes[0], currentBoxes[1], currentBoxes[2], currentBoxes[3]);
         }
         cv::imwrite(SAVE_DETECT_RESULT(NET_NAME), mat);
     }
@@ -231,16 +229,13 @@ int main()
     //engine inference
     std::string jpgFile = "./example/yolov3/bus.jpg";
     cv::Mat colorJpg = cv::imread(jpgFile.c_str());
-    // cv::Mat rgbMat;
-    // cv::cvtColor(colorJpg, rgbMat, cv::COLOR_BGR2RGB);
-    
+
     tensorrtEngine engine(inferenceFileName);
     std::map<std::string, void*> inputsData;
     inputsData["bgr_image"] = colorJpg.data;
 
     engine.prepareData(inputsData);
     
-    // engine.doInference(true);
     for (int i = 0; i < 10; i++) {
         auto start = std::chrono::system_clock::now();
         engine.doInference(true);

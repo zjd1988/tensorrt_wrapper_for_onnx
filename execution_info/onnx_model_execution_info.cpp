@@ -65,8 +65,8 @@ namespace tensorrtInference
         CHECK_ASSERT(cudastatus == cudaSuccess, "launch onnx tensorrt engine fail: %s\n", cudaGetErrorString(cudastatus));
         // {
         //     auto tensorsInfo = getTensorsInfo();
-        //     // printBuffer<float>(tensorsInfo["boxes"], 0, 10);
-        //     printBuffer<float>(tensorsInfo["classes"], 0, 10);
+        //     printBuffer<float>(tensorsInfo["prefix/pred/global_head/l2_normalize:0"], 0, 10);
+        //     printBuffer<float>(tensorsInfo["prefix/image:0"], 0, 10);
         // }
         afterRun();
         return;

@@ -9,6 +9,7 @@
 #include "normalization_execution_info.hpp"
 #include "onnx_model_execution_info.hpp"
 #include "yolo_nms_execution_info.hpp"
+#include "hfnet_resample_execution_info.hpp"
 using namespace std;
 
 #define CONSTUCT_EXECUTIONINFO_FUNC_DEF(type)                                                                  \
@@ -171,6 +172,7 @@ namespace tensorrtInference {
         }        
     }
 
+    CONSTUCT_EXECUTIONINFO_FUNC_DEF(HFNETResample)
     CONSTUCT_EXECUTIONINFO_FUNC_DEF(YoloNMS)
     CONSTUCT_EXECUTIONINFO_FUNC_DEF(Normalization)
     CONSTUCT_EXECUTIONINFO_FUNC_DEF(Transpose)
@@ -191,6 +193,7 @@ namespace tensorrtInference {
 
     void ConstructExecutionInfo::registerConstructExecutionInfoFunc()
     {
+        constructExecutionInfoFuncMap["HFNETResample"]              = CONSTUCT_EXECUTIONINFO_FUNC(HFNETResample);
         constructExecutionInfoFuncMap["YoloNMS"]                    = CONSTUCT_EXECUTIONINFO_FUNC(YoloNMS);
         constructExecutionInfoFuncMap["Normalization"]              = CONSTUCT_EXECUTIONINFO_FUNC(Normalization);
         constructExecutionInfoFuncMap["Transpose"]                  = CONSTUCT_EXECUTIONINFO_FUNC(Transpose);

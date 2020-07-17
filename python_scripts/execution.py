@@ -92,9 +92,9 @@ class DataTypeConvertExecution(Execution):
         result_data = []
         assert(len(input_data) == 1)
         if self.attr["convert_type"] == "ConvertUint8ToFloat32":
-            result_data.extend(input_data[0].astype(np.float32))
+            result_data.append(input_data[0].astype(np.float32))
         elif self.attr["convert_type"] == "ConvertUint8ToFloat16":
-            result_data.extend(input_data[0].astype(np.float16))
+            result_data.append(input_data[0].astype(np.float16))
         else:
             print("not supported type {}".format(attr["convert_type"]))
             assert False
@@ -313,6 +313,27 @@ class YoloNMSExecution(Execution):
         result_data.extend(self.non_max_suppression(input_data))
         output_name = self.get_outputs()
         return dict(zip(output_name,result_data))
+
+class HFnetResampleExecution(Execution):
+    def __init__(self, execution_input_name, execution_output_name):
+        Execution.__init__(self, "HFnetResample", execution_input_name, execution_output_name)
+        self.attr["img_height"] = 720
+        self.attr["img_width"] = 1280
+
+    def init_attr(self, attr):
+        pass
+
+    def execute(self, input_data):
+        input_name = self.get_inputs()
+        assert(len(input_data) == len(input_name))
+        output_name = self.get_outputs()
+        results = []
+        output_global = np.zeros((1,1,1,4096)).astype(np.float32)
+        output_local = np.zeros((2000,256)).astype(np.float32)
+        results.append(output_global)
+        results.append(output_local)
+        return dict(zip(output_name,results))
+
 
 class Network:
     net_index = 0

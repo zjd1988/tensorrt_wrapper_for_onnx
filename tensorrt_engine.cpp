@@ -13,9 +13,9 @@ namespace tensorrtInference
         CHECK_ASSERT((weightsAndGraph.get()->getInitFlag() != false), "init jsonFile and weightsFile fail!!\n");
     }
     
-    tensorrtEngine::tensorrtEngine(std::string engineFile)
+    tensorrtEngine::tensorrtEngine(std::string engineFile, int gpuId)
     {
-        cudaRuntime.reset(new CUDARuntime(0));
+        cudaRuntime.reset(new CUDARuntime(gpuId));
         executionInfo.reset(new executionParse(cudaRuntime.get(), engineFile));
         CHECK_ASSERT((executionInfo.get()->getInitFlag() != false), "init engineFile fail!!\n");
     }
@@ -43,6 +43,7 @@ namespace tensorrtInference
 
     void tensorrtEngine::doInference(bool syncFlag)
     {
+        cudaRuntime->activate();
         executionInfo->runInference();
         if(syncFlag)
             cudaRuntime->onWaitFinish();

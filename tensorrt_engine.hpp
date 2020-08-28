@@ -19,7 +19,7 @@ namespace tensorrtInference
     {
     public:
         tensorrtEngine(std::string jsonFile, std::string weightsFile, bool fp16Flag = false);
-        tensorrtEngine(std::string engineFile);
+        tensorrtEngine(std::string engineFile, int gpuId = 0);
         ~tensorrtEngine();
         bool saveEnginePlanFile(std::string saveFile);
         // void createEngine(unsigned int maxBatchSize, bool fp16Flag);

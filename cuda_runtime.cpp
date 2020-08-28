@@ -36,6 +36,7 @@ CUDARuntime::CUDARuntime(int device_id) {
         CUDA_CHECK(cudaGetDevice(&id));
     }
     mDeviceId = id;
+    CUDA_CHECK(cudaSetDevice(id));
     CUDA_CHECK(cudaGetDeviceProperties(&mProp, id));
     CUDA_CHECK(cudaStreamCreate(&mStream));
 

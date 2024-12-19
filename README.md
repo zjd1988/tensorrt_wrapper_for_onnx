@@ -1,3 +1,6 @@
+# note
+will update to cuda-12.x and tensorrt-10.x
+
 # tensorrt_wrapper_for_onnx
 
 * easily modifying and converting onnx models to tensorrt engine files
@@ -19,32 +22,24 @@
 
 
 # verified models
-* nvidia-gpu  GTX1060(3GB)
-
-1. lenet  --------- ./example/lenet/lenet_simplify.onnx ---------------------- verified(fp16/fp32)
-
-2. mobilenet_v2 --------- ./example/mobilenet_v2_simplify.onnx ---------------------- verified(fp16/fp32)
-
-3. vgg --------- ./example/vgg/vgg_simplify.onnx ---------------------- verified(fp16/fp32)
-
-4. squeezenet --------- ./example/squeezenet/squeeze_simplify.onnx ---------------------- verified(fp16/fp32)
-
-5. yolov3 --------- ./example/yolov3/yolov3_simplify.onnx ---------------------- verified(fp16/fp32)
-
-6. yolov3-tiny --------- ./example/yolov3-tiny/yolov3-tiny_simplify.onnx ---------------------- verified(fp16/fp32)
-
-7. yolov3-spp --------- ./example/yolov3-spp/yolov3-spp_simplify.onnx ---------------------- verified(fp16/fp32)
-
-8. yolov4 --------- ./example/yolov4/yolov4_simplify.onnx ---------------------- verified(fp16/fp32)
-
-8. yolov5 --------- ./example/yolov5/yolov5_simplify.onnx ---------------------- verified(fp16/fp32)
+|      model      |      int8      |      fp16      |      fp32      |     device     |
+ -----------------|----------------|----------------|----------------|----------------
+|      lenet      |       no       |       yes      |      yes       |                |
+|   mobilenet_v2  |       no       |       yes      |      yes       |                |
+|       vgg       |       no       |       yes      |      yes       |                |
+|    squeezenet   |       no       |       yes      |      yes       |                |
+|      yolov3     |       no       |       yes      |      yes       |                |
+|   yolov3-tiny   |       no       |       yes      |      yes       |                |
+|    yolov3-spp   |       no       |       yes      |      yes       |                |
+|      yolov4     |       no       |       yes      |      yes       |                |
+|      yolov5     |       no       |       yes      |      yes       |                |
 
 # step 1
 1. cd tesensorrt_wrapper_for_onnx
 
-2. (optional) download jsoncpp-00.11.0 from https://github.com/open-source-parsers/jsoncpp/releases  
+2. (optional) download jsoncpp-1.9.6: Bugfixes from https://github.com/open-source-parsers/jsoncpp/releases  
 
-3. compile jsoncpp-00.11.0 follow https://github.com/open-source-parsers/jsoncpp/wiki/Building
+3. compile jsoncpp-1.9.6 follow https://github.com/open-source-parsers/jsoncpp/wiki/Building
 
 4. mkdir build && cd build
 

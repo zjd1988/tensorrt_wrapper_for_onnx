@@ -1,5 +1,9 @@
-#ifndef __WEIGHTS_GRAPH_PARSE_HPP__
-#define __WEIGHTS_GRAPH_PARSE_HPP__
+/********************************************
+ * Filename: weights_graph_parse.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
 #include <iostream>
 #include <string>
 #include <vector>
@@ -7,8 +11,6 @@
 #include "utils.hpp"
 #include "json/json.h"
 #include "node_info.hpp"
-// #include "create_node.hpp"
-
 
 namespace tensorrtInference
 {
@@ -72,5 +74,3 @@ namespace tensorrtInference
         nvinfer1::ICudaEngine* cudaEngine;
     };
 } //tensorrtInference
-
-#endif //__WEIGHTS_GRAPH_PARSE_HPP__

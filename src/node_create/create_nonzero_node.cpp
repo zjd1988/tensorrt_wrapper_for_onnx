@@ -5,12 +5,12 @@
 #include "create_node.hpp"
 #include "create_nonzero_node.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     nvinfer1::ILayer* createNonZeroNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto inputs = nodeConfInfo->getInputs();
+        auto inputs = node_info->getInputs();
         nvinfer1::ITensor* inputTensor = tensors[inputs[0]];
         auto creator = getPluginRegistry()->getPluginCreator("NonZero_TRT", "1");
         auto pfc = creator->getFieldNames();

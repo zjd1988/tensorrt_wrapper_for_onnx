@@ -1,21 +1,28 @@
-#include "slice_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: slice_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/slice_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // Slice Node
     SliceNodeInfo::SliceNodeInfo()
     {
         setNodeType("Slice");
-        setSubNodeType("");
+        setNodeSubType("");
     }
+
     SliceNodeInfo::~SliceNodeInfo()
-    {  
-        
+    {
     }
+
     bool SliceNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize >= 3, "slice node must greate equal than 3 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -31,4 +38,5 @@ namespace tensorrtInference
         }
         return true;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

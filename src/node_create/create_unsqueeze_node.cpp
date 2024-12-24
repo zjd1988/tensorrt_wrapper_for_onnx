@@ -5,12 +5,12 @@
 #include "create_unsqueeze_node.hpp"
 #include "unsqueeze_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     nvinfer1::ILayer* createUnsqueezeNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto unsqueezeNodeInfo = (UnsqueezeNodeInfo*)nodeConfInfo;
+        auto unsqueezeNodeInfo = (UnsqueezeNodeInfo*)node_info;
         auto inputs = unsqueezeNodeInfo->getInputs();
         auto axes    = unsqueezeNodeInfo->getAxes();
         nvinfer1::ITensor* inputTensor = (tensors.count(inputs[0]) != 0) ? tensors[inputs[0]] : nullptr;

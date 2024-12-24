@@ -3,16 +3,16 @@
 #include "weights_graph_parse.hpp"
 #include "create_node.hpp"
 #include "shuffle_node_info.hpp"
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     nvinfer1::ILayer* createShuffleNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto shuffleNodeInfo = (ShuffleNodeInfo*)nodeConfInfo;
+        auto shuffleNodeInfo = (ShuffleNodeInfo*)node_info;
         auto inputs = shuffleNodeInfo->getInputs();
         nvinfer1::IShuffleLayer* shuffle = nullptr;
         nvinfer1::ITensor* inputTensor = tensors[inputs[0]];
-        auto subType = shuffleNodeInfo->getSubNodeType();
+        auto subType = shuffleNodeInfo->getNodeSubType();
         if(inputs.size() == 1 && subType.compare("Transpose") == 0)
         {
             auto perm = shuffleNodeInfo->getPerm();
@@ -40,8 +40,8 @@ namespace tensorrtInference
         }
         else if(inputs.size() == 2 && subType.compare("Reshape") == 0)
         {
-            auto dims = parseIntArrayValue(nodeWeightsInfo[inputs[1]].dataType, nodeWeightsInfo[inputs[1]].data, 
-                            nodeWeightsInfo[inputs[1]].byteCount, nodeWeightsInfo[inputs[1]].shape);
+            auto dims = parseIntArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
+                            node_weight_info[inputs[1]].byteCount, node_weight_info[inputs[1]].shape);
             shuffle = network->addShuffle(*inputTensor);
             CHECK_ASSERT(shuffle, "create shuffle node fail\n");
 

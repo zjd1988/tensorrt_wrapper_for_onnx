@@ -1,18 +1,21 @@
 
-#ifndef __NONZERO_NODE_INFO_HPP__
-#define __NONZERO_NODE_INFO_HPP__
+/********************************************
+ * Filename: nonzero_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class NonZeroNodeInfo : public nodeInfo
+
+    class NonZeroNodeInfo : public NodeInfo
     {
     public:
         NonZeroNodeInfo();
         ~NonZeroNodeInfo();
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-    private:
     };
-} // tensorrtInference
-#endif //__NONZERO_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

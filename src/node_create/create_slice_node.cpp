@@ -5,22 +5,22 @@
 #include "create_slice_node.hpp"
 #include "slice_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     nvinfer1::ILayer* createSliceNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto inputs = nodeConfInfo->getInputs();
+        auto inputs = node_info->getInputs();
         CHECK_ASSERT(inputs.size() >= 3 && inputs.size() <= 5, "conv2d inputs must greater equal than 3 and less equal than 5\n");
         nvinfer1::ISliceLayer* slice = nullptr;
         nvinfer1::ITensor* inputTensor = tensors[inputs[0]];
         nvinfer1::Dims dims = inputTensor->getDimensions();
         if(inputs.size() == 3)
         {
-            auto starts = parseIntArrayValue(nodeWeightsInfo[inputs[1]].dataType, nodeWeightsInfo[inputs[1]].data, 
-                    nodeWeightsInfo[inputs[1]].byteCount, nodeWeightsInfo[inputs[1]].shape);
-            auto ends   = parseIntArrayValue(nodeWeightsInfo[inputs[2]].dataType, nodeWeightsInfo[inputs[2]].data, 
-                    nodeWeightsInfo[inputs[2]].byteCount, nodeWeightsInfo[inputs[2]].shape);
+            auto starts = parseIntArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
+                    node_weight_info[inputs[1]].byteCount, node_weight_info[inputs[1]].shape);
+            auto ends   = parseIntArrayValue(node_weight_info[inputs[2]].dataType, node_weight_info[inputs[2]].data, 
+                    node_weight_info[inputs[2]].byteCount, node_weight_info[inputs[2]].shape);
             std::vector<int> axes = {1, 1, 1, 1};
             std::vector<int> steps = {1, 1, 1, 1};
             CHECK_ASSERT(starts.size() == ends.size(), "starts size must be equal to ends size!\n");
@@ -46,12 +46,12 @@ namespace tensorrtInference
         }
         else if(inputs.size() == 4)
         {
-            auto starts = parseIntArrayValue(nodeWeightsInfo[inputs[1]].dataType, nodeWeightsInfo[inputs[1]].data, 
-                    nodeWeightsInfo[inputs[1]].byteCount, nodeWeightsInfo[inputs[1]].shape);
-            auto ends   = parseIntArrayValue(nodeWeightsInfo[inputs[2]].dataType, nodeWeightsInfo[inputs[2]].data, 
-                    nodeWeightsInfo[inputs[2]].byteCount, nodeWeightsInfo[inputs[2]].shape);
-            auto axes   = parseIntArrayValue(nodeWeightsInfo[inputs[3]].dataType, nodeWeightsInfo[inputs[3]].data, 
-                    nodeWeightsInfo[inputs[3]].byteCount, nodeWeightsInfo[inputs[3]].shape);
+            auto starts = parseIntArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
+                    node_weight_info[inputs[1]].byteCount, node_weight_info[inputs[1]].shape);
+            auto ends   = parseIntArrayValue(node_weight_info[inputs[2]].dataType, node_weight_info[inputs[2]].data, 
+                    node_weight_info[inputs[2]].byteCount, node_weight_info[inputs[2]].shape);
+            auto axes   = parseIntArrayValue(node_weight_info[inputs[3]].dataType, node_weight_info[inputs[3]].data, 
+                    node_weight_info[inputs[3]].byteCount, node_weight_info[inputs[3]].shape);
             std::vector<int> steps = {1, 1, 1, 1};
             CHECK_ASSERT(starts.size() == dims.nbDims, "starts size(%d) must be equal to input tensor dims(%d)!\n", starts.size(), dims.nbDims);
             CHECK_ASSERT(starts.size() == ends.size(), "starts size must be equal to ends size!\n");
@@ -80,14 +80,14 @@ namespace tensorrtInference
         }
         else
         {
-            auto starts = parseIntArrayValue(nodeWeightsInfo[inputs[1]].dataType, nodeWeightsInfo[inputs[1]].data, 
-                    nodeWeightsInfo[inputs[1]].byteCount, nodeWeightsInfo[inputs[1]].shape);
-            auto ends   = parseIntArrayValue(nodeWeightsInfo[inputs[2]].dataType, nodeWeightsInfo[inputs[2]].data, 
-                    nodeWeightsInfo[inputs[2]].byteCount, nodeWeightsInfo[inputs[2]].shape);
-            auto axes   = parseIntArrayValue(nodeWeightsInfo[inputs[3]].dataType, nodeWeightsInfo[inputs[3]].data, 
-                    nodeWeightsInfo[inputs[3]].byteCount, nodeWeightsInfo[inputs[3]].shape);
-            auto steps = parseIntArrayValue(nodeWeightsInfo[inputs[4]].dataType, nodeWeightsInfo[inputs[4]].data, 
-                    nodeWeightsInfo[inputs[4]].byteCount, nodeWeightsInfo[inputs[4]].shape);
+            auto starts = parseIntArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
+                    node_weight_info[inputs[1]].byteCount, node_weight_info[inputs[1]].shape);
+            auto ends   = parseIntArrayValue(node_weight_info[inputs[2]].dataType, node_weight_info[inputs[2]].data, 
+                    node_weight_info[inputs[2]].byteCount, node_weight_info[inputs[2]].shape);
+            auto axes   = parseIntArrayValue(node_weight_info[inputs[3]].dataType, node_weight_info[inputs[3]].data, 
+                    node_weight_info[inputs[3]].byteCount, node_weight_info[inputs[3]].shape);
+            auto steps = parseIntArrayValue(node_weight_info[inputs[4]].dataType, node_weight_info[inputs[4]].data, 
+                    node_weight_info[inputs[4]].byteCount, node_weight_info[inputs[4]].shape);
             CHECK_ASSERT(starts.size() <= dims.nbDims, "starts size(%d) must be less than input tensor dims(%d)!\n", starts.size(), dims.nbDims);
             CHECK_ASSERT(starts.size() == ends.size(), "starts size must be equal to ends size!\n");
             CHECK_ASSERT(starts.size() == axes.size(), "starts size must be equal to axes size!\n");

@@ -1,27 +1,31 @@
+/********************************************
+ * Filename: gemm_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __GEMM_NODE_INFO_HPP__
-#define __GEMM_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class GemmNodeInfo : public nodeInfo
+
+    class GemmNodeInfo : public NodeInfo
     {
     public:
         GemmNodeInfo();
         ~GemmNodeInfo();
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        float getAlpha(){return alpha;}
-        float getBeta(){return beta;}
-        int getTransA(){return transA;}
-        int getTransB(){return transB;}
+        float getAlpha() { return alpha; }
+        float getBeta() { return beta; }
+        int getTransA() {return transA; }
+        int getTransB() { return transB; }
+
     private:
         float alpha;
         float beta;
         int transA;
         int transB;
     };
-} // tensorrtInference
-#endif //__GEMM_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

@@ -8,7 +8,7 @@
 #include <opencv2/opencv.hpp>
 
 using namespace std;
-using namespace tensorrtInference;
+using namespace TENSORRT_WRAPPER;
 
 #define NET_NAME "./example/yolov3/"
 #define GRAPH_JSON_FILE(net)    net "net_graph.json"

@@ -1,11 +1,13 @@
-#ifndef __NONZERO_PLUGIN_HPP__
-#define __NONZERO_PLUGIN_HPP__
-
+/********************************************
+ * Filename: nonzero_plugin.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
 #include <string>
 #include <vector>
 #include "NvInfer.h"
 #include "NvInferPlugin.h"
-
 
 class NonZeroPlugin: public nvinfer1::IPluginV2IOExt
 {
@@ -100,5 +102,3 @@ class NonZeroPluginCreator : public nvinfer1::IPluginCreator
         nvinfer1::PluginFieldCollection mFC;
         std::vector<nvinfer1::PluginField> mPluginAttributes;
 };
-
-#endif 

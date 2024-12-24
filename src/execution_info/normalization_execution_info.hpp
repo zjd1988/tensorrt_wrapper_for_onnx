@@ -2,7 +2,7 @@
 #define __NORMALIZATION_EXECUTION_INFO_HPP__
 #include "execution_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     class NormalizationExecutionInfo : public ExecutionInfo
     {
@@ -22,6 +22,6 @@ namespace tensorrtInference
         Buffer* srcTensor;
         Buffer* dstTensor;        
     };
-} // namespace tensorrtInference 
+} // namespace TENSORRT_WRAPPER
 
 #endif

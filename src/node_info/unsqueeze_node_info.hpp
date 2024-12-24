@@ -1,21 +1,25 @@
+/********************************************
+ * Filename: unsqueeze_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __UNSQUEEZE_NODE_INFO_HPP__
-#define __UNSQUEEZE_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class UnsqueezeNodeInfo : public nodeInfo
+
+    class UnsqueezeNodeInfo : public NodeInfo
     {
     public:
         UnsqueezeNodeInfo();
         ~UnsqueezeNodeInfo();
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        std::vector<int> getAxes(){return axes;}
+        std::vector<int> getAxes() { return axes; }
+
     private:
         std::vector<int> axes;
     };
-} // tensorrtInference
-#endif //__UNSQUEEZE_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

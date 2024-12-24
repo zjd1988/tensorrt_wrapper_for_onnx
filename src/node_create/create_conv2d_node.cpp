@@ -1,16 +1,19 @@
-#include "NvInfer.h"
-#include "cuda_runtime_api.h"
-#include "weights_graph_parse.hpp"
-#include "create_node.hpp"
-#include "create_conv2d_node.hpp"
-#include "conv2d_node_info.hpp"
+/********************************************
+ * Filename: create_conv2d_node.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "node_create/create_node.hpp"
+#include "node_create/create_conv2d_node.hpp"
+#include "node_info/conv2d_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     nvinfer1::ILayer* createConv2dNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto conv2dNodeInfo = (Conv2dNodeInfo *)nodeConfInfo;
+        auto conv2dNodeInfo = (Conv2dNodeInfo *)node_info;
         auto inputs = conv2dNodeInfo->getInputs();
         CHECK_ASSERT(inputs.size() >= 2, "conv2d inputs must greater than 2\n");
         auto kernelShape = conv2dNodeInfo->getKernelShape();
@@ -18,25 +21,25 @@ namespace tensorrtInference
 
         nvinfer1::IConvolutionLayer* conv2d = nullptr;
         nvinfer1::ITensor* inputTensors = tensors[inputs[0]];
-        nvinfer1::DataType dataType = (nodeWeightsInfo[inputs[1]].dataType == tensorrtInference::OnnxDataType::FLOAT) ? 
+        nvinfer1::DataType dataType = (node_weight_info[inputs[1]].dataType == OnnxDataType::FLOAT) ? 
                                         nvinfer1::DataType::kFLOAT : nvinfer1::DataType::kHALF;
-        int weightEleCount = onnxDataTypeEleCount[nodeWeightsInfo[inputs[1]].dataType];
-        CHECK_ASSERT(nodeWeightsInfo[inputs[1]].byteCount % weightEleCount == 0,
+        int weightEleCount = onnxDataTypeEleCount[node_weight_info[inputs[1]].dataType];
+        CHECK_ASSERT(node_weight_info[inputs[1]].byteCount % weightEleCount == 0,
             "weights byte count shoud be mulptile of element byte count\n");
         nvinfer1::Weights wt{dataType, nullptr, 0};
         wt.type   = dataType;
-        wt.values = nodeWeightsInfo[inputs[1]].data;
-        wt.count  = nodeWeightsInfo[inputs[1]].byteCount / weightEleCount;
-        int nbOutputMaps = nodeWeightsInfo[inputs[1]].shape[0];
+        wt.values = node_weight_info[inputs[1]].data;
+        wt.count  = node_weight_info[inputs[1]].byteCount / weightEleCount;
+        int nbOutputMaps = node_weight_info[inputs[1]].shape[0];
         if(inputs.size() > 2)
         {
-            int biasEleCount = onnxDataTypeEleCount[nodeWeightsInfo[inputs[2]].dataType];
-            CHECK_ASSERT(nodeWeightsInfo[inputs[2]].byteCount % biasEleCount == 0,
+            int biasEleCount = onnxDataTypeEleCount[node_weight_info[inputs[2]].dataType];
+            CHECK_ASSERT(node_weight_info[inputs[2]].byteCount % biasEleCount == 0,
                 "bias byte count shoud be mulptile of element byte count\n");
             nvinfer1::Weights bias{dataType, nullptr, 0};
             bias.type = dataType;
-            bias.values = nodeWeightsInfo[inputs[2]].data;
-            bias.count = nodeWeightsInfo[inputs[2]].byteCount / biasEleCount;
+            bias.values = node_weight_info[inputs[2]].data;
+            bias.count = node_weight_info[inputs[2]].byteCount / biasEleCount;
             conv2d = network->addConvolution(*inputTensors, nbOutputMaps, nvinfer1::DimsHW{kernelShape[0], kernelShape[1]}, wt, bias);
         }
         else
@@ -60,10 +63,11 @@ namespace tensorrtInference
             CHECK_ASSERT(pads[0] == pads[2], "conv2d only support symmetric padding %d %d %d %d\n", pads[0], pads[1], pads[2], pads[3]);
             conv2d->setPadding(nvinfer1::DimsHW{pads[0], pads[1]});
         }
-        
+
         if(dilation.size())
             conv2d->setDilation(nvinfer1::DimsHW{dilation[0], dilation[1]});
         
         return conv2d;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

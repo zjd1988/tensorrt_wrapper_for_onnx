@@ -1,13 +1,15 @@
-#ifndef __UTILS_HPP__
-#define __UTILS_HPP__
-
+/********************************************
+ * Filename: utils.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
 #include "NvInfer.h"
 #include "NvOnnxConfig.h"
 #include "NvOnnxParser.h"
 #include <cuda_runtime_api.h>
 #include <iostream>
 #include "assert.h"
-
 
 #define CHECK_ASSERT(x, format, args...) do {   \
     if(!(x)) {                                  \
@@ -50,7 +52,7 @@
         CUDA_CHECK(cudaGetLastError());                      \
     } while (0)
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
 
     class Logger : public nvinfer1::ILogger
@@ -106,5 +108,5 @@ namespace tensorrtInference
     extern int getTensorrtDataType(OnnxDataType onnxDataType);
     extern std::vector<int> dimsToVector(nvinfer1::Dims dims);
     extern nvinfer1::Dims vectorToDims(std::vector<int> shape);
-} //tensorrtInference
-#endif
+
+} // namespace TENSORRT_WRAPPER

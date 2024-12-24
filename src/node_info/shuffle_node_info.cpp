@@ -1,24 +1,32 @@
-#include "shuffle_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: shuffle_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/shuffle_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // Shuffle Node
     ShuffleNodeInfo::ShuffleNodeInfo()
     {
         setNodeType("Shuffle");
-        setSubNodeType("");
+        setNodeSubType("");
         axis = 1;
         perm.clear();
     }
+
     ShuffleNodeInfo::~ShuffleNodeInfo()
-    {  
+    {
         axis = 1;
         perm.clear();
     }
+
     bool ShuffleNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize <= 2, "Shuffle node must less than 2 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -56,14 +64,16 @@ namespace tensorrtInference
         }
         return true;
     }
+
     void ShuffleNodeInfo::printNodeInfo()
     {
-        nodeInfo::printNodeInfo();
+        NodeInfo::printNodeInfo();
         LOG("node attribute is as follows:\n");
         LOG("----perm is : ");
         for(int i = 0; i < perm.size(); i++) {
             LOG("%d ", perm[i]);
         }
         LOG("\n");
-    }        
-}
+    }
+
+} // namespace TENSORRT_WRAPPER

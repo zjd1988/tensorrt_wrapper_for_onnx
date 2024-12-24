@@ -1,8 +1,14 @@
-#include "conv2d_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: conv2d_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/conv2d_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // Conv2d Node
     Conv2dNodeInfo::Conv2dNodeInfo()
     {
@@ -12,19 +18,16 @@ namespace tensorrtInference
         strides.clear();
         dilation.clear();
         setNodeType("Conv2d");
-        setSubNodeType("");
+        setNodeSubType("");
     }
+
     Conv2dNodeInfo::~Conv2dNodeInfo()
     {
-        group = 0;
-        kernel_shape.clear();
-        pads.clear();
-        strides.clear();
-        dilation.clear();
     }
+
     bool Conv2dNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize >= 2, "conv2d node inputs size must larger than 2\n");
         for(int i = 0; i < inputSize; i++)
@@ -87,9 +90,10 @@ namespace tensorrtInference
         }
         return true;
     }
+
     void Conv2dNodeInfo::printNodeInfo()
     {
-        nodeInfo::printNodeInfo();
+        NodeInfo::printNodeInfo();
         LOG("node attribute is as follows:\n");
         LOG("----group is %d \n", group);
         LOG("----kernel_shape is : ");
@@ -110,4 +114,5 @@ namespace tensorrtInference
         }
         LOG("\n");
     }
-}
+
+} // namespace TENSORRT_WRAPPER

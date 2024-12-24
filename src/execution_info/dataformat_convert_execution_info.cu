@@ -1,6 +1,6 @@
 #include "dataformat_convert_execution_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     template <typename T>
     __global__ void BGR2RGBExecutionKernel(const T* src, T* dst, const int size, const int channel)

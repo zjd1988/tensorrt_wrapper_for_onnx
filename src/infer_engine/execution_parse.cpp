@@ -1,8 +1,14 @@
-#include "execution_parse.hpp"
+/********************************************
+ * Filename: execution_parse.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "infer_engine/execution_parse.hpp"
 using namespace std;
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     executionParse::executionParse(CUDARuntime *runtime, std::string &jsonFile)
     {
         CHECK_ASSERT(runtime != nullptr, "cuda runtime is null!\n");
@@ -58,6 +64,7 @@ namespace tensorrtInference
         jsonStream.close();
         return;
     }
+
     executionParse::~executionParse()
     {
 
@@ -91,14 +98,17 @@ namespace tensorrtInference
     {
         return topoExecutionInfoOrder;
     }
+
     const std::map<std::string, std::shared_ptr<Buffer>>& executionParse::getTensorsInfo()
     {
         return tensorsInfo;
     }
+
     const std::map<std::string, std::shared_ptr<ExecutionInfo>>& executionParse::getExecutionInfoMap()
     {
         return executionInfoMap;
     }
+
     void executionParse::runInference()
     {
         int executionSize = topoExecutionInfoOrder.size();
@@ -108,6 +118,7 @@ namespace tensorrtInference
             executionInfoMap[name]->run();
         }
     }
+
     std::map<std::string, void*> executionParse::getInferenceResult()
     {
         int size = outputTensorNames.size();
@@ -119,4 +130,5 @@ namespace tensorrtInference
         }
         return result;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

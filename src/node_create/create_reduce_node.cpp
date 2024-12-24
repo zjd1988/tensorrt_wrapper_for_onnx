@@ -3,13 +3,13 @@
 #include "weights_graph_parse.hpp"
 #include "create_reduce_node.hpp"
 #include "reduce_node_info.hpp"
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     nvinfer1::ILayer* createReduceNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto reduceNodeInfo = (ReduceNodeInfo*)nodeConfInfo;
-        auto subType = reduceNodeInfo->getSubNodeType();
+        auto reduceNodeInfo = (ReduceNodeInfo*)node_info;
+        auto subType = reduceNodeInfo->getNodeSubType();
         nvinfer1::ReduceOperation operation;
         nvinfer1::IReduceLayer* reduce = nullptr;
         //ReduceSum

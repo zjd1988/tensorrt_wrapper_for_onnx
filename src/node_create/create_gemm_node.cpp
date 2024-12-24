@@ -5,10 +5,11 @@
 #include "create_gemm_node.hpp"
 #include "gemm_node_info.hpp"
 
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    nvinfer1::MatrixOperation getMatrixOperation(const nvinfer1::ITensor& input, bool transpose) {
+
+    static nvinfer1::MatrixOperation getMatrixOperation(const nvinfer1::ITensor& input, bool transpose)
+    {
         if (input.getDimensions().nbDims == 1)
         {
             return nvinfer1::MatrixOperation::kVECTOR;
@@ -21,17 +22,17 @@ namespace tensorrtInference
     };
 
     nvinfer1::ILayer* createGemmNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto gemmNodeInfo = (GemmNodeInfo*)nodeConfInfo;
+        auto gemmNodeInfo = (GemmNodeInfo*)node_info;
         auto inputs    = gemmNodeInfo->getInputs();
         auto alpha     = gemmNodeInfo->getAlpha();
         auto beta      = gemmNodeInfo->getBeta();
         auto transA    = gemmNodeInfo->getTransA();
         auto transB    = gemmNodeInfo->getTransB();
-        tensorrtInference::weightInfo weightInfoA;
-        tensorrtInference::weightInfo weightInfoB;
-        tensorrtInference::weightInfo weightInfoC;
+        WeightInfo weightInfoA;
+        WeightInfo weightInfoB;
+        WeightInfo weightInfoC;
         bool weightA = false;
         bool weightB = false;
         bool weightC = false;
@@ -42,30 +43,30 @@ namespace tensorrtInference
         CHECK_ASSERT(inputTensorA != nullptr, "get gemm input tensor:%d fail,topo order error\n", 0);
         auto dataTypeA = inputTensorA->getType();
         CHECK_ASSERT(dataTypeA != nvinfer1::DataType::kINT32, "gemm node: Int32 tensors are not valid input tensors.\n");
-        if(nodeWeightsInfo.count(inputs[0]) != 0)
+        if(node_weight_info.count(inputs[0]) != 0)
         {
             weightA = true;
-            weightInfoA = nodeWeightsInfo[inputs[0]];
+            weightInfoA = node_weight_info[inputs[0]];
         }
 
         inputTensorB = (tensors.count(inputs[1]) != 0) ? tensors[inputs[1]] : nullptr;
         CHECK_ASSERT(inputTensorB != nullptr, "get gemm input tensor:%d fail,topo order error\n", 1);
         auto dataTypeB = inputTensorB->getType();
         CHECK_ASSERT(dataTypeB != nvinfer1::DataType::kINT32, "gemm node: Int32 tensors are not valid input tensors.\n");        
-        if(nodeWeightsInfo.count(inputs[1]) != 0)
+        if(node_weight_info.count(inputs[1]) != 0)
         {
             weightB = true;
-            weightInfoB = nodeWeightsInfo[inputs[1]];
+            weightInfoB = node_weight_info[inputs[1]];
         }
 
         if(inputs.size() == 3)
         {
             inputTensorC = (tensors.count(inputs[2]) != 0) ? tensors[inputs[2]] : nullptr;
             CHECK_ASSERT(inputTensorC != nullptr, "get gemm input tensor:%d fail,topo order error\n", 2);
-            if(nodeWeightsInfo.count(inputs[2]) != 0)
+            if(node_weight_info.count(inputs[2]) != 0)
             {
                 weightC = true;
-                weightInfoC = nodeWeightsInfo[inputs[2]];
+                weightInfoC = node_weight_info[inputs[2]];
             }
         }
         

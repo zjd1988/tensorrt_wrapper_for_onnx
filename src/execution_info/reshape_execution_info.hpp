@@ -2,7 +2,7 @@
 #define __RESHAPE_EXECUTION_INFO_HPP__
 #include "execution_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     class ReshapeExecutionInfo : public ExecutionInfo
     {
@@ -18,6 +18,6 @@ namespace tensorrtInference
         Buffer* srcTensor;
         Buffer* dstTensor;
     };
-} // namespace tensorrtInference 
+} // namespace TENSORRT_WRAPPER
 
 #endif

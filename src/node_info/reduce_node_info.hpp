@@ -1,12 +1,15 @@
+/********************************************
+ * Filename: reduce_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __REDUCE_NODE_INFO_HPP__
-#define __REDUCE_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class ReduceNodeInfo : public nodeInfo
+
+    class ReduceNodeInfo : public NodeInfo
     {
     public:
         ReduceNodeInfo();
@@ -14,10 +17,11 @@ namespace tensorrtInference
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
         std::vector<int> getAxes() {return axes;}
-        bool getKeepdims() {return keepdims == 1;}
+        bool getKeepdims() { return keepdims == 1; }
+
     private:
         std::vector<int> axes;
         int keepdims;
     };
-} // tensorrtInference
-#endif //__REDUCE_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

@@ -1,20 +1,24 @@
-#ifndef __TENSORRT_ENGINE_HPP__
-#define __TENSORRT_ENGINE_HPP__
-
+/********************************************
+ * Filename: tensorrt_engine.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
 #include <iostream>
 #include <string>
 #include <vector>
 #include <map>
-#include "utils.hpp"
-#include "weights_graph_parse.hpp"
-#include "execution_parse.hpp"
-#include "cuda_runtime.hpp"
+#include "common/utils.hpp"
+#include "common/cuda_runtime.hpp"
+#include "infer_engine/weights_graph_parse.hpp"
+#include "infer_engine/execution_parse.hpp"
 
 using namespace nvinfer1;
 using namespace std;
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     class tensorrtEngine
     {
     public:
@@ -28,11 +32,10 @@ namespace tensorrtInference
         std::map<std::string, void*> getInferenceResult();
 
     private:
-        std::shared_ptr<tensorrtInference::weightsAndGraphParse> weightsAndGraph;
-        std::shared_ptr<tensorrtInference::executionParse> executionInfo;
+        std::shared_ptr<weightsAndGraphParse> weightsAndGraph;
+        std::shared_ptr<executionParse> executionInfo;
         //gpu runtime
         std::shared_ptr<CUDARuntime> cudaRuntime;
     };
-}
 
-#endif
+} // namespace TENSORRT_WRAPPER

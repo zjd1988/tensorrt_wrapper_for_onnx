@@ -1,8 +1,14 @@
-#include "gemm_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: gemm_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/gemm_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // Gemm Node
     GemmNodeInfo::GemmNodeInfo()
     {
@@ -11,18 +17,16 @@ namespace tensorrtInference
         transA = 0;
         transB = 0;
         setNodeType("Gemm");
-        setSubNodeType("");
+        setNodeSubType("");
     }
+
     GemmNodeInfo::~GemmNodeInfo()
     {
-        alpha = 1.0f;
-        beta = 1.0f;
-        transA = 0;
-        transB = 0;        
     }
+
     bool GemmNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize >= 2 && inputSize <= 3, "Gemm node inputs must less than 3 and biger than 2\n");
         for(int i = 0; i < inputSize; i++)
@@ -70,13 +74,15 @@ namespace tensorrtInference
         }
         return true;
     }
+
     void GemmNodeInfo::printNodeInfo()
     {
-        nodeInfo::printNodeInfo();
+        NodeInfo::printNodeInfo();
         LOG("node attribute is as follows:\n");
         LOG("----alpha is :  %f\n", alpha);
         LOG("----beta is :  %f\n", beta);
         LOG("----transA is :  %d\n", transA);
         LOG("----transB is :  %d\n", transB);
     }
-}
+
+} // namespace TENSORRT_WRAPPER

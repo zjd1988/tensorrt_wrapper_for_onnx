@@ -1,6 +1,6 @@
 #include "reshape_execution_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
 
     ReshapeExecutionInfo::ReshapeExecutionInfo(CUDARuntime *runtime,

@@ -1,7 +1,7 @@
 #include "batchnormalization_node_info.hpp"
 #include "utils.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     // BatchNormalization Node
     BatchNormalizationNodeInfo::BatchNormalizationNodeInfo()
@@ -9,7 +9,7 @@ namespace tensorrtInference
         epsilon = 1e-05f;
         momentum = 0.9f;
         setNodeType("BatchNormalization");
-        setSubNodeType("");
+        setNodeSubType("");
     }
     BatchNormalizationNodeInfo::~BatchNormalizationNodeInfo()
     {
@@ -18,7 +18,7 @@ namespace tensorrtInference
     }
     bool BatchNormalizationNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize == 5, "BatchNormalization node must have 5 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -56,7 +56,7 @@ namespace tensorrtInference
     }
     void BatchNormalizationNodeInfo::printNodeInfo()
     {
-        nodeInfo::printNodeInfo();
+        NodeInfo::printNodeInfo();
         LOG("node attribute is as follows:\n");
         LOG("----epsilon is : %f \n", epsilon);
         LOG("----momentum is : %f \n", momentum);

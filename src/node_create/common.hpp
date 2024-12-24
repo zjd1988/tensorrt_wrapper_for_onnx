@@ -1,20 +1,14 @@
-#ifndef __COMMON_HPP__
-#define __COMMON_HPP__
+/********************************************
+ * Filename: common.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
 #include "NvInfer.h"
-#include "cuda_runtime_api.h"
-#include "node_info.hpp"
-#include "weights_graph_parse.hpp"
-#include "utils.hpp"
-#include <iostream>
-#include <numeric>
-#include <algorithm>
-using namespace std;
 
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    extern bool broadcastTensors(nvinfer1::INetworkDefinition* network, nvinfer1::ITensor*& tensor1, nvinfer1::ITensor*& tensor2);
-}
 
+    bool broadcastTensors(nvinfer1::INetworkDefinition* network, nvinfer1::ITensor*& tensor1, nvinfer1::ITensor*& tensor2);
 
-#endif //__COMMON_HPP__
+} // namespace TENSORRT_WRAPPER

@@ -8,14 +8,15 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "utils.hpp"
 #include "json/json.h"
-#include "node_info.hpp"
+#include "common/utils.hpp"
+#include "node_info/node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    struct weightInfo {
-        weightInfo() {
+
+    struct WeightInfo {
+        WeightInfo() {
             byteCount = 0;
             dataType = 0;
             data = nullptr;
@@ -25,7 +26,7 @@ namespace tensorrtInference
         {
             nvinfer1::Weights w{};
             w.values = data;
-            auto type = tensorrtInference::getTensorrtDataType((tensorrtInference::OnnxDataType)dataType);
+            auto type = getTensorrtDataType((OnnxDataType)dataType);
             CHECK_ASSERT(type != -1, "not supported type !!\n");
             w.type = (nvinfer1::DataType)type;
             w.count = byteCount / onnxDataTypeEleCount[dataType];
@@ -62,8 +63,8 @@ namespace tensorrtInference
         bool extractNodeInfo(Json::Value &root);
         std::map<std::string, char*> weightsData;
         std::vector<std::string> topoNodeOrder;
-        std::map<std::string, std::shared_ptr<nodeInfo>> nodeInfoMap;
-        std::map<std::string, weightInfo> netWeightsInfo;
+        std::map<std::string, std::shared_ptr<NodeInfo>> nodeInfoMap;
+        std::map<std::string, WeightInfo> netWeightsInfo;
         std::vector<std::string> inputTensorNames;
         std::vector<std::string> outputTensorNames;
         bool initFlag = false;
@@ -73,4 +74,5 @@ namespace tensorrtInference
         nvinfer1::IBuilder* builder;
         nvinfer1::ICudaEngine* cudaEngine;
     };
-} //tensorrtInference
+
+} // namespace TENSORRT_WRAPPER

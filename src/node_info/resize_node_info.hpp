@@ -1,12 +1,14 @@
+/********************************************
+ * Filename: resize_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __RESIZE_NODE_INFO_HPP__
-#define __RESIZE_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class ResizeNodeInfo : public nodeInfo
+    class ResizeNodeInfo : public NodeInfo
     {
     public:
         ResizeNodeInfo();
@@ -17,5 +19,5 @@ namespace tensorrtInference
     private:
         std::string mode;
     };
-} // tensorrtInference
+} // namespace TENSORRT_WRAPPER
 #endif //__RESIZE_NODE_INFO_HPP__

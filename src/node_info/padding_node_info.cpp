@@ -1,8 +1,14 @@
-#include "padding_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: padding_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/padding_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // Padding Node
     PaddingNodeInfo::PaddingNodeInfo()
     {
@@ -11,18 +17,16 @@ namespace tensorrtInference
         floatValue = 0.0f;
         intValue = 0;
         setNodeType("Padding");
-        setSubNodeType("");
+        setNodeSubType("");
     }
+
     PaddingNodeInfo::~PaddingNodeInfo()
-    {  
-        mode = "";
-        pads.clear();
-        floatValue = 0.0f;
-        intValue = 0;
+    {
     }
+
     bool PaddingNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize >= 1, "Padding node must have 2 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -66,4 +70,5 @@ namespace tensorrtInference
         }        
         return true;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

@@ -5,12 +5,12 @@
 #include "create_softmax_node.hpp"
 #include "softmax_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     nvinfer1::ILayer* createSoftmaxNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto softmaxNodeInfo = (SoftmaxNodeInfo*)nodeConfInfo;
+        auto softmaxNodeInfo = (SoftmaxNodeInfo*)node_info;
         auto inputs = softmaxNodeInfo->getInputs();
         int axes = softmaxNodeInfo->getAxis();
         // CHECK_ASSERT(axes >= 0, "axes only support positive\n");

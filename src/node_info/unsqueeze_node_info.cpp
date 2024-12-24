@@ -1,22 +1,29 @@
-#include "unsqueeze_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: unsqueeze_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/unsqueeze_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // Unsqueeze Node
     UnsqueezeNodeInfo::UnsqueezeNodeInfo()
     {
         axes.clear();
         setNodeType("Unsqueeze");
-        setSubNodeType("");
+        setNodeSubType("");
     }
+
     UnsqueezeNodeInfo::~UnsqueezeNodeInfo()
     {
-        axes.clear();
     }
+
     bool UnsqueezeNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize == 1, "Unsqueeze node must have 1 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -48,9 +55,10 @@ namespace tensorrtInference
         }
         return true;
     }
+
     void UnsqueezeNodeInfo::printNodeInfo()
     {
-        nodeInfo::printNodeInfo();
+        NodeInfo::printNodeInfo();
         LOG("node attribute is as follows:\n");
         LOG("----axes is :  ");
         for(int i = 0; i < axes.size(); i++) {
@@ -58,4 +66,5 @@ namespace tensorrtInference
         }
         LOG("\n");
     }
-}
+
+} // namespace TENSORRT_WRAPPER

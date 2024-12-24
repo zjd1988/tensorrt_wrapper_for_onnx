@@ -5,12 +5,12 @@
 #include "create_gather_node.hpp"
 #include "gather_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     nvinfer1::ILayer* createGatherNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto gatherNodeInfo = (GatherNodeInfo*)nodeConfInfo;
+        auto gatherNodeInfo = (GatherNodeInfo*)node_info;
         auto inputs = gatherNodeInfo->getInputs();
         int axis    = gatherNodeInfo->getAxis();
         nvinfer1::ITensor* data        = (tensors.count(inputs[0]) != 0) ? tensors[inputs[0]] : nullptr;

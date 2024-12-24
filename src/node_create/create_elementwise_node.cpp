@@ -1,15 +1,20 @@
-#include "NvInfer.h"
-#include "cuda_runtime_api.h"
-#include "weights_graph_parse.hpp"
-#include "create_node.hpp"
-#include "create_elementwise_node.hpp"
+/********************************************
+ * Filename: create_elementwise_node.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "node_create/create_node.hpp"
+#include "node_create/create_elementwise_node.hpp"
+#include "node_info/elementwise_node_info"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     nvinfer1::ILayer* createElementWiseNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto subType = nodeConfInfo->getSubNodeType();
+        auto elementWiseNodeInfo = (ElementWiseNodeInfo *)node_info;
+        auto subType = elementWiseNodeInfo->getNodeSubType();
         nvinfer1::ElementWiseOperation operation;
         //Sub Div Add Mul Equal Greater Max
         if(subType.compare("Sub") == 0) {
@@ -37,7 +42,7 @@ namespace tensorrtInference
             LOG("Current not support elementwise operation(%s) \n", subType);
             return nullptr;
         }
-        auto inputs = nodeConfInfo->getInputs();
+        auto inputs = node_info->getInputs();
         nvinfer1::ITensor* inputTensor1 = tensors[inputs[0]];
         nvinfer1::ITensor* inputTensor2 = tensors[inputs[1]];
         int maxNbDims1 = inputTensor1->getDimensions().nbDims;
@@ -79,4 +84,5 @@ namespace tensorrtInference
         // }
         return ew;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

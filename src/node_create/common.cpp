@@ -1,8 +1,17 @@
-#include "common.hpp"
+/********************************************
+ * Filename: common.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include <iostream>
+#include <numeric>
+#include <algorithm>
+#include "node_create/common.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    bool broadcastTensor(nvinfer1::INetworkDefinition* network, nvinfer1::ITensor*& t, const int nbDims)
+
+    static bool broadcastTensor(nvinfer1::INetworkDefinition* network, nvinfer1::ITensor*& t, const int nbDims)
     {
         const nvinfer1::Dims inputDims = t->getDimensions();
         const int nbInputDims = inputDims.nbDims;
@@ -25,6 +34,7 @@ namespace tensorrtInference
         }
         return true;
     }
+
     bool broadcastTensors(nvinfer1::INetworkDefinition* network, nvinfer1::ITensor*& tensor1, nvinfer1::ITensor*& tensor2)
     {
         const int t1Dims = tensor1->getDimensions().nbDims;
@@ -41,4 +51,5 @@ namespace tensorrtInference
         }
         return broadcastTensor(network, tensor1, t2Dims);
     }
-}
+
+} // namespace TENSORRT_WRAPPER

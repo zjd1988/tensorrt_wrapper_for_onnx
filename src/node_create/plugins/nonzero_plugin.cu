@@ -1,10 +1,15 @@
+/********************************************
+ * Filename: nonzero_plugin.cu
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
 #include <cmath>
 #include <stdio.h>
 #include <cassert>
 #include <iostream>
-#include "utils.hpp"
-#include "nonzero_plugin.hpp"
 #include <cub/cub.cuh>
+#include "common/utils.hpp"
+#include "node_create/plugins/nonzero_plugin.hpp"
 
 #define THREADS_PER_BLOCK 256
 
@@ -191,7 +196,7 @@ int NonZeroPlugin::enqueue(int batchSize, const void*const * inputs, void** outp
 }
 
 size_t NonZeroPlugin::getSerializationSize() const
-{  
+{
     return sizeof(inputSize);
 }
 

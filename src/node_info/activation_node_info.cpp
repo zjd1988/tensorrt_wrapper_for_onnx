@@ -1,21 +1,28 @@
-#include "activation_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: activation_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/activation_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // Activation Node
     ActivationNodeInfo::ActivationNodeInfo()
     {
         setNodeType("Activation");
-        setSubNodeType("");
+        setNodeSubType("");
     }
+
     ActivationNodeInfo::~ActivationNodeInfo()
     {
-
     }
+
     bool ActivationNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize <= 3, "Activation node must less than 3 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -36,14 +43,14 @@ namespace tensorrtInference
             {
                 auto size = attr[elem].size();
                 CHECK_ASSERT(size == 1, "Activation node's alpha must have 1 element\n");
-                alpha = attr[elem][0].asFloat();
+                m_alpha = attr[elem][0].asFloat();
             }
             else if(elem.compare("beta") == 0)
             {
                 auto size = attr[elem].size();
                 CHECK_ASSERT(size == 1, "Activation node's beta must have 1 element\n");
-                beta = attr[elem][0].asFloat();
-            }            
+                m_alpha = attr[elem][0].asFloat();
+            }
             else
             {
                 LOG("currnet Activation node not support %s \n", elem.c_str());
@@ -51,4 +58,5 @@ namespace tensorrtInference
         }        
         return true;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

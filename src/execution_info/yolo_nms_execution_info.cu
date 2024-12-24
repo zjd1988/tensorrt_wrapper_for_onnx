@@ -7,7 +7,7 @@
 
 #define DIVUP(m,n) (((m)+(n)-1) / (n))
 static int const threadsPerBlock = sizeof(unsigned long long) * 8;
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
 
     template <typename scalar_t>

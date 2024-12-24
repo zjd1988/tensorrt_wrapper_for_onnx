@@ -1,20 +1,24 @@
+/********************************************
+ * Filename: gather_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __GATHER_NODE_INFO_HPP__
-#define __GATHER_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class GatherNodeInfo : public nodeInfo
+
+    class GatherNodeInfo : public NodeInfo
     {
     public:
         GatherNodeInfo();
         ~GatherNodeInfo();
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        int getAxis() { return axis;}
+        int getAxis() { return axis; }
+
     private:
         int axis;
     };
-} // tensorrtInference
-#endif //__GATHER_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

@@ -1,8 +1,14 @@
-#include "pooling_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: pooling_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/pooling_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // Pooling Node
     PoolingNodeInfo::PoolingNodeInfo()
     {
@@ -13,17 +19,19 @@ namespace tensorrtInference
         count_include_pad = 0;
         auto_pad = "NOTSET";
         setNodeType("Pooling");
-        setSubNodeType("");
+        setNodeSubType("");
     }
+
     PoolingNodeInfo::~PoolingNodeInfo()
     {
         kernelShape.clear();
         pads.clear();
         strides.clear();
     }
+
     bool PoolingNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize == 1, "Pooling node must have 1 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -87,9 +95,10 @@ namespace tensorrtInference
         }
         return true;
     }
+
     void PoolingNodeInfo::printNodeInfo()
     {
-        nodeInfo::printNodeInfo();
+        NodeInfo::printNodeInfo();
         LOG("node attribute is as follows:\n");
         LOG("----kernelShape is : ");
         for(int i = 0; i < kernelShape.size(); i++) {
@@ -107,5 +116,6 @@ namespace tensorrtInference
         LOG("\n----count_include_pad is : %d", count_include_pad);
         LOG("\n----auto_pad is : %s", auto_pad.c_str());
         LOG("\n");
-    }    
-}
+    }
+
+} // namespace TENSORRT_WRAPPER

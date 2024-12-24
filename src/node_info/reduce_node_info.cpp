@@ -1,24 +1,32 @@
-#include "reduce_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: reduce_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/reduce_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // Reduce Node
     ReduceNodeInfo::ReduceNodeInfo()
     {
         axes.clear();
         keepdims = 0;
         setNodeType("Reduce");
-        setSubNodeType("");        
+        setNodeSubType("");        
     }
+
     ReduceNodeInfo::~ReduceNodeInfo()
     {
         axes.clear();
         keepdims = 0;
     }
+
     bool ReduceNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize == 1, "Reduce node must have 1 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -55,11 +63,13 @@ namespace tensorrtInference
         }
         return true;
     }
+
     void ReduceNodeInfo::printNodeInfo()
     {
-        nodeInfo::printNodeInfo();
+        NodeInfo::printNodeInfo();
         LOG("node attribute is as follows:\n");
         LOG("----axes is : %d \n", axes);
         LOG("----keepdims is : %d \n", keepdims);
     }
-}
+
+} // namespace TENSORRT_WRAPPER

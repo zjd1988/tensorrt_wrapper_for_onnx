@@ -1,6 +1,6 @@
 #include "onnx_model_execution_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     OnnxModelExecutionInfo::OnnxModelExecutionInfo(CUDARuntime *runtime,
         std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root) : ExecutionInfo(runtime, tensorsInfo, root)

@@ -22,7 +22,7 @@ ExecutionInfo* construct##type##ExecutionInfo(CUDARuntime *runtime,             
 
 #define CONSTUCT_EXECUTIONINFO_FUNC(type) construct##type##ExecutionInfo
 
-namespace tensorrtInference {
+namespace TENSORRT_WRAPPER{
 
     ExecutionInfo::ExecutionInfo(CUDARuntime *runtime, std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root)
     {

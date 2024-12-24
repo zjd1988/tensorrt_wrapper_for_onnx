@@ -1,6 +1,6 @@
 #include "datatype_convert_execution_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     template <typename SRC_T, typename DST_T>
     __global__ void DataTypeConvertExecutionKernel(const SRC_T* src, DST_T* dst, const int size)

@@ -1,12 +1,15 @@
+/********************************************
+ * Filename: conv2d_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __CONV2D_NODE_INFO_HPP__
-#define __CONV2D_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class Conv2dNodeInfo : public nodeInfo
+
+    class Conv2dNodeInfo : public NodeInfo
     {
     public:
         Conv2dNodeInfo();
@@ -18,6 +21,7 @@ namespace tensorrtInference
         std::vector<int> getPads() { return pads; }
         std::vector<int> getStrides() { return strides; }
         std::vector<int> getDilation() { return dilation; }
+
     private:
         int group;
         std::vector<int> kernel_shape;
@@ -25,5 +29,5 @@ namespace tensorrtInference
         std::vector<int> strides;
         std::vector<int> dilation;
     };
-} // tensorrtInference
-#endif //__CONV2D_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

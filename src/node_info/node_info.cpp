@@ -1,3 +1,8 @@
+/********************************************
+ * Filename: node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
 #include "node_info.hpp"
 #include "conv2d_node_info.hpp"
 #include "elementwise_node_info.hpp"
@@ -20,9 +25,9 @@
 #include "batchnormalization_node_info.hpp"
 
 #define PARSE_NODE_FUNC_DEF(nodeType)                                      \
-nodeInfo* parse##nodeType##NodeInfo(std::string type, Json::Value& root)   \
+NodeInfo* parse##nodeType##NodeInfo(std::string type, Json::Value& root)   \
 {                                                                          \
-    nodeInfo* node = new nodeType##NodeInfo();                             \
+    NodeInfo* node = new nodeType##NodeInfo();                             \
     if(node->parseNodeInfoFromJson(type, root))                            \
         return node;                                                       \
     else                                                                   \
@@ -32,26 +37,26 @@ nodeInfo* parse##nodeType##NodeInfo(std::string type, Json::Value& root)   \
 
 #define PARSE_NODE_FUNC(nodeType) parse##nodeType##NodeInfo
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    //nodeInfo member function def
-    nodeInfo::nodeInfo() {
+    //NodeInfo member function def
+    NodeInfo::NodeInfo() {
         inputs.clear();
         outputs.clear();
     }
-    nodeInfo::~nodeInfo() {
+    NodeInfo::~NodeInfo() {
         inputs.clear();
         outputs.clear();
     }
-    std::string nodeInfo::getNodeType() { return nodeType; }
-    void nodeInfo::setNodeType(std::string type) { nodeType = type; }
-    std::string nodeInfo::getSubNodeType() { return subNodeType; }
-    void nodeInfo::setSubNodeType(std::string type) { subNodeType = type; }
-    std::vector<std::string> nodeInfo::getOutputs() { return outputs; }
-    std::vector<std::string> nodeInfo::getInputs() { return inputs; }
-    void nodeInfo::addInput(std::string input) { inputs.push_back(input); }
-    void nodeInfo::addOutput(std::string output) { outputs.push_back(output); }
-    void nodeInfo::printNodeInfo() {
+    std::string NodeInfo::getNodeType() { return nodeType; }
+    void NodeInfo::setNodeType(std::string type) { nodeType = type; }
+    std::string NodeInfo::getNodeSubType() { return subNodeType; }
+    void NodeInfo::setNodeSubType(std::string type) { subNodeType = type; }
+    std::vector<std::string> NodeInfo::getOutputs() { return outputs; }
+    std::vector<std::string> NodeInfo::getInputs() { return inputs; }
+    void NodeInfo::addInput(std::string input) { inputs.push_back(input); }
+    void NodeInfo::addOutput(std::string output) { outputs.push_back(output); }
+    void NodeInfo::printNodeInfo() {
         LOG("################### NODE INFO ######################\n");
         LOG("currend node type is %s , sub node type is %s\n", nodeType.c_str(), subNodeType.c_str());
         auto input = getInputs();
@@ -65,7 +70,6 @@ namespace tensorrtInference
             LOG("----index %d tensor : %s\n", i, output[i].c_str());
         }
     }
-
 
     PARSE_NODE_FUNC_DEF(Conv2d)
     PARSE_NODE_FUNC_DEF(ElementWise)

@@ -5,7 +5,7 @@
 #include "cuda_runtime.hpp"
 #include "execution_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     class OnnxModelExecutionInfo : public ExecutionInfo
     {
@@ -23,6 +23,6 @@ namespace tensorrtInference
         std::vector<void*> engineBufferArray;
         int batchSize = 1;
     };
-} // namespace tensorrtInference 
+} // namespace TENSORRT_WRAPPER
 
 #endif

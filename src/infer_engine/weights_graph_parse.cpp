@@ -3,13 +3,14 @@
  * Created by zjd1988 on 2024/12/19
  * Description:
  ********************************************/
-#include "weights_graph_parse.hpp"
-#include "create_node.hpp"
+#include "infer_engine/weights_graph_parse.hpp"
+#include "node_create/create_node.hpp"
 #include <fstream>
 using namespace std;
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     weightsAndGraphParse::weightsAndGraphParse(std::string &jsonFile, std::string &weightsFile, bool fp16Flag)
     {
         ifstream jsonStream;
@@ -50,7 +51,7 @@ namespace tensorrtInference
         //extract weight info 
         {
             auto weihtsInfo = root["weights_info"];
-            weightInfo nodeWeightInfo;
+            WeightInfo nodeWeightInfo;
             for (auto elem : weihtsInfo.getMemberNames())
             {
                 if(elem.compare("net_output") != 0)
@@ -132,7 +133,7 @@ namespace tensorrtInference
             {
                 auto op_type = root[elem]["op_type"].asString();
 
-                std::shared_ptr<nodeInfo> node;
+                std::shared_ptr<NodeInfo> node;
                 auto parseNodeInfoFromJsonFunc = getNodeParseFuncMap(op_type);
                 if(parseNodeInfoFromJsonFunc != nullptr)
                 {
@@ -158,7 +159,7 @@ namespace tensorrtInference
         for(auto it : nodeInfoMap)
         {
             auto nodeType = it.second->getNodeType();
-            auto subNodeType = it.second->getSubNodeType();
+            auto subNodeType = it.second->getNodeSubType();
             if(nodeType.compare("ElementWise") == 0 || nodeType.compare("Gemm") == 0)
             {
                 auto inputs = it.second->getInputs();
@@ -195,7 +196,7 @@ namespace tensorrtInference
             for(int j = 0; j < shape.size(); j++)
                 count *= shape[j];
             
-            nvinfer1::DataType dataType = (netWeightsInfo[constWeightTensors[i]].dataType == tensorrtInference::OnnxDataType::FLOAT) ? 
+            nvinfer1::DataType dataType = (netWeightsInfo[constWeightTensors[i]].dataType == OnnxDataType::FLOAT) ? 
                                 nvinfer1::DataType::kFLOAT : nvinfer1::DataType::kHALF;
             nvinfer1::Weights weights{dataType, netWeightsInfo[constWeightTensors[i]].data, count};
             nvinfer1::ILayer* constLayer = nullptr;
@@ -220,7 +221,7 @@ namespace tensorrtInference
             channel = shape[1];
             height = shape[2];
             width = shape[3];
-            nvinfer1::DataType dataType = (netWeightsInfo[inputTensorNames[i]].dataType == tensorrtInference::OnnxDataType::FLOAT) ? 
+            nvinfer1::DataType dataType = (netWeightsInfo[inputTensorNames[i]].dataType == OnnxDataType::FLOAT) ? 
                                 nvinfer1::DataType::kFLOAT : nvinfer1::DataType::kHALF;
 
             nvinfer1::ITensor* data = network->addInput(inputTensorNames[i].c_str(), dataType, 
@@ -314,5 +315,6 @@ namespace tensorrtInference
         if(modelStream != nullptr)
             modelStream->destroy();
         return true;
-    }    
-}
+    }
+
+} // namespace TENSORRT_WRAPPER

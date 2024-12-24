@@ -1,22 +1,26 @@
+/********************************************
+ * Filename: activation_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __CLIP_NODE_INFO_HPP__
-#define __CLIP_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class ActivationNodeInfo : public nodeInfo
+
+    class ActivationNodeInfo : public NodeInfo
     {
     public:
         ActivationNodeInfo();
         ~ActivationNodeInfo();
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        float getAlpha() { return alpha; }
-        float getBeta() { return alpha; }
+        float getAlpha() { return m_alpha; }
+        float getBeta() { return m_beta; }
+
     private:
-        float alpha;
-        float beta;
+        float                          m_alpha;
+        float                          m_beta;
     };
-} // tensorrtInference
-#endif // __CLIP_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

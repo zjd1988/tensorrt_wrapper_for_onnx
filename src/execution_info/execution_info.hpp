@@ -7,7 +7,7 @@
 #include "json/json.h"
 #define DIVUP(m,n) (((m)+(n)-1) / (n))
 
-namespace tensorrtInference {
+namespace TENSORRT_WRAPPER{
 
     class ExecutionInfo {
     public:

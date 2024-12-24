@@ -6,20 +6,20 @@
 #include "create_pooling_node.hpp"
 
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    void getKernelParams(PoolingNodeInfo* nodeInfo, nvinfer1::Dims* kernelSize, nvinfer1::Dims* strides, nvinfer1::Dims* begPadding, 
+    void getKernelParams(PoolingNodeInfo* NodeInfo, nvinfer1::Dims* kernelSize, nvinfer1::Dims* strides, nvinfer1::Dims* begPadding, 
     nvinfer1::Dims* endPadding, nvinfer1::PaddingMode& paddingMode, bool& countExcludePadding, const bool poolingCeilMode)
     {
         kernelSize->nbDims = 0;
         strides->nbDims = 0;
         begPadding->nbDims = 0;
         endPadding->nbDims = 0;
-        auto onnxKernelShape      = nodeInfo->getKernelShape();
-        auto onnxPads             = nodeInfo->getPads();
-        auto onnxStrides          = nodeInfo->getStrides();
-        auto onnxAutoPad          = nodeInfo->getAutoPad();
-        auto onnxCountIncludePad  = nodeInfo->getCountIncludePad();
+        auto onnxKernelShape      = NodeInfo->getKernelShape();
+        auto onnxPads             = NodeInfo->getPads();
+        auto onnxStrides          = NodeInfo->getStrides();
+        auto onnxAutoPad          = NodeInfo->getAutoPad();
+        auto onnxCountIncludePad  = NodeInfo->getCountIncludePad();
         CHECK_ASSERT(onnxKernelShape.size() == 2, "current only support 2d pooling\n");
 
         kernelSize->nbDims = onnxKernelShape.size();
@@ -76,9 +76,9 @@ namespace tensorrtInference
         }
     }
     nvinfer1::ILayer* createPoolingNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        PoolingNodeInfo *nodeConfigInfo = (PoolingNodeInfo *)nodeConfInfo;
+        PoolingNodeInfo *nodeConfigInfo = (PoolingNodeInfo *)node_info;
         auto inputs = nodeConfigInfo->getInputs();
         nvinfer1::ITensor* inputTensor = tensors[inputs[0]];
         nvinfer1::IPoolingLayer* pooling = nullptr;
@@ -90,7 +90,7 @@ namespace tensorrtInference
         bool excludePadding = true;
         auto poolingCeilMode = nodeConfigInfo->getCeilMode();
         getKernelParams(nodeConfigInfo, &kernelSize, &strides, &beginPadding, &endPadding, paddingMode, excludePadding, poolingCeilMode);
-        auto subNodeType     = nodeConfigInfo->getSubNodeType();
+        auto subNodeType     = nodeConfigInfo->getNodeSubType();
         if(subNodeType.compare("MaxPool") == 0 )
         {
             pooling = network->addPoolingNd(*inputTensor, nvinfer1::PoolingType::kMAX, kernelSize);

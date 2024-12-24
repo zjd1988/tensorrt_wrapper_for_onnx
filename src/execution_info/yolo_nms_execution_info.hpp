@@ -3,7 +3,7 @@
 #include "execution_info.hpp"
 
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     class YoloNMSExecutionInfo : public ExecutionInfo
     {
@@ -31,6 +31,6 @@ namespace tensorrtInference
         float confThresh;
         float iouThresh;
     };
-} // namespace tensorrtInference 
+} // namespace TENSORRT_WRAPPER
 
 #endif

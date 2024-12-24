@@ -1,19 +1,20 @@
+/********************************************
+ * Filename: shape_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __SHAPE_NODE_INFO_HPP__
-#define __SHAPE_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class ShapeNodeInfo : public nodeInfo
+
+    class ShapeNodeInfo : public NodeInfo
     {
     public:
         ShapeNodeInfo();
         ~ShapeNodeInfo();
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-    private:
-        
     };
-} // tensorrtInference
-#endif //__SHAPE_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

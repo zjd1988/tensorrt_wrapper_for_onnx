@@ -1,6 +1,6 @@
 #include "transpose_execution_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
 
     template <typename T>

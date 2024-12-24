@@ -19,51 +19,52 @@
 #include "create_resize_node.hpp"
 #include "create_batchnormalization_node.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     typedef nvinfer1::ILayer* (*func)(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo);
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info);
     
     static std::map<std::string, func> createNodeFuncMap;
 
     nvinfer1::ILayer* createNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-     tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+     NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
         if(createNodeFuncMap.size() == 0)
         {
-            createNodeFuncMap["ElementWise"]             = tensorrtInference::createElementWiseNode;
-            createNodeFuncMap["Activation"]              = tensorrtInference::createActivationNode;
-            createNodeFuncMap["Padding"]                 = tensorrtInference::createPaddingNode;
-            createNodeFuncMap["Reduce"]                  = tensorrtInference::createReduceNode;
-            createNodeFuncMap["Softmax"]                 = tensorrtInference::createSoftmaxNode;
-            createNodeFuncMap["Unary"]                   = tensorrtInference::createUnaryNode;
-            createNodeFuncMap["Shuffle"]                 = tensorrtInference::createShuffleNode;
-            createNodeFuncMap["Conv2d"]                  = tensorrtInference::createConv2dNode;
-            createNodeFuncMap["Slice"]                   = tensorrtInference::createSliceNode;
-            createNodeFuncMap["Identity"]                = tensorrtInference::createIdentityNode;
-            createNodeFuncMap["Pooling"]                 = tensorrtInference::createPoolingNode;
-            createNodeFuncMap["NonZero"]                 = tensorrtInference::createNonZeroNode;
-            createNodeFuncMap["Shape"]                   = tensorrtInference::createShapeNode;
-            createNodeFuncMap["Gather"]                  = tensorrtInference::createGatherNode;
-            createNodeFuncMap["Unsqueeze"]               = tensorrtInference::createUnsqueezeNode;
-            createNodeFuncMap["Concatenation"]           = tensorrtInference::createConcatenationNode;
-            createNodeFuncMap["Gemm"]                    = tensorrtInference::createGemmNode;
-            createNodeFuncMap["Resize"]                  = tensorrtInference::createResizeNode;
-            createNodeFuncMap["BatchNormalization"]      = tensorrtInference::createBatchNormalizationNode;
+            createNodeFuncMap["ElementWise"]             = createElementWiseNode;
+            createNodeFuncMap["Activation"]              = createActivationNode;
+            createNodeFuncMap["Padding"]                 = createPaddingNode;
+            createNodeFuncMap["Reduce"]                  = createReduceNode;
+            createNodeFuncMap["Softmax"]                 = createSoftmaxNode;
+            createNodeFuncMap["Unary"]                   = createUnaryNode;
+            createNodeFuncMap["Shuffle"]                 = createShuffleNode;
+            createNodeFuncMap["Conv2d"]                  = createConv2dNode;
+            createNodeFuncMap["Slice"]                   = createSliceNode;
+            createNodeFuncMap["Identity"]                = createIdentityNode;
+            createNodeFuncMap["Pooling"]                 = createPoolingNode;
+            createNodeFuncMap["NonZero"]                 = createNonZeroNode;
+            createNodeFuncMap["Shape"]                   = createShapeNode;
+            createNodeFuncMap["Gather"]                  = createGatherNode;
+            createNodeFuncMap["Unsqueeze"]               = createUnsqueezeNode;
+            createNodeFuncMap["Concatenation"]           = createConcatenationNode;
+            createNodeFuncMap["Gemm"]                    = createGemmNode;
+            createNodeFuncMap["Resize"]                  = createResizeNode;
+            createNodeFuncMap["BatchNormalization"]      = createBatchNormalizationNode;
         }
-        auto inputs = nodeConfInfo->getInputs();
+        auto inputs = node_info->getInputs();
         for(int i = 0; i < inputs.size(); i++)
         {
-            if(tensors.count(inputs[i]) == 0 && nodeWeightsInfo.count(inputs[i]) == 0)
+            if(tensors.count(inputs[i]) == 0 && node_weight_info.count(inputs[i]) == 0)
             {
                 CHECK_ASSERT(0, "topo order wrong!\n");
             }
         }
-        auto nodeType = nodeConfInfo->getNodeType();
+        auto nodeType = node_info->getNodeType();
         nvinfer1::ILayer* layer = nullptr;
         if(createNodeFuncMap.count(nodeType) != 0)
         {
-            layer = createNodeFuncMap[nodeType](network, tensors, nodeConfInfo, nodeWeightsInfo);
+            layer = createNodeFuncMap[nodeType](network, tensors, node_info, node_weight_info);
         }
         else
             LOG("current not support node type (%s)\n", nodeType.c_str());
@@ -71,4 +72,4 @@ namespace tensorrtInference
         return layer;
     }
 
-} // tensorrtInference
+} // namespace TENSORRT_WRAPPER

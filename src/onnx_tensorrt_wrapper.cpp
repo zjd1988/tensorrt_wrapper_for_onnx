@@ -1,7 +1,7 @@
 #include "onnx_tensorrt_wrapper.hpp"
 #include "tensorrt_engine.hpp"
 
-namespace tensorrtInference 
+namespace TENSORRT_WRAPPER
 {
     onnxTensorrtWrapper::onnxTensorrtWrapper(std::string engineFile, int deviceID)
     {

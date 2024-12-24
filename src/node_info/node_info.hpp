@@ -1,6 +1,9 @@
-#ifndef __NODE_INFO_HPP__
-#define __NODE_INFO_HPP__
-
+/********************************************
+ * Filename: node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
 #include <iostream>
 #include <string>
 #include <vector>
@@ -8,23 +11,25 @@
 #include "utils.hpp"
 using namespace std;
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class nodeInfo
+
+    class NodeInfo
     {
     public:
-        nodeInfo();
-        ~nodeInfo();
+        NodeInfo();
+        ~NodeInfo();
         void setNodeType(std::string type);
         std::string getNodeType();
-        void setSubNodeType(std::string type);
-        std::string getSubNodeType();
+        void setNodeSubType(std::string type);
+        std::string getNodeSubType();
         std::vector<std::string> getInputs();
         std::vector<std::string> getOutputs();
         void addInput(std::string input);
         void addOutput(std::string output);
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) = 0;
         void printNodeInfo();
+
     private:
         std::string nodeType;
         std::string subNodeType;
@@ -32,7 +37,7 @@ namespace tensorrtInference
         std::vector<std::string> outputs;
     };
 
-    typedef nodeInfo* (*nodeParseFunc)(std::string, Json::Value&);
+    typedef NodeInfo* (*nodeParseFunc)(std::string, Json::Value&);
 
     class NodeParse
     {

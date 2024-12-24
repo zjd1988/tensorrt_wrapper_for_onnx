@@ -1,19 +1,20 @@
+/********************************************
+ * Filename: unary_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __UNARY_NODE_INFO_HPP__
-#define __UNARY_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class UnaryNodeInfo : public nodeInfo
+
+    class UnaryNodeInfo : public NodeInfo
     {
     public:
         UnaryNodeInfo();
         ~UnaryNodeInfo();
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-    private:
-        
     };
-} // tensorrtInference
-#endif //__UNARY_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

@@ -1,21 +1,28 @@
-#include "gather_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: gather_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/gather_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // Gather Node
     GatherNodeInfo::GatherNodeInfo()
     {
         setNodeType("Gather");
-        setSubNodeType("");
+        setNodeSubType("");
     }
+
     GatherNodeInfo::~GatherNodeInfo()
-    {  
-        
+    {
     }
+
     bool GatherNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize == 2, "Gather node must have 2 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -45,4 +52,5 @@ namespace tensorrtInference
         }
         return true;
     }
-} //tensorrtInference
+
+} // namespace TENSORRT_WRAPPER

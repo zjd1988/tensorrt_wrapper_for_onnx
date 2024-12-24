@@ -1,17 +1,21 @@
-#ifndef __EXECUTION_PARSE_HPP__
-#define __EXECUTION_PARSE_HPP__
+/********************************************
+ * Filename: execution_parse.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <map>
-#include "utils.hpp"
 #include "json/json.h"
-#include "execution_info.hpp"
+#include "common/utils.hpp"
+#include "execution_info/execution_info.hpp"
 
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     class executionParse {
     public:
         executionParse(CUDARuntime *cudaRuntime, std::string &jsonFile);
@@ -33,6 +37,5 @@ namespace tensorrtInference
         CUDARuntime *cudaRuntime;
         bool initFlag = false;
     };
-} //tensorrtInference
 
-#endif //__EXECUTION_PARSE_HPP__
+} // namespace TENSORRT_WRAPPER

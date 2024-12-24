@@ -3,7 +3,7 @@
 #include "execution_info.hpp"
 #define TRANSPOSE_MAX_DIMENSION 4
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     class TransposeExecutionInfo : public ExecutionInfo
     {
@@ -23,6 +23,6 @@ namespace tensorrtInference
         Buffer* srcTensor;
         Buffer* dstTensor;
     };
-} // namespace tensorrtInference 
+} // namespace TENSORRT_WRAPPER
 
 #endif

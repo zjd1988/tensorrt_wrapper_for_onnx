@@ -1,21 +1,25 @@
+/********************************************
+ * Filename: identity_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __IDENTITY_NODE_INFO_HPP__
-#define __IDENTITY_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class IdentityNodeInfo : public nodeInfo
+
+    class IdentityNodeInfo : public NodeInfo
     {
     public:
         IdentityNodeInfo();
         ~IdentityNodeInfo();
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        int getDataType() {return dataType;}
+        int getDataType() { return dataType; }
+
     private:
         int dataType;
     };
-} // tensorrtInference
-#endif //__IDENTITY_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

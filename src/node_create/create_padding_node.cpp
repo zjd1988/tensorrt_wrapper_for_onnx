@@ -5,12 +5,12 @@
 #include "create_padding_node.hpp"
 #include "padding_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     nvinfer1::ILayer* createPaddingNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        PaddingNodeInfo* paddingNodeInfo = (PaddingNodeInfo*)nodeConfInfo;
+        PaddingNodeInfo* paddingNodeInfo = (PaddingNodeInfo*)node_info;
         auto inputs = paddingNodeInfo->getInputs();
         CHECK_ASSERT(inputs.size() >= 1, "Padding node must have 1 inputs\n");
         nvinfer1::ITensor* inputTensor = nullptr;
@@ -19,11 +19,11 @@ namespace tensorrtInference
         {
             inputTensor = tensors[inputs[0]];
             auto dims = inputTensor->getDimensions();
-            auto shape = nodeWeightsInfo[inputs[1]].shape;
+            auto shape = node_weight_info[inputs[1]].shape;
             CHECK_ASSERT(shape.size() == 1 && shape[0] == 2*dims.nbDims, "Pads value must be twice tensor dims\n");
             CHECK_ASSERT(4 == dims.nbDims, "Only 2D padding is currently supported.\n");
-            auto pads = parseIntArrayValue(nodeWeightsInfo[inputs[1]].dataType, nodeWeightsInfo[inputs[1]].data,
-                            nodeWeightsInfo[inputs[1]].byteCount, shape);
+            auto pads = parseIntArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data,
+                            node_weight_info[inputs[1]].byteCount, shape);
             padding = network->addPadding(*inputTensor, nvinfer1::DimsHW{pads[2], pads[3]}, nvinfer1::DimsHW{pads[6], pads[7]});
         }
         else

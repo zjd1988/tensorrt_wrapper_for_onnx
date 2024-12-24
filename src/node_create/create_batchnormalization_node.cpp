@@ -1,23 +1,26 @@
-#include "NvInfer.h"
-#include "cuda_runtime_api.h"
-#include "weights_graph_parse.hpp"
-#include "create_node.hpp"
-#include "create_batchnormalization_node.hpp"
-#include "batchnormalization_node_info.hpp"
+/********************************************
+ * Filename: create_batchnormalization_node.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "node_create/create_node.hpp"
+#include "node_create/create_batchnormalization_node.hpp"
+#include "node_info/batchnormalization_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     nvinfer1::ILayer* createBatchNormalizationNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto batchNormalNodeInfo = (BatchNormalizationNodeInfo*)nodeConfInfo;
+        auto batchNormalNodeInfo = (BatchNormalizationNodeInfo*)node_info;
         auto inputs = batchNormalNodeInfo->getInputs();
         float epsilon = batchNormalNodeInfo->getEpsilon();
         nvinfer1::ITensor* inputTensor = tensors[inputs[0]];
-        auto scaleWeight = nodeWeightsInfo[inputs[1]];
-        auto biasWeight = nodeWeightsInfo[inputs[2]];
-        auto meanWeight = nodeWeightsInfo[inputs[3]];
-        auto varWeight = nodeWeightsInfo[inputs[4]];
+        auto scaleWeight = node_weight_info[inputs[1]];
+        auto biasWeight = node_weight_info[inputs[2]];
+        auto meanWeight = node_weight_info[inputs[3]];
+        auto varWeight = node_weight_info[inputs[4]];
         auto scaleType = scaleWeight.dataType;
         auto biasType = biasWeight.dataType;
         auto meanType = meanWeight.dataType;
@@ -27,8 +30,8 @@ namespace tensorrtInference
         nvinfer1::Dims dims = inputTensor->getDimensions();
         CHECK_ASSERT(dims.nbDims == 4 || dims.nbDims == 5, "input tensor dims must be 4 or 5!\n");
 
-        weightInfo combinedScale;
-        weightInfo combinedBias;
+        WeightInfo combinedScale;
+        WeightInfo combinedBias;
         combinedScale.byteCount = scaleWeight.byteCount;
         combinedScale.dataType = scaleWeight.dataType;
         combinedScale.shape = scaleWeight.shape;
@@ -36,7 +39,7 @@ namespace tensorrtInference
         combinedScale.data = (char*)malloc(combinedScale.byteCount);
         CHECK_ASSERT(combinedScale.data, "malloc mem fail!\n");
         std::string combinedScaleName = "combinedScale_" + inputs[1];
-        nodeWeightsInfo[combinedScaleName] = combinedScale;
+        node_weight_info[combinedScaleName] = combinedScale;
 
         combinedBias.byteCount = scaleWeight.byteCount;
         combinedBias.dataType = scaleWeight.dataType;
@@ -45,7 +48,7 @@ namespace tensorrtInference
         combinedBias.data = (char*)malloc(combinedBias.byteCount);
         CHECK_ASSERT(combinedBias.data, "malloc mem fail!\n");
         std::string combinedBiasName = "combinedBias_" + inputs[2];
-        nodeWeightsInfo[combinedBiasName] = combinedBias;
+        node_weight_info[combinedBiasName] = combinedBias;
 
         auto nweight = scaleWeight.shape[0];
         for (size_t i = 0; i < nweight; ++i)
@@ -69,4 +72,5 @@ namespace tensorrtInference
         CHECK_ASSERT(batchNormalLayer, "create BatchNormalization node fail\n");
         return batchNormalLayer;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

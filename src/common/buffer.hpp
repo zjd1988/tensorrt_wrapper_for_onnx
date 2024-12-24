@@ -1,15 +1,20 @@
-#ifndef __BUFFER_HPP__
-#define __BUFFER_HPP__
-
+/********************************************
+ * Filename: buffer.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
 #include <iostream>
 #include <vector>
-#include "utils.hpp"
+#include "common/utils.hpp"
 using namespace std;
 
-namespace tensorrtInference {
+namespace TENSORRT_WRAPPER
+{
 
     /** backend buffer storage type */
-    enum StorageType {
+    enum StorageType
+    {
         /**
          use NOT reusable memory.
             - allocates memory when `onAcquireBuffer` is called.
@@ -28,6 +33,7 @@ namespace tensorrtInference {
          * */
         UNDEFINED_STORAGE_TYPE,
     };
+
     class Buffer
     {
     public:
@@ -60,5 +66,5 @@ namespace tensorrtInference {
         bool ownHost = false;
         StorageType storageType;
     };
-} // namespace tensorrtInference
-#endif
+
+} // namespace TENSORRT_WRAPPER

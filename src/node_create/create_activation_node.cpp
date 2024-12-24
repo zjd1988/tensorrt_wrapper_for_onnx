@@ -1,76 +1,82 @@
-#include "NvInfer.h"
-#include "cuda_runtime_api.h"
-#include "weights_graph_parse.hpp"
-#include "create_node.hpp"
-#include "activation_node_info.hpp"
-#include "create_activation_node.hpp"
+/********************************************
+ * Filename: create_activation_node.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "node_create/create_node.hpp"
+#include "node_create/create_activation_node.hpp"
+#include "node_info/activation_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     nvinfer1::ILayer* createActivationNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        ActivationNodeInfo* activationNodeConfInfo = (ActivationNodeInfo*)nodeConfInfo;
-        auto subType = activationNodeConfInfo->getSubNodeType();
-        nvinfer1::ActivationType type;
-        auto inputs = activationNodeConfInfo->getInputs();
+        ActivationNodeInfo* act_node_info = (ActivationNodeInfo*)node_info;
+        auto sub_type = act_node_info->getNodeSubType();
+        nvinfer1::ActivationType act_type;
+        auto inputs = act_node_info->getInputs();
         nvinfer1::IActivationLayer* activation = nullptr;
-        nvinfer1::ITensor* inputTensors = tensors[inputs[0]];
+        nvinfer1::ITensor* input_tensors = tensors[inputs[0]];
         //Clip kRELU
-        if(subType.compare("Clip") == 0) {
-            type = nvinfer1::ActivationType::kCLIP;
+        if(0 == sub_type.compare("Clip"))
+        {
+            act_type = nvinfer1::ActivationType::kCLIP;
             int size = inputs.size();
             CHECK_ASSERT(size == 3, "Clip must have 3 inputs!\n");
-            auto alpha = parseFloatArrayValue(nodeWeightsInfo[inputs[1]].dataType, nodeWeightsInfo[inputs[1]].data, 
-                            nodeWeightsInfo[inputs[1]].byteCount, nodeWeightsInfo[inputs[1]].shape);
-            auto beta = parseFloatArrayValue(nodeWeightsInfo[inputs[2]].dataType, nodeWeightsInfo[inputs[2]].data, 
-                            nodeWeightsInfo[inputs[2]].byteCount, nodeWeightsInfo[inputs[2]].shape);
-            
-            activation = network->addActivation(*inputTensors, type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", subType.c_str());
+            auto alpha = parseFloatArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
+                node_weight_info[inputs[1]].byteCount, node_weight_info[inputs[1]].shape);
+            auto beta = parseFloatArrayValue(node_weight_info[inputs[2]].dataType, node_weight_info[inputs[2]].data, 
+                node_weight_info[inputs[2]].byteCount, node_weight_info[inputs[2]].shape);
+            activation = network->addActivation(*input_tensors, act_type);
+            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
             activation->setAlpha(alpha[0]);
             activation->setBeta(beta[0]);
         }
-        else if(subType.compare("Relu") == 0) {
-            type = nvinfer1::ActivationType::kRELU;
-            activation = network->addActivation(*inputTensors, type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", subType.c_str());
-        }
-        else if(subType.compare("LeakyRelu") == 0)
+        else if(0 == sub_type.compare("Relu"))
         {
-            type = nvinfer1::ActivationType::kLEAKY_RELU;
-            auto alpha = activationNodeConfInfo->getAlpha();
-            activation = network->addActivation(*inputTensors, type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", subType.c_str());
+            act_type = nvinfer1::ActivationType::kRELU;
+            activation = network->addActivation(*input_tensors, act_type);
+            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
+        }
+        else if(0 == sub_type.compare("LeakyRelu"))
+        {
+            act_type = nvinfer1::ActivationType::kLEAKY_RELU;
+            auto alpha = act_node_info->getAlpha();
+            activation = network->addActivation(*input_tensors, act_type);
+            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
             activation->setAlpha(alpha);
         }
-        else if(subType.compare("Sigmoid") == 0)
+        else if(0 == sub_type.compare("Sigmoid"))
         {
-            type = nvinfer1::ActivationType::kSIGMOID;
-            activation = network->addActivation(*inputTensors, type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", subType.c_str());
+            act_type = nvinfer1::ActivationType::kSIGMOID;
+            activation = network->addActivation(*input_tensors, act_type);
+            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
         }
-        else if(subType.compare("Softplus") == 0)
+        else if(0 == sub_type.compare("Softplus"))
         {
             float alpha = 1.0f;
             float beta = 1.0f;
-            type = nvinfer1::ActivationType::kSOFTPLUS;
-            activation = network->addActivation(*inputTensors, type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", subType.c_str());
+            act_type = nvinfer1::ActivationType::kSOFTPLUS;
+            activation = network->addActivation(*input_tensors, act_type);
+            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
             activation->setAlpha(alpha);
             activation->setBeta(beta);
         }
-        else if(subType.compare("Tanh") == 0)
+        else if(0 == sub_type.compare("Tanh"))
         {
-            type = nvinfer1::ActivationType::kTANH;
-            activation = network->addActivation(*inputTensors, type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", subType.c_str());
-        }                
-        else {
-            LOG("Current not support activation type(%s) \n", subType);
+            act_type = nvinfer1::ActivationType::kTANH;
+            activation = network->addActivation(*input_tensors, act_type);
+            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
+        }
+        else
+        {
+            LOG("Current not support activation type(%s) \n", sub_type);
             return nullptr;
         }
-        
+
         return activation;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

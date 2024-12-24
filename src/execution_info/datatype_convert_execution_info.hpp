@@ -2,7 +2,7 @@
 #define __DATATYPE_CONVERT_EXECUTION_INFO_HPP__
 #include "execution_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     class DataTypeConvertExecutionInfo : public ExecutionInfo
     {
@@ -20,6 +20,6 @@ namespace tensorrtInference
         Buffer* srcTensor;
         Buffer* dstTensor;
     };
-} // namespace tensorrtInference 
+} // namespace TENSORRT_WRAPPER
 
 #endif

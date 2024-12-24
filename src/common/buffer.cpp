@@ -1,8 +1,14 @@
-#include "buffer.hpp"
-
+/********************************************
+ * Filename: buffer.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/buffer.hpp"
 
 #define MEMORY_ALIGN_DEFAULT 64
-namespace tensorrtInference {
+
+namespace TENSORRT_WRAPPER
+{
 
     static inline void **alignPointer(void **ptr, size_t alignment) {
         return (void **)((intptr_t)((unsigned char *)ptr + alignment - 1) & -alignment);
@@ -126,4 +132,5 @@ namespace tensorrtInference {
     void Buffer::setHost(void* ptr) {
         hostPtr = ptr;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

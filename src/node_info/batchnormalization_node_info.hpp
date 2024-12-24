@@ -4,9 +4,9 @@
 
 #include "node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class BatchNormalizationNodeInfo : public nodeInfo
+    class BatchNormalizationNodeInfo : public NodeInfo
     {
     public:
         BatchNormalizationNodeInfo();
@@ -19,5 +19,5 @@ namespace tensorrtInference
         float epsilon;
         float momentum;
     };
-} // tensorrtInference
+} // namespace TENSORRT_WRAPPER
 #endif //__BATCHNORMALIZATION_NODE_INFO_HPP__

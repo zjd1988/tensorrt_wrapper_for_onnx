@@ -1,22 +1,29 @@
-#include "resize_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: resize_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/resize_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // Resize Node
     ResizeNodeInfo::ResizeNodeInfo()
     {
         mode = "nearest";
         setNodeType("Resize");
-        setSubNodeType("");
+        setNodeSubType("");
     }
+
     ResizeNodeInfo::~ResizeNodeInfo()
     {
-        mode = "";
     }
+
     bool ResizeNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize > 1, "Resize node must larger than 1 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -46,10 +53,12 @@ namespace tensorrtInference
         }
         return true;
     }
+
     void ResizeNodeInfo::printNodeInfo()
     {
-        nodeInfo::printNodeInfo();
+        NodeInfo::printNodeInfo();
         LOG("node attribute is as follows:\n");
         LOG("----mode is : %s \n", mode.c_str());
     }
-}
+
+} // namespace TENSORRT_WRAPPER

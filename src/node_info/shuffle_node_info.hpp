@@ -1,12 +1,15 @@
+/********************************************
+ * Filename: shuffle_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __SHUFFLE_NODE_INFO_HPP__
-#define __SHUFFLE_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class ShuffleNodeInfo : public nodeInfo
+
+    class ShuffleNodeInfo : public NodeInfo
     {
     public:
         ShuffleNodeInfo();
@@ -15,9 +18,10 @@ namespace tensorrtInference
         void printNodeInfo();
         std::vector<int> getPerm() { return perm; }
         int getAxis() { return axis; }
+
     private:
         std::vector<int> perm;
         int axis; //Flatten
     };
-} // tensorrtInference
-#endif // __SHUFFLE_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

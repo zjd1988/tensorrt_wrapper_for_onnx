@@ -5,12 +5,12 @@
 #include "create_resize_node.hpp"
 #include "resize_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     nvinfer1::ILayer* createResizeNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto resizeNodeInfo = (ResizeNodeInfo*)nodeConfInfo;
+        auto resizeNodeInfo = (ResizeNodeInfo*)node_info;
         auto inputs = resizeNodeInfo->getInputs();
         std::string mode = resizeNodeInfo->getMode();
         nvinfer1::ResizeMode resizeMode;
@@ -24,7 +24,7 @@ namespace tensorrtInference
         nvinfer1::IResizeLayer* resize = network->addResize(*inputTensor);
         CHECK_ASSERT(resize, "create resize node fail\n");
 
-        auto scaleWeights = nodeWeightsInfo[inputs[1]];
+        auto scaleWeights = node_weight_info[inputs[1]];
         auto scales = parseFloatArrayValue(scaleWeights.dataType, scaleWeights.data, scaleWeights.byteCount, scaleWeights.shape);
         resize->setScales(scales.data(), scales.size());
         resize->setResizeMode(resizeMode);

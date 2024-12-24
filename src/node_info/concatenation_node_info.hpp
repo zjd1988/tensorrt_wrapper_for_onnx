@@ -1,21 +1,24 @@
+/********************************************
+ * Filename: concatenation_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __CONCATENATION_NODE_INFO_HPP__
-#define __CONCATENATION_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class ConcatenationNodeInfo : public nodeInfo
+    class ConcatenationNodeInfo : public NodeInfo
     {
     public:
         ConcatenationNodeInfo();
         ~ConcatenationNodeInfo();
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        int getAxis(){return axis;}
+        int getAxis() { return m_axis; }
+
     private:
-        int axis;
+        int                            m_axis;
     };
-} // tensorrtInference
-#endif //__CONCATENATION_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

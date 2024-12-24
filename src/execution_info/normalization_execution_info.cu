@@ -1,6 +1,6 @@
 #include "normalization_execution_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
     __global__ void NormalizationExecutionKernel(unsigned char* src, float* dst, const int size,
          const float alpha, const float beta, const float bias)

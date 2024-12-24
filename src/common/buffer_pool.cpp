@@ -1,37 +1,43 @@
-#include "buffer_pool.hpp"
+/********************************************
+ * Filename: buffer_pool.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/buffer_pool.hpp"
 
-namespace tensorrtInference {
+namespace TENSORRT_WRAPPER
+{
 
-void* BufferPool::alloc(int size, bool seperate) {
-    if (!seperate) {
-        auto iter = mFreeList.lower_bound(size);
-        if (iter != mFreeList.end()) {
-            auto buffer = iter->second->buffer;
-            mFreeList.erase(iter);
-            return buffer;
+    void* BufferPool::alloc(int size, bool seperate) {
+        if (!seperate) {
+            auto iter = mFreeList.lower_bound(size);
+            if (iter != mFreeList.end()) {
+                auto buffer = iter->second->buffer;
+                mFreeList.erase(iter);
+                return buffer;
+            }
         }
+        std::shared_ptr<BufferNode> node(new BufferNode(size));
+        mAllBuffer.insert(std::make_pair(node->buffer, node));
+        return node->buffer;
     }
-    std::shared_ptr<BufferNode> node(new BufferNode(size));
-    mAllBuffer.insert(std::make_pair(node->buffer, node));
-    return node->buffer;
-}
 
-void BufferPool::recycle(void* buffer, bool release) {
-    auto iter = mAllBuffer.find(buffer);
-    if (iter == mAllBuffer.end()) {
-        CHECK_ASSERT(false, "Error for recycle buffer\n");
-        return;
+    void BufferPool::recycle(void* buffer, bool release) {
+        auto iter = mAllBuffer.find(buffer);
+        if (iter == mAllBuffer.end()) {
+            CHECK_ASSERT(false, "Error for recycle buffer\n");
+            return;
+        }
+        if (release) {
+            mAllBuffer.erase(iter);
+            return;
+        }
+        mFreeList.insert(std::make_pair(iter->second->size, iter->second));
     }
-    if (release) {
-        mAllBuffer.erase(iter);
-        return;
+
+    void BufferPool::clear() {
+        mFreeList.clear();
+        mAllBuffer.clear();
     }
-    mFreeList.insert(std::make_pair(iter->second->size, iter->second));
-}
 
-void BufferPool::clear() {
-    mFreeList.clear();
-    mAllBuffer.clear();
-}
-
-} // namespace tensorrtInference
+} // namespace TENSORRT_WRAPPER

@@ -1,12 +1,15 @@
+/********************************************
+ * Filename: padding_node_info.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
+#include "node_info/node_info.hpp"
 
-#ifndef __PADDING_NODE_INFO_HPP__
-#define __PADDING_NODE_INFO_HPP__
-
-#include "node_info.hpp"
-
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    class PaddingNodeInfo : public nodeInfo
+
+    class PaddingNodeInfo : public NodeInfo
     {
     public:
         PaddingNodeInfo();
@@ -16,11 +19,12 @@ namespace tensorrtInference
         std::vector<int> getPads() {return pads;}
         float getFloatValue() {return floatValue;}
         int getIntValue() {return intValue;}
+
     private:
         std::string mode;
         std::vector<int> pads;
         float floatValue;
         int intValue;
     };
-} //tensorrtInference
-#endif // __PADDING_NODE_INFO_HPP__
+
+} // namespace TENSORRT_WRAPPER

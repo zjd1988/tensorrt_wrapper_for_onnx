@@ -1,13 +1,12 @@
-#ifndef __ONNX_TENSORRT_WRAPPER_HPP__
-#define __ONNX_TENSORRT_WRAPPER_HPP__
-
+#pragma once
 #include <iostream>
 #include <string>
 #include <map>
 using namespace std;
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     class onnxTensorrtWrapper
     {
     public:
@@ -19,6 +18,5 @@ namespace tensorrtInference
     private:
         void *inferenceEngine = nullptr;
     };
-}
 
-#endif
+} // namespace TENSORRT_WRAPPER

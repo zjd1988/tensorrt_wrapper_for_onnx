@@ -1,5 +1,9 @@
-#ifndef __CREATE_NODE_HPP__
-#define __CREATE_NODE_HPP__
+/********************************************
+ * Filename: create_node.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
 #include "NvInfer.h"
 #include "cuda_runtime_api.h"
 #include "node_info.hpp"
@@ -11,10 +15,10 @@
 #include <algorithm>
 using namespace std;
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
-    extern nvinfer1::ILayer* createNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors, 
-        tensorrtInference::nodeInfo* nodeConfInfo, std::map<std::string, tensorrtInference::weightInfo>& nodeWeightsInfo);
-}
 
-#endif
+    nvinfer1::ILayer* createNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors, 
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info);
+
+} // namespace TENSORRT_WRAPPER

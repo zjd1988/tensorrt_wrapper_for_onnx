@@ -1,21 +1,28 @@
-#include "nonzero_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: nonzero_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/nonzero_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // NonZero Node
     NonZeroNodeInfo::NonZeroNodeInfo()
     {
         setNodeType("NonZero");
-        setSubNodeType("");
+        setNodeSubType("");
     }
+
     NonZeroNodeInfo::~NonZeroNodeInfo()
-    {  
-        
+    {
     }
+
     bool NonZeroNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize == 1, "NonZero node must have 1 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -31,4 +38,5 @@ namespace tensorrtInference
         }
         return true;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

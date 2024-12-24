@@ -1,8 +1,13 @@
-#include "utils.hpp"
+/********************************************
+ * Filename: utils.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
 
-
-namespace tensorrtInference 
+namespace TENSORRT_WRAPPER
 {
+
     int onnxDataTypeEleCount[] = {0, 4, 1, 1, 2, 2, 4, 8, 0, 1, 2, 8, 4, 8, 8, 16, 2};
 
     std::vector<float> parseFloatArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape)
@@ -68,6 +73,7 @@ namespace tensorrtInference
         }
         return arrValue;
     }
+
     int getTensorrtDataType(OnnxDataType onnxDataType)
     {
         switch(onnxDataType)
@@ -92,6 +98,7 @@ namespace tensorrtInference
         }
         return shapeVec;
     }
+
     nvinfer1::Dims vectorToDims(std::vector<int> shape)
     {
         int size = shape.size();
@@ -103,6 +110,5 @@ namespace tensorrtInference
         }
         return dims;
     }
-}
 
-
+} // namespace TENSORRT_WRAPPER

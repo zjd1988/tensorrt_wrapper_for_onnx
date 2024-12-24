@@ -1,21 +1,28 @@
-#include "elementwise_node_info.hpp"
-#include "utils.hpp"
+/********************************************
+ * Filename: elementwise_node_info.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "common/utils.hpp"
+#include "node_info/elementwise_node_info.hpp"
 
-namespace tensorrtInference
+namespace TENSORRT_WRAPPER
 {
+
     // ElementWise Node
     ElementWiseNodeInfo::ElementWiseNodeInfo()
     {
         setNodeType("ElementWise");
-        setSubNodeType("");
+        setNodeSubType("");
     }
+
     ElementWiseNodeInfo::~ElementWiseNodeInfo()
-    {  
-        
+    {
     }
+
     bool ElementWiseNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setSubNodeType(type);
+        setNodeSubType(type);
         auto inputSize = root["inputs"].size();
         CHECK_ASSERT(inputSize == 2, "ElementWise node must have 2 inputs\n");
         for(int i = 0; i < inputSize; i++)
@@ -31,4 +38,5 @@ namespace tensorrtInference
         }
         return true;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

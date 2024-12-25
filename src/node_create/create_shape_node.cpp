@@ -1,11 +1,15 @@
-#include "NvInfer.h"
-#include "cuda_runtime_api.h"
-#include "weights_graph_parse.hpp"
-#include "create_node.hpp"
-#include "create_shape_node.hpp"
+/********************************************
+ * Filename: create_shape_node.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "node_create/create_node.hpp"
+#include "node_create/create_shape_node.hpp"
+#include "node_info/shape_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
+
     nvinfer1::ILayer* createShapeNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
         NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
@@ -17,4 +21,5 @@ namespace TENSORRT_WRAPPER
         CHECK_ASSERT(shape, "create shape node fail\n");
         return shape;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

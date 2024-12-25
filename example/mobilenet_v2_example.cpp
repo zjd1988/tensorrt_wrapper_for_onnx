@@ -49,14 +49,14 @@ int main()
     std::string inferenceFileName = INFERENCE_JSON_FILE(NET_NAME);
 #if SAVE_ENGINE
     // save engine file
-    tensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
+    TensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
     engine.saveEnginePlanFile(engineFileName);
 #else
     // init input data
     float* data = (float*)malloc(BACTCH_SIZE * CHANNEL_SIZE * HEIGHT_SIZE * WIDTH_SIZE * sizeof(float));
     initInputData(data);
     //engine inference
-    tensorrtEngine engine(inferenceFileName);
+    TensorrtEngine engine(inferenceFileName);
 
     //prepare input data
     std::map<std::string, void*> inputs;

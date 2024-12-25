@@ -9,7 +9,8 @@
 
 namespace TENSORRT_WRAPPER{
 
-    class ExecutionInfo {
+    class ExecutionInfo
+    {
     public:
         ExecutionInfo(CUDARuntime *runtime, std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root);
         virtual ~ExecutionInfo();
@@ -61,7 +62,7 @@ namespace TENSORRT_WRAPPER{
                     printf("%d \n", debugData[i]);
                 }
             }
-        }        
+        }
     private:
         CUDARuntime* cudaRuntime;
         std::string executionInfoType;

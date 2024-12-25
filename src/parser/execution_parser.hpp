@@ -1,5 +1,5 @@
 /********************************************
- * Filename: execution_parse.hpp
+ * Filename: execution_parser.hpp
  * Created by zjd1988 on 2024/12/19
  * Description:
  ********************************************/
@@ -16,16 +16,17 @@
 namespace TENSORRT_WRAPPER
 {
 
-    class executionParse {
+    class ExecutionParser {
     public:
-        executionParse(CUDARuntime *cudaRuntime, std::string &jsonFile);
-        ~executionParse();
+        ExecutionParser(CUDARuntime *cudaRuntime, std::string &jsonFile);
+        ~ExecutionParser();
         const std::vector<std::string>& getTopoNodeOrder();
         const std::map<std::string, std::shared_ptr<Buffer>>& getTensorsInfo();
         const std::map<std::string, std::shared_ptr<ExecutionInfo>>& getExecutionInfoMap();
         bool getInitFlag() {return initFlag;}
         void runInference();
         std::map<std::string, void*> getInferenceResult();
+
     private:
         bool extractExecutionInfo(Json::Value &root);
         CUDARuntime* getCudaRuntime() {return cudaRuntime;}

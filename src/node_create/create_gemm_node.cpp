@@ -1,9 +1,11 @@
-#include "NvInfer.h"
-#include "cuda_runtime_api.h"
-#include "weights_graph_parse.hpp"
-#include "create_node.hpp"
-#include "create_gemm_node.hpp"
-#include "gemm_node_info.hpp"
+/********************************************
+ * Filename: create_gemm_node.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "node_create/create_node.hpp"
+#include "node_create/create_gemm_node.hpp"
+#include "node_info/gemm_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
@@ -117,4 +119,5 @@ namespace TENSORRT_WRAPPER
         // else
         //     return matmul;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

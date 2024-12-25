@@ -3,7 +3,7 @@
  * Created by zjd1988 on 2024/12/19
  * Description:
  ********************************************/
-#include "infer_engine/weights_graph_parse.hpp"
+#include "parser/weight_graph_parser.hpp"
 #include "node_create/create_node.hpp"
 #include <fstream>
 using namespace std;
@@ -11,114 +11,119 @@ using namespace std;
 namespace TENSORRT_WRAPPER
 {
 
-    weightsAndGraphParse::weightsAndGraphParse(std::string &jsonFile, std::string &weightsFile, bool fp16Flag)
+    WeightGraphParser::WeightGraphParser(const std::string &json_file, const std::string &weight_file, bool fp16_flag)
     {
-        ifstream jsonStream;
-        jsonStream.open(jsonFile);
-        if(!jsonStream.is_open())
+        ifstream json_stream;
+        json_stream.open(json_file);
+        if(!json_stream.is_open())
         {
-            std::cout << "open json file " << jsonFile << " fail!!!" << std::endl;
+            std::cout << "open json file " << json_file << " fail!!!" << std::endl;
             return;
         }
-        ifstream weightStream;
-        weightStream.open(weightsFile, ios::in | ios::binary);
-        if(!weightStream.is_open())
+
+        ifstream weight_stream;
+        weight_stream.open(weight_file, ios::in | ios::binary);
+        if(!weight_stream.is_open())
         {
-            jsonStream.close();
-            std::cout << "open weights file " << weightsFile << " fail!!!" << std::endl;
+            json_stream.close();
+            std::cout << "open weights file " << weight_file << " fail!!!" << std::endl;
             return;
         }
 
         Json::Reader reader;
         Json::Value root;
-        if (!reader.parse(jsonStream, root, false))
+        if (!reader.parse(json_stream, root, false))
         {
-            std::cout << "parse json file " << jsonFile << " fail!!!" << std::endl;
-            jsonStream.close();
-            weightStream.close();
+            std::cout << "parse json file " << json_file << " fail!!!" << std::endl;
+            json_stream.close();
+            weight_stream.close();
             return;
         }
+
         //extract topo node order
         {
             int size = root["topo_order"].size();
             for(int i = 0; i < size; i++)
             {
-                std::string nodeName;
-                nodeName = root["topo_order"][i].asString();
-                topoNodeOrder.push_back(nodeName);
+                std::string node_name;
+                node_name = root["topo_order"][i].asString();
+                m_topo_node_order.push_back(node_name);
             }
         }
+
         //extract weight info 
         {
-            auto weihtsInfo = root["weights_info"];
-            WeightInfo nodeWeightInfo;
-            for (auto elem : weihtsInfo.getMemberNames())
+            auto weights_info = root["weights_info"];
+            WeightInfo node_weight_info;
+            for (auto elem : weights_info.getMemberNames())
             {
                 if(elem.compare("net_output") != 0)
                 {
-                    auto offset = weihtsInfo[elem]["offset"].asInt();
-                    auto byteCount  = weihtsInfo[elem]["count"].asInt();
-                    auto dataType = weihtsInfo[elem]["data_type"].asInt();
+                    auto offset = weights_info[elem]["offset"].asInt();
+                    auto byte_count  = weights_info[elem]["count"].asInt();
+                    auto dataT_type = weights_info[elem]["data_type"].asInt();
                     std::vector<int> shape;
-                    int size = weihtsInfo[elem]["tensor_shape"].size();
+                    int size = weights_info[elem]["tensor_shape"].size();
                     for(int i = 0; i < size; i++)
                     {
-                        auto dim = weihtsInfo[elem]["tensor_shape"][i].asInt();
+                        auto dim = weights_info[elem]["tensor_shape"][i].asInt();
                         shape.push_back(dim);
                     }
-                    nodeWeightInfo.byteCount = byteCount;
-                    nodeWeightInfo.dataType = dataType;
-                    nodeWeightInfo.shape = shape;
+                    node_weight_info.byteCount = byte_count;
+                    node_weight_info.dataType = dataT_type;
+                    node_weight_info.shape = shape;
                     char* data = nullptr;
                     if(offset != -1)
                     {
-                        data = (char*)malloc(byteCount);
+                        data = (char*)malloc(byte_count);
                         CHECK_ASSERT(data, "malloc memory fail!!!!\n");
-                        weightStream.seekg(offset, ios::beg);
-                        weightStream.read(data, byteCount);
-                        weightsData[elem] = data;
+                        weight_stream.seekg(offset, ios::beg);
+                        weight_stream.read(data, byte_count);
+                        m_weights_data[elem] = data;
                     }
-                    nodeWeightInfo.data = data;
-                    netWeightsInfo[elem] = nodeWeightInfo;
+                    node_weight_info.data = data;
+                    m_net_weights_info[elem] = node_weight_info;
                     if(offset == -1)
                     {
-                        inputTensorNames.push_back(elem);
+                        m_input_tensor_names.push_back(elem);
                     }
                 }
                 else
                 {
-                    int size = weihtsInfo[elem].size();
+                    int size = weights_info[elem].size();
                     for(int i = 0; i < size; i++)
                     {
-                        std::string tensorName;
-                        tensorName = weihtsInfo[elem][i].asString();
-                        outputTensorNames.push_back(tensorName);
+                        std::string tensor_name;
+                        tensor_name = weights_info[elem][i].asString();
+                        m_output_tensor_names.push_back(tensor_name);
                     }
                 }
             }
         }
+
         // extra node info 
-        initFlag = extractNodeInfo(root["nodes_info"]);
-        jsonStream.close();
-        weightStream.close();
+        m_init_flag = extractNodeInfo(root["nodes_info"]);
+        json_stream.close();
+        weight_stream.close();
 
         //create engine
-        builder = nullptr;
-        cudaEngine = nullptr;
-        builder = nvinfer1::createInferBuilder(mLogger);
-        CHECK_ASSERT(builder != nullptr, "create builder fail!\n");
+        m_builder = nullptr;
+        m_cuda_engine = nullptr;
+        m_builder = nvinfer1::createInferBuilder(m_logger);
+        CHECK_ASSERT(m_builder != nullptr, "create m_builder fail!\n");
         createEngine(1, fp16Flag);
         return;
     }
-    weightsAndGraphParse::~weightsAndGraphParse()
+
+    WeightGraphParser::~WeightGraphParser()
     {
-        if(builder != nullptr)
-            builder->destroy();
-        if(cudaEngine != nullptr)
-            cudaEngine->destroy();
-        for(auto it : netWeightsInfo)
+        if(nullptr != m_builder)
+            m_builder->destroy();
+        if(nullptr != m_cuda_engine)
+            m_cuda_engine->destroy();
+        for(auto it : m_net_weights_info)
         {
-            if(it.second.data != nullptr)
+            if(nullptr != it.second.data)
             {
                 free(it.second.data);
                 it.second.data = nullptr;
@@ -126,23 +131,23 @@ namespace TENSORRT_WRAPPER
         }
     }
 
-    bool weightsAndGraphParse::extractNodeInfo(Json::Value &root)
+    bool WeightGraphParser::extractNodeInfo(Json::Value &root)
     {
-        for (auto elem : root.getMemberNames()) {
+        for (auto elem : root.getMemberNames())
+        {
             if(root[elem]["op_type"].isString())
             {
                 auto op_type = root[elem]["op_type"].asString();
-
                 std::shared_ptr<NodeInfo> node;
-                auto parseNodeInfoFromJsonFunc = getNodeParseFuncMap(op_type);
-                if(parseNodeInfoFromJsonFunc != nullptr)
+                auto parse_func = getNodeParserFunc(op_type);
+                if(nullptr != parse_func)
                 {
                     auto curr_node = parseNodeInfoFromJsonFunc(op_type, root[elem]);
-                    if(curr_node == nullptr)
+                    if(nullptr == curr_node)
                         return false;
                     // curr_node->printNodeInfo();
                     node.reset(curr_node);
-                    nodeInfoMap[elem] = node;
+                    m_node_info_map[elem] = node;
                 }
                 else
                 {
@@ -153,10 +158,10 @@ namespace TENSORRT_WRAPPER
         return true;
     }
 
-    std::vector<std::string> weightsAndGraphParse::getConstWeightTensorNames()
+    std::vector<std::string> WeightGraphParser::getConstWeightTensorNames()
     {
         std::vector<std::string> constTensorNames;
-        for(auto it : nodeInfoMap)
+        for(auto it : m_node_info_map)
         {
             auto nodeType = it.second->getNodeType();
             auto subNodeType = it.second->getNodeSubType();
@@ -166,9 +171,9 @@ namespace TENSORRT_WRAPPER
                 int size = inputs.size();
                 for(int i = 0; i < size; i++)
                 {
-                    if(netWeightsInfo.count(inputs[i]))
+                    if(m_net_weights_info.count(inputs[i]))
                     {
-                        auto weight = netWeightsInfo[inputs[i]];
+                        auto weight = m_net_weights_info[inputs[i]];
                         if(weight.byteCount == 0)
                             continue;
                         else
@@ -180,7 +185,7 @@ namespace TENSORRT_WRAPPER
         return constTensorNames;
     }
 
-    void weightsAndGraphParse::initConstTensors(std::map<std::string, nvinfer1::ITensor*> &tensors, 
+    void WeightGraphParser::initConstTensors(std::map<std::string, nvinfer1::ITensor*> &tensors, 
         nvinfer1::INetworkDefinition* network)
     {
         auto constWeightTensors = getConstWeightTensorNames();
@@ -190,15 +195,15 @@ namespace TENSORRT_WRAPPER
             if(tensors.count(constWeightTensors[i]))
                 continue;
             LOG("create const tensor %s \n", constWeightTensors[i].c_str());
-            auto shape = netWeightsInfo[constWeightTensors[i]].shape;
+            auto shape = m_net_weights_info[constWeightTensors[i]].shape;
             CHECK_ASSERT((shape.size() <= 4), "const tensor shape must less than 4!\n");
             int count = 1;
             for(int j = 0; j < shape.size(); j++)
                 count *= shape[j];
             
-            nvinfer1::DataType dataType = (netWeightsInfo[constWeightTensors[i]].dataType == OnnxDataType::FLOAT) ? 
+            nvinfer1::DataType dataType = (m_net_weights_info[constWeightTensors[i]].dataType == OnnxDataType::FLOAT) ? 
                                 nvinfer1::DataType::kFLOAT : nvinfer1::DataType::kHALF;
-            nvinfer1::Weights weights{dataType, netWeightsInfo[constWeightTensors[i]].data, count};
+            nvinfer1::Weights weights{dataType, m_net_weights_info[constWeightTensors[i]].data, count};
             nvinfer1::ILayer* constLayer = nullptr;
             nvinfer1::Dims dims = vectorToDims(shape);
             constLayer = network->addConstant(dims, weights);
@@ -206,42 +211,44 @@ namespace TENSORRT_WRAPPER
             tensors[constWeightTensors[i]] = constLayer->getOutput(0);
         }
     }
-    void weightsAndGraphParse::setNetInput(std::map<std::string, nvinfer1::ITensor*> &tensors, 
+
+    void WeightGraphParser::setNetInput(std::map<std::string, nvinfer1::ITensor*> &tensors, 
         nvinfer1::INetworkDefinition* network)
     {
         int channel, height, width;
-        int size = inputTensorNames.size();
+        int size = m_input_tensor_names.size();
         for(int i = 0; i < size; i++)
         {
-            auto shape = netWeightsInfo[inputTensorNames[i]].shape;
-            if(shape.size() != 4 || inputTensorNames[i].compare("") == 0)
+            auto shape = m_net_weights_info[m_input_tensor_names[i]].shape;
+            if(shape.size() != 4 || m_input_tensor_names[i].compare("") == 0)
             {
                 LOG("input blob shape or input blob name error!\n");
             }
             channel = shape[1];
             height = shape[2];
             width = shape[3];
-            nvinfer1::DataType dataType = (netWeightsInfo[inputTensorNames[i]].dataType == OnnxDataType::FLOAT) ? 
+            nvinfer1::DataType dataType = (m_net_weights_info[m_input_tensor_names[i]].dataType == OnnxDataType::FLOAT) ? 
                                 nvinfer1::DataType::kFLOAT : nvinfer1::DataType::kHALF;
 
-            nvinfer1::ITensor* data = network->addInput(inputTensorNames[i].c_str(), dataType, 
-                    nvinfer1::Dims4{1, channel, height, width});
+            nvinfer1::ITensor* data = network->addInput(m_input_tensor_names[i].c_str(), dataType, 
+                nvinfer1::Dims4{1, channel, height, width});
             CHECK_ASSERT(data!=nullptr, "setNetInput fail\n");
-            tensors[inputTensorNames[i]] = data;
+            tensors[m_input_tensor_names[i]] = data;
         }
     }
-    void weightsAndGraphParse::createNetBackbone(std::map<std::string, nvinfer1::ITensor*>& tensors, 
+
+    void WeightGraphParser::createNetBackbone(std::map<std::string, nvinfer1::ITensor*>& tensors, 
         nvinfer1::INetworkDefinition* network)
     {
         std::map<std::string, nvinfer1::ILayer*> netNode;
-        for(int i = 0; i < topoNodeOrder.size(); i++)
+        for(int i = 0; i < m_topo_node_order.size(); i++)
         {
-            std::string nodeName = topoNodeOrder[i];
+            std::string nodeName = m_topo_node_order[i];
             LOG("create %s node\n", nodeName.c_str());
             // if(nodeName.compare("prefix/pred/global_head/vlad/Reshape") == 0)
             //     LOG("run here\n");
-            auto nodeConfigInfo = nodeInfoMap[nodeName];
-            nvinfer1::ILayer* layer = createNode(network, tensors, nodeConfigInfo.get(), netWeightsInfo);
+            auto nodeConfigInfo = m_node_info_map[nodeName];
+            nvinfer1::ILayer* layer = createNode(network, tensors, nodeConfigInfo.get(), m_net_weights_info);
             layer->setName(nodeName.c_str());
             CHECK_ASSERT(layer != nullptr, "create %s node fail\n", nodeName);
             netNode[nodeName] = layer;
@@ -262,12 +269,13 @@ namespace TENSORRT_WRAPPER
                     LOG("tensor %s  shape is %d\n", outputs[i].c_str(), dims.d[0]);
             }
         }
-    }    
-    void weightsAndGraphParse::createEngine(unsigned int maxBatchSize, bool fp16Flag)
+    }
+
+    void WeightGraphParser::createEngine(unsigned int maxBatchSize, bool fp16Flag)
     {
         bool ret = true;
         std::map<std::string, nvinfer1::ITensor*> tensors;
-        nvinfer1::INetworkDefinition* network = builder->createNetwork();
+        nvinfer1::INetworkDefinition* network = m_builder->createNetwork();
 
         //init constant tensors
         initConstTensors(tensors, network);
@@ -276,35 +284,36 @@ namespace TENSORRT_WRAPPER
         //set network backbone 
         createNetBackbone(tensors, network);
         //mark network output
-        for(int i = 0; i < outputTensorNames.size(); i++)
+        for(int i = 0; i < m_output_tensor_names.size(); i++)
         {
-            nvinfer1::ITensor* tensor = tensors[outputTensorNames[i]];
+            nvinfer1::ITensor* tensor = tensors[m_output_tensor_names[i]];
             network->markOutput(*tensor);
         }
         // Build engine
-        builder->setMaxBatchSize(maxBatchSize);
-        builder->setMaxWorkspaceSize(1 << 30);
+        m_builder->setMaxBatchSize(maxBatchSize);
+        m_builder->setMaxWorkspaceSize(1 << 30);
         if(fp16Flag)
         {
-            builder->setFp16Mode(fp16Flag);
+            m_builder->setFp16Mode(fp16Flag);
             LOG("enable fp16!!!!\n");
         }
-        cudaEngine = builder->buildCudaEngine(*network);
-        CHECK_ASSERT(cudaEngine != nullptr, "createEngine fail!\n");
+        m_cuda_engine = m_builder->buildCudaEngine(*network);
+        CHECK_ASSERT(m_cuda_engine != nullptr, "createEngine fail!\n");
         LOG("createEngine success!\n");
         // Don't need the network any more
         network->destroy();
     }
-    bool weightsAndGraphParse::saveEnginePlanFile(std::string saveFile)
+
+    bool WeightGraphParser::saveEnginePlanFile(std::string saveFile)
     {
         nvinfer1::IHostMemory* modelStream = nullptr;
-        if(cudaEngine == nullptr)
+        if(m_cuda_engine == nullptr)
         {
             LOG("please create net engine first!\n");
             return false;
         }
         // Serialize the engine
-        modelStream = cudaEngine->serialize();
+        modelStream = m_cuda_engine->serialize();
         std::ofstream plan(saveFile);
         if (!plan)
         {

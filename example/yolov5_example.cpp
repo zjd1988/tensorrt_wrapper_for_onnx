@@ -48,7 +48,7 @@ int main()
     std::string engineFileName  = GRAPH_ENGINE_FILE(NET_NAME);
     // save engine file
 #if SAVE_ENGINE
-    tensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
+    TensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
     engine.saveEnginePlanFile(engineFileName);
 #else
     //engine inference
@@ -61,7 +61,7 @@ int main()
     // grayBmp.copyTo(inputBmp(rect));
     // cv::Mat inputFloatBmp( 721, 1281, CV_32FC1, cv::Scalar(0));
     // inputBmp.convertTo(inputFloatBmp, CV_32F);
-    tensorrtEngine engine(engineFileName);
+    TensorrtEngine engine(engineFileName);
     auto hostMem = engine.getBindingNamesHostMemMap();
     initInputData(hostMem);
     

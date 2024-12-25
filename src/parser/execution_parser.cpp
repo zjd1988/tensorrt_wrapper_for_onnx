@@ -3,13 +3,13 @@
  * Created by zjd1988 on 2024/12/19
  * Description:
  ********************************************/
-#include "infer_engine/execution_parse.hpp"
+#include "parser/execution_parser.hpp"
 using namespace std;
 
 namespace TENSORRT_WRAPPER
 {
 
-    executionParse::executionParse(CUDARuntime *runtime, std::string &jsonFile)
+    ExecutionParser::ExecutionParser(CUDARuntime *runtime, std::string &jsonFile)
     {
         CHECK_ASSERT(runtime != nullptr, "cuda runtime is null!\n");
         cudaRuntime = runtime;
@@ -65,12 +65,11 @@ namespace TENSORRT_WRAPPER
         return;
     }
 
-    executionParse::~executionParse()
+    ExecutionParser::~ExecutionParser()
     {
-
     }
 
-    bool executionParse::extractExecutionInfo(Json::Value &root)
+    bool ExecutionParser::extractExecutionInfo(Json::Value &root)
     {
         CUDARuntime *runtime = getCudaRuntime();
         for (int i = 0; i < topoExecutionInfoOrder.size(); i++) 
@@ -94,22 +93,22 @@ namespace TENSORRT_WRAPPER
         return true;
     }
 
-    const std::vector<std::string>& executionParse::getTopoNodeOrder()
+    const std::vector<std::string>& ExecutionParser::getTopoNodeOrder()
     {
         return topoExecutionInfoOrder;
     }
 
-    const std::map<std::string, std::shared_ptr<Buffer>>& executionParse::getTensorsInfo()
+    const std::map<std::string, std::shared_ptr<Buffer>>& ExecutionParser::getTensorsInfo()
     {
         return tensorsInfo;
     }
 
-    const std::map<std::string, std::shared_ptr<ExecutionInfo>>& executionParse::getExecutionInfoMap()
+    const std::map<std::string, std::shared_ptr<ExecutionInfo>>& ExecutionParser::getExecutionInfoMap()
     {
         return executionInfoMap;
     }
 
-    void executionParse::runInference()
+    void ExecutionParser::runInference()
     {
         int executionSize = topoExecutionInfoOrder.size();
         for(int i = 0; i < executionSize; i++)
@@ -119,7 +118,7 @@ namespace TENSORRT_WRAPPER
         }
     }
 
-    std::map<std::string, void*> executionParse::getInferenceResult()
+    std::map<std::string, void*> ExecutionParser::getInferenceResult()
     {
         int size = outputTensorNames.size();
         std::map<std::string, void*> result;

@@ -1,12 +1,15 @@
-#include "NvInfer.h"
-#include "cuda_runtime_api.h"
-#include "weights_graph_parse.hpp"
-#include "create_node.hpp"
-#include "create_resize_node.hpp"
-#include "resize_node_info.hpp"
+/********************************************
+ * Filename: create_resize_node.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "node_create/create_node.hpp"
+#include "node_create/create_resize_node.hpp"
+#include "node_info/resize_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
+
     nvinfer1::ILayer* createResizeNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
         NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
@@ -30,4 +33,5 @@ namespace TENSORRT_WRAPPER
         resize->setResizeMode(resizeMode);
         return resize;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

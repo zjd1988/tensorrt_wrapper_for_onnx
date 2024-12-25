@@ -22,7 +22,8 @@ ExecutionInfo* construct##type##ExecutionInfo(CUDARuntime *runtime,             
 
 #define CONSTUCT_EXECUTIONINFO_FUNC(type) construct##type##ExecutionInfo
 
-namespace TENSORRT_WRAPPER{
+namespace TENSORRT_WRAPPER
+{
 
     ExecutionInfo::ExecutionInfo(CUDARuntime *runtime, std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root)
     {
@@ -169,7 +170,7 @@ namespace TENSORRT_WRAPPER{
                 auto buffer = tensors[item.first];
                 cudaRuntime->copyFromDevice(buffer, buffer);
             }
-        }        
+        }
     }
 
     CONSTUCT_EXECUTIONINFO_FUNC_DEF(HFNETResample)

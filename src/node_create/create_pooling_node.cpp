@@ -1,13 +1,15 @@
-#include "NvInfer.h"
-#include "cuda_runtime_api.h"
-#include "weights_graph_parse.hpp"
-#include "create_node.hpp"
-#include "pooling_node_info.hpp"
-#include "create_pooling_node.hpp"
-
+/********************************************
+ * Filename: create_pooling_node.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "node_create/create_node.hpp"
+#include "node_create/create_pooling_node.hpp"
+#include "node_info/pooling_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
+
     void getKernelParams(PoolingNodeInfo* NodeInfo, nvinfer1::Dims* kernelSize, nvinfer1::Dims* strides, nvinfer1::Dims* begPadding, 
     nvinfer1::Dims* endPadding, nvinfer1::PaddingMode& paddingMode, bool& countExcludePadding, const bool poolingCeilMode)
     {
@@ -113,4 +115,5 @@ namespace TENSORRT_WRAPPER
         
         return pooling;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

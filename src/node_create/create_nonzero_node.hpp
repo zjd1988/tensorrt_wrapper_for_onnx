@@ -6,7 +6,7 @@
 #pragma once
 #include "NvInfer.h"
 #include "node_info/node_info.hpp"
-#include "infer_engine/weights_graph_parse.hpp"
+#include "parser/weight_graph_parser.hpp"
 
 //plugin currently not support DataType::kBOOL
 namespace TENSORRT_WRAPPER

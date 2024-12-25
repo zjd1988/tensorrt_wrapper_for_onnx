@@ -1,12 +1,15 @@
-#include "NvInfer.h"
-#include "cuda_runtime_api.h"
-#include "weights_graph_parse.hpp"
-#include "create_node.hpp"
-#include "create_softmax_node.hpp"
-#include "softmax_node_info.hpp"
+/********************************************
+ * Filename: create_softmax_node.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "node_create/create_node.hpp"
+#include "node_create/create_softmax_node.hpp"
+#include "node_info/softmax_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
+
     nvinfer1::ILayer* createSoftmaxNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
         NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
@@ -26,4 +29,5 @@ namespace TENSORRT_WRAPPER
         softmax->setAxes(1 << axes);
         return softmax;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

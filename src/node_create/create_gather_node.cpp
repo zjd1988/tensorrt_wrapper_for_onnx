@@ -1,12 +1,15 @@
-#include "NvInfer.h"
-#include "cuda_runtime_api.h"
-#include "weights_graph_parse.hpp"
-#include "create_node.hpp"
-#include "create_gather_node.hpp"
-#include "gather_node_info.hpp"
+/********************************************
+ * Filename: create_gather_node.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#include "node_create/create_node.hpp"
+#include "node_create/create_gather_node.hpp"
+#include "node_info/gather_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
+
     nvinfer1::ILayer* createGatherNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
         NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
@@ -26,4 +29,5 @@ namespace TENSORRT_WRAPPER
         CHECK_ASSERT(gather, "create gather node fail\n");
         return gather;
     }
-}
+
+} // namespace TENSORRT_WRAPPER

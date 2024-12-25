@@ -102,11 +102,11 @@ namespace TENSORRT_WRAPPER
         BFLOAT16,
     };
 
-    extern int onnxDataTypeEleCount[];
-    extern std::vector<float> parseFloatArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape);
-    extern std::vector<int> parseIntArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape);
-    extern int getTensorrtDataType(OnnxDataType onnxDataType);
-    extern std::vector<int> dimsToVector(nvinfer1::Dims dims);
-    extern nvinfer1::Dims vectorToDims(std::vector<int> shape);
+    int onnxDataTypeEleCount[];
+    std::vector<float> parseFloatArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape);
+    std::vector<int> parseIntArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape);
+    int getTensorrtDataType(OnnxDataType onnxDataType);
+    std::vector<int> dimsToVector(nvinfer1::Dims dims);
+    nvinfer1::Dims vectorToDims(std::vector<int> shape);
 
 } // namespace TENSORRT_WRAPPER

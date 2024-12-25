@@ -52,12 +52,12 @@ int main()
     std::string engineFileName  = GRAPH_ENGINE_FILE(NET_NAME);
 #if SAVE_ENGINE
     // save engine file
-    tensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
+    TensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
     engine.saveEnginePlanFile(engineFileName);
 #else
     //engine inference
     unsigned char* data = (unsigned char*)malloc(BACTCH_SIZE * CHANNEL_SIZE * HEIGHT_SIZE * WIDTH_SIZE);
-    tensorrtEngine engine(engineFileName);
+    TensorrtEngine engine(engineFileName);
     auto hostMemIndex = engine.getBindingNamesIndexMap();
     auto inputs = initInputData(hostMemIndex, data);
     engine.prepareData(inputs);

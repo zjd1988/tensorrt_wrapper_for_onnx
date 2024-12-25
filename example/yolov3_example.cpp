@@ -223,14 +223,14 @@ int main()
     std::string inferenceFileName = INFERENCE_JSON_FILE(NET_NAME);
 #if SAVE_ENGINE
     // save engine file
-    tensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
+    TensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
     engine.saveEnginePlanFile(engineFileName);
 #else
     //engine inference
     std::string jpgFile = "./example/yolov3/bus.jpg";
     cv::Mat colorJpg = cv::imread(jpgFile.c_str());
 
-    tensorrtEngine engine(inferenceFileName);
+    TensorrtEngine engine(inferenceFileName);
     std::map<std::string, void*> inputsData;
     inputsData["bgr_image"] = colorJpg.data;
 

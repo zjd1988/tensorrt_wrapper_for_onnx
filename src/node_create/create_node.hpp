@@ -7,7 +7,7 @@
 #include "NvInfer.h"
 #include "cuda_runtime_api.h"
 #include "node_info.hpp"
-#include "weights_graph_parse.hpp"
+#include "weight_graph_parser.hpp"
 #include "utils.hpp"
 #include "common.hpp"
 #include <iostream>

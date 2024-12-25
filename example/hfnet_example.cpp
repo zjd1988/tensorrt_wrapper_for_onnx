@@ -32,7 +32,7 @@ int main()
     std::string inferenceFileName = INFERENCE_JSON_FILE(NET_NAME);
 #if SAVE_ENGINE
     // save engine file
-    tensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
+    TensorrtEngine engine(jsonFileName, weightsFileName, FP16_FLAG);
     engine.saveEnginePlanFile(engineFileName);
 #else
     //engine inference
@@ -44,7 +44,7 @@ int main()
     cv::cvtColor(colorMat, grayMat, cv::COLOR_BGR2GRAY);
     grayMat.copyTo(inputMat(rect));
 
-    tensorrtEngine engine(inferenceFileName);
+    TensorrtEngine engine(inferenceFileName);
     std::map<std::string, void*> inputs;
     inputs["gray_image"] = (void*)inputMat.data;
     engine.prepareData(inputs);

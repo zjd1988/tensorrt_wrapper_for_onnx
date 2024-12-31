@@ -13,18 +13,18 @@ namespace TENSORRT_WRAPPER
     {
     public:
         PaddingNodeInfo();
-        ~PaddingNodeInfo();
+        ~PaddingNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        std::string getMode() {return mode;}
-        std::vector<int> getPads() {return pads;}
-        float getFloatValue() {return floatValue;}
-        int getIntValue() {return intValue;}
+        std::string getMode() { return m_mode; }
+        std::vector<int> getPads() { return m_pads; }
+        float getFloatValue() { return m_float_value; }
+        int getIntValue() { return m_int_value; }
 
     private:
-        std::string mode;
-        std::vector<int> pads;
-        float floatValue;
-        int intValue;
+        std::string                    m_mode;
+        std::vector<int>               m_pads;
+        float                          m_float_value;
+        int                            m_int_value;
     };
 
 } // namespace TENSORRT_WRAPPER

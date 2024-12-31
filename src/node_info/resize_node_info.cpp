@@ -12,28 +12,23 @@ namespace TENSORRT_WRAPPER
     // Resize Node
     ResizeNodeInfo::ResizeNodeInfo()
     {
-        mode = "nearest";
+        m_mode = "nearest";
         setNodeType("Resize");
         setNodeSubType("");
-    }
-
-    ResizeNodeInfo::~ResizeNodeInfo()
-    {
     }
 
     bool ResizeNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
         setNodeSubType(type);
-        auto inputSize = root["inputs"].size();
-        CHECK_ASSERT(inputSize > 1, "Resize node must larger than 1 inputs\n");
-        for(int i = 0; i < inputSize; i++)
+        auto input_size = root["inputs"].size();
+        CHECK_ASSERT(input_size > 1, "Resize node must larger than 1 inputs\n");
+        for(int i = 0; i < input_size; i++)
         {
             addInput(root["inputs"][i].asString());
         }
-        auto outputSize = root["outputs"].size();
-        CHECK_ASSERT(outputSize == 1, "Resize node must have 1 output\n");
-        auto nodeOutputs = getOutputs();
-        for(int i = 0; i < outputSize; i++)
+        auto output_size = root["outputs"].size();
+        CHECK_ASSERT(output_size == 1, "Resize node must have 1 output\n");
+        for(int i = 0; i < output_size; i++)
         {
             addOutput(root["outputs"][i].asString());
         }
@@ -44,7 +39,7 @@ namespace TENSORRT_WRAPPER
             {
                 auto size = attr[elem].size();
                 CHECK_ASSERT(size == 1, "Resize node's mode must have 1 element\n");
-                mode = attr[elem][0].asString();
+                m_mode = attr[elem][0].asString();
             }
             else
             {

@@ -13,12 +13,12 @@ namespace TENSORRT_WRAPPER
     nvinfer1::ILayer* createIdentityNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
         NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        IdentityNodeInfo *nodeConfigInfo = (IdentityNodeInfo *)node_info;
-        auto inputs = nodeConfigInfo->getInputs();
-        nvinfer1::ITensor* inputTensor = tensors[inputs[0]];
-        nvinfer1::IIdentityLayer* identity = network->addIdentity(*inputTensor);
+        auto identity_node_info = (IdentityNodeInfo *)node_info;
+        auto inputs = identity_node_info->getInputs();
+        nvinfer1::ITensor* input_tensor = tensors[inputs[0]];
+        nvinfer1::IIdentityLayer* identity = network->addIdentity(*input_tensor);
         CHECK_ASSERT(identity, "create identity node fail\n");
-        int type = getTensorrtDataType(OnnxDataType(nodeConfigInfo->getDataType()));
+        int type = getTensorrtDataType(OnnxDataType(identity_node_info->getDataType()));
         CHECK_ASSERT(type != -1, "only support float/half!\n");
         identity->setOutputType(0, nvinfer1::DataType(type));
         return identity;

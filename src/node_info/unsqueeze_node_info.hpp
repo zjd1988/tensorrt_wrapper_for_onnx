@@ -13,13 +13,13 @@ namespace TENSORRT_WRAPPER
     {
     public:
         UnsqueezeNodeInfo();
-        ~UnsqueezeNodeInfo();
+        ~UnsqueezeNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        std::vector<int> getAxes() { return axes; }
+        std::vector<int> getAxes() { return m_axes; }
 
     private:
-        std::vector<int> axes;
+        std::vector<int>               m_axes;
     };
 
 } // namespace TENSORRT_WRAPPER

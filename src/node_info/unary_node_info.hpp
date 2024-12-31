@@ -13,7 +13,7 @@ namespace TENSORRT_WRAPPER
     {
     public:
         UnaryNodeInfo();
-        ~UnaryNodeInfo();
+        ~UnaryNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
     };
 

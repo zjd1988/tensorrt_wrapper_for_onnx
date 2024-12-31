@@ -13,15 +13,15 @@ namespace TENSORRT_WRAPPER
     {
     public:
         ShuffleNodeInfo();
-        ~ShuffleNodeInfo();
+        ~ShuffleNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        std::vector<int> getPerm() { return perm; }
-        int getAxis() { return axis; }
+        std::vector<int> getPerm() { return m_perm; }
+        int getAxis() { return m_axis; }
 
     private:
-        std::vector<int> perm;
-        int axis; //Flatten
+        std::vector<int>               m_perm;
+        int                            m_axis; //Flatten
     };
 
 } // namespace TENSORRT_WRAPPER

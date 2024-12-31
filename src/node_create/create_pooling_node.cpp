@@ -11,7 +11,7 @@ namespace TENSORRT_WRAPPER
 {
 
     void getKernelParams(PoolingNodeInfo* NodeInfo, nvinfer1::Dims* kernelSize, nvinfer1::Dims* strides, nvinfer1::Dims* begPadding, 
-    nvinfer1::Dims* endPadding, nvinfer1::PaddingMode& paddingMode, bool& countExcludePadding, const bool poolingCeilMode)
+        nvinfer1::Dims* endPadding, nvinfer1::PaddingMode& paddingMode, bool& countExcludePadding, const bool poolingCeilMode)
     {
         kernelSize->nbDims = 0;
         strides->nbDims = 0;
@@ -80,39 +80,40 @@ namespace TENSORRT_WRAPPER
     nvinfer1::ILayer* createPoolingNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
         NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        PoolingNodeInfo *nodeConfigInfo = (PoolingNodeInfo *)node_info;
-        auto inputs = nodeConfigInfo->getInputs();
-        nvinfer1::ITensor* inputTensor = tensors[inputs[0]];
+        auto pooling_node_info = (PoolingNodeInfo *)node_info;
+        auto inputs = pooling_node_info->getInputs();
+        nvinfer1::ITensor* input_tensor = tensors[inputs[0]];
         nvinfer1::IPoolingLayer* pooling = nullptr;
-        nvinfer1::Dims kernelSize;
+        nvinfer1::Dims kernel_size;
         nvinfer1::Dims strides;
-        nvinfer1::Dims beginPadding;
-        nvinfer1::Dims endPadding;
-        nvinfer1::PaddingMode paddingMode;
-        bool excludePadding = true;
-        auto poolingCeilMode = nodeConfigInfo->getCeilMode();
-        getKernelParams(nodeConfigInfo, &kernelSize, &strides, &beginPadding, &endPadding, paddingMode, excludePadding, poolingCeilMode);
-        auto subNodeType     = nodeConfigInfo->getNodeSubType();
+        nvinfer1::Dims begin_padding;
+        nvinfer1::Dims end_padding;
+        nvinfer1::PaddingMode padding_mode;
+        bool exclude_padding = true;
+        auto pooling_ceil_mode = pooling_node_info->getCeilMode();
+        getKernelParams(pooling_node_info, &kernel_size, &strides, &begin_padding, &end_padding, padding_mode, 
+            exclude_padding, pooling_ceil_mode);
+        auto subNodeType     = pooling_node_info->getNodeSubType();
         if(subNodeType.compare("MaxPool") == 0 )
         {
-            pooling = network->addPoolingNd(*inputTensor, nvinfer1::PoolingType::kMAX, kernelSize);
+            pooling = network->addPoolingNd(*input_tensor, nvinfer1::PoolingType::kMAX, kernel_size);
         }
         else if(subNodeType.compare("AveragePool") == 0)
         {
-            pooling = network->addPoolingNd(*inputTensor, nvinfer1::PoolingType::kAVERAGE, kernelSize);
+            pooling = network->addPoolingNd(*input_tensor, nvinfer1::PoolingType::kAVERAGE, kernel_size);
         }
         else
             LOG("current noly support max/average 2d pooling!\n");
         CHECK_ASSERT(pooling, "create pooling node fail\n");
-        pooling->setAverageCountExcludesPadding(excludePadding);
-        pooling->setPaddingMode(paddingMode);
+        pooling->setAverageCountExcludesPadding(exclude_padding);
+        pooling->setPaddingMode(padding_mode);
         if(strides.nbDims)
             pooling->setStrideNd(strides);
         if(beginPadding.nbDims)
-            pooling->setPrePadding(beginPadding);
+            pooling->setPrePadding(begin_padding);
         if(endPadding.nbDims)
-            pooling->setPostPadding(endPadding);
-        
+            pooling->setPostPadding(end_padding);
+
         return pooling;
     }
 

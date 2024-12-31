@@ -13,15 +13,15 @@ namespace TENSORRT_WRAPPER
     {
     public:
         ReduceNodeInfo();
-        ~ReduceNodeInfo();
+        ~ReduceNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        std::vector<int> getAxes() {return axes;}
-        bool getKeepdims() { return keepdims == 1; }
+        std::vector<int> getAxes() {return m_axes;}
+        bool getKeepdims() { return m_keepdims == 1; }
 
     private:
-        std::vector<int> axes;
-        int keepdims;
+        std::vector<int>               m_axes;
+        int                            m_keepdims;
     };
 
 } // namespace TENSORRT_WRAPPER

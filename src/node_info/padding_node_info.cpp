@@ -12,31 +12,26 @@ namespace TENSORRT_WRAPPER
     // Padding Node
     PaddingNodeInfo::PaddingNodeInfo()
     {
-        mode = "constant";
-        pads.clear();
-        floatValue = 0.0f;
-        intValue = 0;
+        m_mode = "constant";
+        m_pads.clear();
+        m_float_value = 0.0f;
+        m_int_value = 0;
         setNodeType("Padding");
         setNodeSubType("");
-    }
-
-    PaddingNodeInfo::~PaddingNodeInfo()
-    {
     }
 
     bool PaddingNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
         setNodeSubType(type);
-        auto inputSize = root["inputs"].size();
-        CHECK_ASSERT(inputSize >= 1, "Padding node must have 2 inputs\n");
-        for(int i = 0; i < inputSize; i++)
+        auto input_size = root["inputs"].size();
+        CHECK_ASSERT(input_size >= 1, "Padding node must have 2 inputs\n");
+        for(int i = 0; i < input_size; i++)
         {
             addInput(root["inputs"][i].asString());
         }
-        auto outputSize = root["outputs"].size();
-        CHECK_ASSERT(outputSize == 1, "Padding node must have 1 output\n");
-        auto nodeOutputs = getOutputs();
-        for(int i = 0; i < outputSize; i++)
+        auto output_size = root["outputs"].size();
+        CHECK_ASSERT(output_size == 1, "Padding node must have 1 output\n");
+        for(int i = 0; i < output_size; i++)
         {
             addOutput(root["outputs"][i].asString());
         }
@@ -47,21 +42,21 @@ namespace TENSORRT_WRAPPER
             {
                 auto size = attr[elem].size();
                 CHECK_ASSERT(size == 1, "Padding node's mode must have 1 element\n");
-                mode = attr[elem][0].asString();
+                m_mode = attr[elem][0].asString();
             }
             else if(elem.compare("pads") == 0)
             {
                 auto size = attr[elem].size();
                 for(int i = 0; i < size; i++)
                 {
-                    pads.push_back(attr[elem][i].asInt());
+                    m_pads.push_back(attr[elem][i].asInt());
                 }
             }
             else if(elem.compare("value") == 0)
             {
                 auto size = attr[elem].size();
                 CHECK_ASSERT(size == 1, "Padding node's value must have 1 element\n");
-                floatValue = attr[elem][0].asFloat();
+                m_float_value = attr[elem][0].asFloat();
             }            
             else
             {

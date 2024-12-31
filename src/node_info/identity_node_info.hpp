@@ -13,13 +13,13 @@ namespace TENSORRT_WRAPPER
     {
     public:
         IdentityNodeInfo();
-        ~IdentityNodeInfo();
+        ~IdentityNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        int getDataType() { return dataType; }
+        int getDataType() { return m_data_type; }
 
     private:
-        int dataType;
+        int                            m_data_type;
     };
 
 } // namespace TENSORRT_WRAPPER

@@ -15,7 +15,7 @@ namespace TENSORRT_WRAPPER
     {
         auto sub_type = node_info->getNodeSubType();
         nvinfer1::UnaryOperation operation;
-        //Sqrt Reciprocal Abs
+        // Sqrt Reciprocal Abs
         if(0 == sub_type.compare("Sqrt"))
         {
             operation = nvinfer1::UnaryOperation::kSQRT;
@@ -38,8 +38,8 @@ namespace TENSORRT_WRAPPER
             return nullptr;
         }
         auto inputs = node_info->getInputs();
-        nvinfer1::ITensor* inputTensors = tensors[inputs[0]];
-        nvinfer1::IUnaryLayer* unary = network->addUnary(*inputTensors, operation);
+        nvinfer1::ITensor* input_tensors = tensors[inputs[0]];
+        nvinfer1::IUnaryLayer* unary = network->addUnary(*input_tensors, operation);
         CHECK_ASSERT(unary, "create unary node fail\n");
         return unary;
     }

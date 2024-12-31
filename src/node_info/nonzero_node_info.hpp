@@ -14,7 +14,7 @@ namespace TENSORRT_WRAPPER
     {
     public:
         NonZeroNodeInfo();
-        ~NonZeroNodeInfo();
+        ~NonZeroNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
     };
 

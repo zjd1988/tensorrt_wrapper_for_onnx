@@ -14,11 +14,11 @@ namespace TENSORRT_WRAPPER
         NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
         auto inputs = node_info->getInputs();
-        nvinfer1::ITensor* inputTensor = tensors[inputs[0]];
+        nvinfer1::ITensor* input_tensor = tensors[inputs[0]];
         auto creator = getPluginRegistry()->getPluginCreator("NonZero_TRT", "1");
         auto pfc = creator->getFieldNames();
         nvinfer1::IPluginV2 *pluginObj = creator->createPlugin("nonzero_plugin", pfc);
-        auto nonzero = network->addPluginV2(&inputTensor, 1, *pluginObj);
+        auto nonzero = network->addPluginV2(&input_tensor, 1, *pluginObj);
         CHECK_ASSERT(nonzero, "create nonzero node fail\n");
         return nonzero;
     }

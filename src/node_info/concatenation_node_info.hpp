@@ -8,11 +8,12 @@
 
 namespace TENSORRT_WRAPPER
 {
+
     class ConcatenationNodeInfo : public NodeInfo
     {
     public:
         ConcatenationNodeInfo();
-        ~ConcatenationNodeInfo();
+        ~ConcatenationNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
         int getAxis() { return m_axis; }

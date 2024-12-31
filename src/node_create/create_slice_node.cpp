@@ -16,8 +16,8 @@ namespace TENSORRT_WRAPPER
         auto inputs = node_info->getInputs();
         CHECK_ASSERT(inputs.size() >= 3 && inputs.size() <= 5, "conv2d inputs must greater equal than 3 and less equal than 5\n");
         nvinfer1::ISliceLayer* slice = nullptr;
-        nvinfer1::ITensor* inputTensor = tensors[inputs[0]];
-        nvinfer1::Dims dims = inputTensor->getDimensions();
+        nvinfer1::ITensor* input_tensor = tensors[inputs[0]];
+        nvinfer1::Dims dims = input_tensor->getDimensions();
         if(inputs.size() == 3)
         {
             auto starts = parseIntArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
@@ -43,7 +43,7 @@ namespace TENSORRT_WRAPPER
             {
                 size[i] = ends[i] - starts[i];
             }
-            slice = network->addSlice(*inputTensor, nvinfer1::Dims4{starts[0], starts[1], starts[2], starts[3]}, 
+            slice = network->addSlice(*input_tensor, nvinfer1::Dims4{starts[0], starts[1], starts[2], starts[3]}, 
                     nvinfer1::Dims4{size[0], size[1], size[2], size[3]}, 
                     nvinfer1::Dims4{stride[0], stride[1], stride[2], stride[3]});
         }
@@ -77,7 +77,7 @@ namespace TENSORRT_WRAPPER
             {
                 size[axes[i]] = ends[axes[i]] - starts[axes[i]];
             }
-            slice = network->addSlice(*inputTensor, nvinfer1::Dims4{starts[0], starts[1], starts[2], starts[3]}, 
+            slice = network->addSlice(*input_tensor, nvinfer1::Dims4{starts[0], starts[1], starts[2], starts[3]}, 
                     nvinfer1::Dims4{size[0], size[1], size[2], size[3]}, 
                     nvinfer1::Dims4{stride[0], stride[1], stride[2], stride[3]});
         }
@@ -120,10 +120,10 @@ namespace TENSORRT_WRAPPER
                 size[axes[i]] = (ends[i] - starts[i]) / steps[i];
                 stride[axes[i]] = steps[i];
             }
-            nvinfer1::Dims startDims = vectorToDims(start);
-            nvinfer1::Dims sizeDims = vectorToDims(size);
-            nvinfer1::Dims strideDims = vectorToDims(stride);
-            slice = network->addSlice(*inputTensor, startDims, sizeDims, strideDims);
+            nvinfer1::Dims start_dims = vectorToDims(start);
+            nvinfer1::Dims size_dims = vectorToDims(size);
+            nvinfer1::Dims stride_dims = vectorToDims(stride);
+            slice = network->addSlice(*input_tensor, start_dims, size_dims, stride_dims);
         }
         CHECK_ASSERT(slice, "create slice node fail\n");
         return slice;

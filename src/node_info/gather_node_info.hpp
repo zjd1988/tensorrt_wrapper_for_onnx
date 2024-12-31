@@ -13,12 +13,12 @@ namespace TENSORRT_WRAPPER
     {
     public:
         GatherNodeInfo();
-        ~GatherNodeInfo();
+        ~GatherNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        int getAxis() { return axis; }
+        int getAxis() { return m_axis; }
 
     private:
-        int axis;
+        int                            m_axis;
     };
 
 } // namespace TENSORRT_WRAPPER

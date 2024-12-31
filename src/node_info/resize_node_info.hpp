@@ -8,16 +8,17 @@
 
 namespace TENSORRT_WRAPPER
 {
+
     class ResizeNodeInfo : public NodeInfo
     {
     public:
         ResizeNodeInfo();
-        ~ResizeNodeInfo();
+        ~ResizeNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        std::string getMode(){return mode;}
+        std::string getMode() { return m_mode; }
     private:
-        std::string mode;
+        std::string                    m_mode;
     };
+
 } // namespace TENSORRT_WRAPPER
-#endif //__RESIZE_NODE_INFO_HPP__

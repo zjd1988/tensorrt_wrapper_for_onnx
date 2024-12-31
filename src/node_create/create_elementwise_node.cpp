@@ -13,8 +13,8 @@ namespace TENSORRT_WRAPPER
     nvinfer1::ILayer* createElementWiseNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
         NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto elementWiseNodeInfo = (ElementWiseNodeInfo *)node_info;
-        auto subType = elementWiseNodeInfo->getNodeSubType();
+        auto elewise_node_info = (ElementWiseNodeInfo *)node_info;
+        auto subType = elewise_node_info->getNodeSubType();
         nvinfer1::ElementWiseOperation operation;
         //Sub Div Add Mul Equal Greater Max
         if(subType.compare("Sub") == 0) {

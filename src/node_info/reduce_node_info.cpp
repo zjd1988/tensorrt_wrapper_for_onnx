@@ -12,31 +12,24 @@ namespace TENSORRT_WRAPPER
     // Reduce Node
     ReduceNodeInfo::ReduceNodeInfo()
     {
-        axes.clear();
-        keepdims = 0;
+        m_axes.clear();
+        m_keepdims = 0;
         setNodeType("Reduce");
         setNodeSubType("");        
-    }
-
-    ReduceNodeInfo::~ReduceNodeInfo()
-    {
-        axes.clear();
-        keepdims = 0;
     }
 
     bool ReduceNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
         setNodeSubType(type);
-        auto inputSize = root["inputs"].size();
-        CHECK_ASSERT(inputSize == 1, "Reduce node must have 1 inputs\n");
-        for(int i = 0; i < inputSize; i++)
+        auto input_size = root["inputs"].size();
+        CHECK_ASSERT(input_size == 1, "Reduce node must have 1 inputs\n");
+        for(int i = 0; i < input_size; i++)
         {
             addInput(root["inputs"][i].asString());
         }
-        auto outputSize = root["outputs"].size();
-        CHECK_ASSERT(outputSize == 1, "Reduce node must have 1 output\n");
-        auto nodeOutputs = getOutputs();
-        for(int i = 0; i < outputSize; i++)
+        auto output_size = root["outputs"].size();
+        CHECK_ASSERT(output_size == 1, "Reduce node must have 1 output\n");
+        for(int i = 0; i < output_size; i++)
         {
             addOutput(root["outputs"][i].asString());
         }
@@ -48,13 +41,13 @@ namespace TENSORRT_WRAPPER
                 auto size = attr[elem].size();
                 // CHECK_ASSERT(size == 1, "Reduce node's axes must have 1 element\n");
                 for(int i = 0; i < size; i++)
-                    axes.push_back(attr[elem][0].asInt());
+                    m_axes.push_back(attr[elem][0].asInt());
             }
             else if(elem.compare("keepdims") == 0)
             {
                 auto size = attr[elem].size();
                 CHECK_ASSERT(size == 1, "Reduce node's keepdims must have 1 element\n");
-                keepdims = attr[elem][0].asInt();
+                m_keepdims = attr[elem][0].asInt();
             }            
             else
             {

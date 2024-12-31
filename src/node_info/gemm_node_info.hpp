@@ -13,19 +13,19 @@ namespace TENSORRT_WRAPPER
     {
     public:
         GemmNodeInfo();
-        ~GemmNodeInfo();
+        ~GemmNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        float getAlpha() { return alpha; }
-        float getBeta() { return beta; }
-        int getTransA() {return transA; }
-        int getTransB() { return transB; }
+        float getAlpha() { return m_alpha; }
+        float getBeta() { return m_beta; }
+        int getTransA() {return m_transA; }
+        int getTransB() { return m_transB; }
 
     private:
-        float alpha;
-        float beta;
-        int transA;
-        int transB;
+        float                          m_alpha;
+        float                          m_beta;
+        int                            m_transA;
+        int                            m_transB;
     };
 
 } // namespace TENSORRT_WRAPPER

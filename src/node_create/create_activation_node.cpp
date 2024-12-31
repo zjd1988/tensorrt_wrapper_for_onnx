@@ -13,7 +13,7 @@ namespace TENSORRT_WRAPPER
     nvinfer1::ILayer* createActivationNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
         NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        ActivationNodeInfo* act_node_info = (ActivationNodeInfo*)node_info;
+        auto act_node_info = (ActivationNodeInfo*)node_info;
         auto sub_type = act_node_info->getNodeSubType();
         nvinfer1::ActivationType act_type;
         auto inputs = act_node_info->getInputs();

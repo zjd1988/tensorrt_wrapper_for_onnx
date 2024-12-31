@@ -13,7 +13,7 @@ namespace TENSORRT_WRAPPER
     {
     public:
         ActivationNodeInfo();
-        ~ActivationNodeInfo();
+        ~ActivationNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         float getAlpha() { return m_alpha; }
         float getBeta() { return m_beta; }

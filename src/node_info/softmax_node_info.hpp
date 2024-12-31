@@ -13,13 +13,13 @@ namespace TENSORRT_WRAPPER
     {
     public:
         SoftmaxNodeInfo();
-        ~SoftmaxNodeInfo();
+        ~SoftmaxNodeInfo() = default;
         virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         void printNodeInfo();
-        int getAxis() { return axis; }
+        int getAxis() { return m_axis; }
 
     private:
-        int axis;
+        int                            m_axis;
     };
 
 } // namespace TENSORRT_WRAPPER

@@ -17,23 +17,18 @@ namespace TENSORRT_WRAPPER
         setNodeSubType("");
     }
 
-    UnsqueezeNodeInfo::~UnsqueezeNodeInfo()
-    {
-    }
-
     bool UnsqueezeNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
         setNodeSubType(type);
-        auto inputSize = root["inputs"].size();
-        CHECK_ASSERT(inputSize == 1, "Unsqueeze node must have 1 inputs\n");
-        for(int i = 0; i < inputSize; i++)
+        auto input_size = root["inputs"].size();
+        CHECK_ASSERT(input_size == 1, "Unsqueeze node must have 1 inputs\n");
+        for(int i = 0; i < input_size; i++)
         {
             addInput(root["inputs"][i].asString());
         }
-        auto outputSize = root["outputs"].size();
-        CHECK_ASSERT(outputSize == 1, "Unsqueeze node must have 1 output\n");
-        auto nodeOutputs = getOutputs();
-        for(int i = 0; i < outputSize; i++)
+        auto output_size = root["outputs"].size();
+        CHECK_ASSERT(output_size == 1, "Unsqueeze node must have 1 output\n");
+        for(int i = 0; i < output_size; i++)
         {
             addOutput(root["outputs"][i].asString());
         }
@@ -45,7 +40,7 @@ namespace TENSORRT_WRAPPER
                 auto size = attr[elem].size();
                 for(int i = 0; i < size; i++)
                 {
-                    axes.push_back(attr[elem][i].asInt());
+                    m_axes.push_back(attr[elem][i].asInt());
                 }
             }
             else
@@ -61,8 +56,9 @@ namespace TENSORRT_WRAPPER
         NodeInfo::printNodeInfo();
         LOG("node attribute is as follows:\n");
         LOG("----axes is :  ");
-        for(int i = 0; i < axes.size(); i++) {
-            LOG("%d ", axes[i]);  
+        for(int i = 0; i < m_axes.size(); i++)
+        {
+            LOG("%d ", m_axes[i]);
         }
         LOG("\n");
     }

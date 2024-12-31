@@ -13,13 +13,13 @@ namespace TENSORRT_WRAPPER
     nvinfer1::ILayer* createSoftmaxNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
         NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto softmaxNodeInfo = (SoftmaxNodeInfo*)node_info;
-        auto inputs = softmaxNodeInfo->getInputs();
-        int axes = softmaxNodeInfo->getAxis();
+        auto softmax_node_info = (SoftmaxNodeInfo*)node_info;
+        auto inputs = softmax_node_info->getInputs();
+        int axes = softmax_node_info->getAxis();
         // CHECK_ASSERT(axes >= 0, "axes only support positive\n");
-        nvinfer1::ITensor* inputTensor = tensors[inputs[0]];
-        nvinfer1::Dims dims = inputTensor->getDimensions();
-        nvinfer1::ISoftMaxLayer* softmax = network->addSoftMax(*inputTensor);
+        nvinfer1::ITensor* input_tensor = tensors[inputs[0]];
+        nvinfer1::Dims dims = input_tensor->getDimensions();
+        nvinfer1::ISoftMaxLayer* softmax = network->addSoftMax(*input_tensor);
         CHECK_ASSERT(softmax, "create softmax node fail\n");
         if(axes < 0)
         {

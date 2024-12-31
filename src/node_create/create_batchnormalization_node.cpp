@@ -13,10 +13,10 @@ namespace TENSORRT_WRAPPER
     nvinfer1::ILayer* createBatchNormalizationNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
         NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
     {
-        auto batchNormalNodeInfo = (BatchNormalizationNodeInfo*)node_info;
-        auto inputs = batchNormalNodeInfo->getInputs();
-        float epsilon = batchNormalNodeInfo->getEpsilon();
-        nvinfer1::ITensor* inputTensor = tensors[inputs[0]];
+        auto batch_normal_node_info = (BatchNormalizationNodeInfo*)node_info;
+        auto inputs = batch_normal_node_info->getInputs();
+        float epsilon = batch_normal_node_info->getEpsilon();
+        nvinfer1::ITensor* input_tensor = tensors[inputs[0]];
         auto scaleWeight = node_weight_info[inputs[1]];
         auto biasWeight = node_weight_info[inputs[2]];
         auto meanWeight = node_weight_info[inputs[3]];
@@ -27,7 +27,7 @@ namespace TENSORRT_WRAPPER
         auto varType = varWeight.dataType;
         CHECK_ASSERT(scaleType == biasType && meanType == varType && biasType == varType, "scale bias mean var must have same data type!\n");
         CHECK_ASSERT((OnnxDataType)scaleType == OnnxDataType::FLOAT, "scale bias mean var must be float!\n");
-        nvinfer1::Dims dims = inputTensor->getDimensions();
+        nvinfer1::Dims dims = input_tensor->getDimensions();
         CHECK_ASSERT(dims.nbDims == 4 || dims.nbDims == 5, "input tensor dims must be 4 or 5!\n");
 
         WeightInfo combinedScale;
@@ -67,7 +67,7 @@ namespace TENSORRT_WRAPPER
         auto scale = combinedScale.getTensorrtWeights();
         nvinfer1::Weights power{nvinfer1::DataType::kFLOAT, nullptr, 0};
         nvinfer1::ScaleMode mode = nvinfer1::ScaleMode::kCHANNEL;
-        nvinfer1::IScaleLayer* batchNormalLayer = network->addScaleNd(*inputTensor, mode, shift, scale, power, 1);
+        nvinfer1::IScaleLayer* batchNormalLayer = network->addScaleNd(*input_tensor, mode, shift, scale, power, 1);
         
         CHECK_ASSERT(batchNormalLayer, "create BatchNormalization node fail\n");
         return batchNormalLayer;

@@ -12,28 +12,23 @@ namespace TENSORRT_WRAPPER
     // Softmax Node
     SoftmaxNodeInfo::SoftmaxNodeInfo()
     {
-        axis = 0;
+        m_axis = 0;
         setNodeType("Softmax");
         setNodeSubType("");
-    }
-
-    SoftmaxNodeInfo::~SoftmaxNodeInfo()
-    {
     }
 
     bool SoftmaxNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
         setNodeSubType(type);
-        auto inputSize = root["inputs"].size();
-        CHECK_ASSERT(inputSize == 1, "Softmax node must have 1 inputs\n");
-        for(int i = 0; i < inputSize; i++)
+        auto input_size = root["inputs"].size();
+        CHECK_ASSERT(input_size == 1, "Softmax node must have 1 inputs\n");
+        for(int i = 0; i < input_size; i++)
         {
             addInput(root["inputs"][i].asString());
         }
-        auto outputSize = root["outputs"].size();
-        CHECK_ASSERT(outputSize == 1, "Softmax node must have 1 output\n");
-        auto nodeOutputs = getOutputs();
-        for(int i = 0; i < outputSize; i++)
+        auto output_size = root["outputs"].size();
+        CHECK_ASSERT(output_size == 1, "Softmax node must have 1 output\n");
+        for(int i = 0; i < output_size; i++)
         {
             addOutput(root["outputs"][i].asString());
         }
@@ -44,7 +39,7 @@ namespace TENSORRT_WRAPPER
             {
                 auto size = attr[elem].size();
                 CHECK_ASSERT(size == 1, "Softmax node's axis must have 1 element\n");
-                axis = attr[elem][0].asInt();
+                m_axis = attr[elem][0].asInt();
             }
             else
             {
@@ -58,7 +53,7 @@ namespace TENSORRT_WRAPPER
     {
         NodeInfo::printNodeInfo();
         LOG("node attribute is as follows:\n");
-        LOG("----axis is : %d \n", axis);
+        LOG("----axis is : %d \n", m_axis);
     }
 
 } // namespace TENSORRT_WRAPPER

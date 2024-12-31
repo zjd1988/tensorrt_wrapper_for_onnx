@@ -14,26 +14,21 @@ namespace TENSORRT_WRAPPER
     {
         setNodeType("Identity");
         setNodeSubType("");
-        dataType = 0;
-    }
-
-    IdentityNodeInfo::~IdentityNodeInfo()
-    {
+        m_data_type = 0;
     }
 
     bool IdentityNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
         setNodeSubType(type);
-        auto inputSize = root["inputs"].size();
-        CHECK_ASSERT(inputSize == 1, "Identity node must have 1 inputs\n");
-        for(int i = 0; i < inputSize; i++)
+        auto input_size = root["inputs"].size();
+        CHECK_ASSERT(input_size == 1, "Identity node must have 1 inputs\n");
+        for(int i = 0; i < input_size; i++)
         {
             addInput(root["inputs"][i].asString());
         }
-        auto outputSize = root["outputs"].size();
-        CHECK_ASSERT(outputSize == 1, "Identity node must have 1 output\n");
-        auto nodeOutputs = getOutputs();
-        for(int i = 0; i < outputSize; i++)
+        auto output_size = root["outputs"].size();
+        CHECK_ASSERT(output_size == 1, "Identity node must have 1 output\n");
+        for(int i = 0; i < output_size; i++)
         {
             addOutput(root["outputs"][i].asString());
         }
@@ -44,7 +39,7 @@ namespace TENSORRT_WRAPPER
             {
                 auto size = attr[elem].size();
                 CHECK_ASSERT(size == 1, "Identity node's to must have 1 element\n");
-                dataType = attr[elem][0].asInt();
+                m_data_type = attr[elem][0].asInt();
             }
             else
             {
@@ -58,7 +53,7 @@ namespace TENSORRT_WRAPPER
     {
         NodeInfo::printNodeInfo();
         LOG("node attribute is as follows:\n");
-        LOG("----dataType is : %d \n", dataType);
+        LOG("----dataType is : %d \n", m_data_type);
     }
 
 } // namespace TENSORRT_WRAPPER

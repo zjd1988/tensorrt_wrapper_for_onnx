@@ -12,7 +12,6 @@
 #include "common/cuda_runtime.hpp"
 #include "parser/weight_graph_parser.hpp"
 #include "parser/execution_parser.hpp"
-
 using namespace nvinfer1;
 using namespace std;
 

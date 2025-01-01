@@ -5,21 +5,16 @@
  ********************************************/
 #include "parser/node_parser.hpp"
 
-
 #define PARSE_NODE_FUNC_DEF(NodeType)                                             \
 static NodeInfo* parse##NodeType##NodeInfo(std::string type, Json::Value& root)   \
 {                                                                                 \
     std::unique_ptr<NodeInfo> node_info(new NodeType##NodeInfo());                \
-    if (nullptr == node_info.get())                                               \
-
-    else                                                                          \
+    if (nullptr == node_info.get() ||                                             \
+        false == node_info->parseNodeInfoFromJson(type, root))                    \
     {                                                                             \
-        if (node_info->parseNodeInfoFromJson(type, root))                         \
-            return node_info.release();                                           \
-        else                                                                      \
-
+        return nullptr;                                                           \
     }                                                                             \
-    return nullptr;                                                               \
+    return node_info.release();                                                   \
 }
 
 #define PARSE_NODE_FUNC(NodeType) parse##NodeType##NodeInfo

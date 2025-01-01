@@ -5,7 +5,7 @@
 
 namespace TENSORRT_WRAPPER
 {
-    class TransposeExecutionInfo : public ExecutionInfo
+    class TransposeExecutionInfo : public BaseExecution
     {
     public:
         TransposeExecutionInfo(CUDARuntime *runtime, 

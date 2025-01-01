@@ -1,26 +1,31 @@
-#ifndef __EXCUTION_INFO_HPP__
-#define __EXCUTION_INFO_HPP__
+/********************************************
+ * Filename: base_execution.hpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
+#pragma once
 #include <vector>
 #include "cuda_runtime.hpp"
-#include "buffer.hpp"
-#include "utils.hpp"
 #include "json/json.h"
+#include "common/buffer.hpp"
+#include "execution/execution_common.hpp"
 #define DIVUP(m,n) (((m)+(n)-1) / (n))
 
-namespace TENSORRT_WRAPPER{
+namespace TENSORRT_WRAPPER
+{
 
-    class ExecutionInfo
+    class BaseExecution
     {
     public:
-        ExecutionInfo(CUDARuntime *runtime, std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root);
-        virtual ~ExecutionInfo();
+        BaseExecution(CUDARuntime *runtime, Json::Value& root);
+        virtual ~BaseExecution() = default;
         virtual bool init(Json::Value& root) = 0;
         virtual void run() = 0;
         void printExecutionInfo();
-        const std::string getExecutionInfoType() {return executionInfoType;}
+        const std::string getExecutionInfoType() { return executionInfoType; }
         const std::vector<std::string>& getInputTensorNames() {return inputTensorNames;}
         const std::vector<std::string>& getOutputTensorNames() {return outputTensorNames;}
-        CUDARuntime* getCudaRuntime() {return cudaRuntime;}
+        CUDARuntime* getCudaRuntime() { return cudaRuntime; }
         void initTensorInfo(std::map<std::string, std::shared_ptr<Buffer>>& tensorsInfo, Json::Value& root);
         const std::map<std::string, Buffer*>& getTensorsInfo() { return tensors; }
         Buffer* mallocBuffer(int size, OnnxDataType dataType, bool mallocHost, bool mallocDevice, 
@@ -63,6 +68,7 @@ namespace TENSORRT_WRAPPER{
                 }
             }
         }
+
     private:
         CUDARuntime* cudaRuntime;
         std::string executionInfoType;
@@ -72,26 +78,19 @@ namespace TENSORRT_WRAPPER{
         std::map<std::string, std::string> memcpyDir;
     };
 
-    typedef ExecutionInfo* (*constructExecutionInfoFunc)(CUDARuntime *runtime, 
-        std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root);
-
-    class ConstructExecutionInfo
+    /** abstract execution register */
+    class ExecutionCreator
     {
-    private:
-        static ConstructExecutionInfo* instance;
-        void registerConstructExecutionInfoFunc();
-        std::map<std::string, constructExecutionInfoFunc> constructExecutionInfoFuncMap;
-        ConstructExecutionInfo()
-        {
-        }
     public:
-        constructExecutionInfoFunc getConstructExecutionInfoFunc(std::string executionType);
-        static ConstructExecutionInfo* getInstance() {
-            return instance;
-        }
-    };
-    
-    extern constructExecutionInfoFunc getConstructExecutionInfoFuncMap(std::string executionType);
+        virtual ~ExecutionCreator() = default;
+        virtual BaseExecution* onCreate() const = 0;
 
-}
-#endif
+    protected:
+        ExecutionCreator() = default;
+    };
+
+    const ExecutionCreator* getExecutionCreator(const ExecutionType type);
+    bool insertExecutionCreator(const ExecutionType type, const ExecutionCreator* creator);
+    void logRegisteredExecutionCreator();
+
+} // namespace TENSORRT_WRAPPER

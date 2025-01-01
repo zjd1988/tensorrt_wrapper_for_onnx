@@ -27,7 +27,8 @@ namespace TENSORRT_WRAPPER
 
     private:
         void registerNodeParserFuncMap();
-        NodeParser() {
+        NodeParser()
+        {
             registerNodeParserFuncMap();
         };
 

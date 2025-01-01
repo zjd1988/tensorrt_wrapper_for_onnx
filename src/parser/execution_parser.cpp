@@ -3,87 +3,87 @@
  * Created by zjd1988 on 2024/12/19
  * Description:
  ********************************************/
+#include <fstream>
 #include "parser/execution_parser.hpp"
 using namespace std;
 
 namespace TENSORRT_WRAPPER
 {
 
-    ExecutionParser::ExecutionParser(CUDARuntime *runtime, std::string &jsonFile)
+    ExecutionParser::ExecutionParser(CUDARuntime *cuda_runtime, std::string &json_file)
     {
-        CHECK_ASSERT(runtime != nullptr, "cuda runtime is null!\n");
-        cudaRuntime = runtime;
-        ifstream jsonStream;
-        jsonStream.open(jsonFile);
-        if(!jsonStream.is_open())
+        CHECK_ASSERT(nullptr != cuda_runtime, "cuda runtime is null!\n");
+        m_cuda_runtime = runtime;
+        std::ifstream json_fstream;
+        json_fstream.open(json_file);
+        if(!json_fstream.is_open())
         {
-            std::cout << "open json file " << jsonFile << " fail!!!" << std::endl;
+            std::cout << "open json file " << json_file << " fail!!!" << std::endl;
             return;
         }
         Json::Reader reader;
         Json::Value root;
-        if (!reader.parse(jsonStream, root, false))
+        if (!reader.parse(json_fstream, root, false))
         {
-            std::cout << "parse json file " << jsonFile << " fail!!!" << std::endl;
-            jsonStream.close();
+            std::cout << "parse json file " << json_file << " fail!!!" << std::endl;
+            json_fstream.close();
             return;
         }
+        json_fstream.close();
+
         //extract topo node order
         {
             int size = root["topo_order"].size();
             for(int i = 0; i < size; i++)
             {
-                std::string executionName;
-                executionName = root["topo_order"][i].asString();
-                topoExecutionInfoOrder.push_back(executionName);
+                std::string execution_name;
+                execution_name = root["topo_order"][i].asString();
+                m_topo_order.push_back(execution_name);
             }
         }
+
         //extract input tensor names
         {
-            int size = root["input_tensor_names"].size();
-            for(int i = 0; i < size; i++)
+            int input_size = root["input_tensor_names"].size();
+            for(int i = 0; i < input_size; i++)
             {
-                std::string tensorName;
-                tensorName = root["input_tensor_names"][i].asString();
-                inputTensorNames.push_back(tensorName);
+                std::string tensor_name;
+                tensor_name = root["input_tensor_names"][i].asString();
+                inputTensorNames.push_back(tensor_name);
             }
         }
+
         //extract output tensor names
         {
-            int size = root["output_tensor_names"].size();
-            for(int i = 0; i < size; i++)
+            int output_size = root["output_tensor_names"].size();
+            for(int i = 0; i < output_size; i++)
             {
-                std::string tensorName;
-                tensorName = root["output_tensor_names"][i].asString();
-                outputTensorNames.push_back(tensorName);
+                std::string tensor_name;
+                tensor_name = root["output_tensor_names"][i].asString();
+                m_output_names.push_back(tensor_name);
             } 
         }
 
         // extract execution execution info
-        initFlag = extractExecutionInfo(root["execution_info"]);
-        jsonStream.close();
+        m_init_flag = extractExecutionInfo(root["execution_info"]);
         return;
-    }
-
-    ExecutionParser::~ExecutionParser()
-    {
     }
 
     bool ExecutionParser::extractExecutionInfo(Json::Value &root)
     {
         CUDARuntime *runtime = getCudaRuntime();
-        for (int i = 0; i < topoExecutionInfoOrder.size(); i++) 
+        for (int i = 0; i < m_topo_order.size(); i++) 
         {
-            auto elem = topoExecutionInfoOrder[i];
+            auto elem = m_topo_order[i];
             auto execution_type = root[elem]["type"].asString();
-            auto parseNodeInfoFromJsonFunc = getConstructExecutionInfoFuncMap(execution_type);
-            if(parseNodeInfoFromJsonFunc != nullptr)
+            auto parse_func = getConstructExecutionInfoFuncMap(execution_type);
+            if(parse_func != nullptr)
             {
-                auto curr_execution = parseNodeInfoFromJsonFunc(runtime, tensorsInfo, root[elem]);
+                auto curr_execution = parse_func(runtime, tensorsInfo, root[elem]);
                 if(curr_execution == nullptr)
                     return false;
                 curr_execution->init(root[elem]);
-                executionInfoMap[elem].reset(curr_execution);
+                m_execution_info_map[elem].reset(curr_execution);
             }
             else
             {
@@ -93,38 +93,24 @@ namespace TENSORRT_WRAPPER
         return true;
     }
 
-    const std::vector<std::string>& ExecutionParser::getTopoNodeOrder()
-    {
-        return topoExecutionInfoOrder;
-    }
-
-    const std::map<std::string, std::shared_ptr<Buffer>>& ExecutionParser::getTensorsInfo()
-    {
-        return tensorsInfo;
-    }
-
-    const std::map<std::string, std::shared_ptr<ExecutionInfo>>& ExecutionParser::getExecutionInfoMap()
-    {
-        return executionInfoMap;
-    }
-
     void ExecutionParser::runInference()
     {
-        int executionSize = topoExecutionInfoOrder.size();
-        for(int i = 0; i < executionSize; i++)
+        size_t execution_size = m_topo_order.size();
+        for(size_t i = 0; i < execution_size; i++)
         {
-            auto name = topoExecutionInfoOrder[i];
-            executionInfoMap[name]->run();
+            auto name = m_topo_order[i];
+            m_execution_info_map[name]->run();
         }
+        return;
     }
 
     std::map<std::string, void*> ExecutionParser::getInferenceResult()
     {
-        int size = outputTensorNames.size();
+        int size = m_output_names.size();
         std::map<std::string, void*> result;
         for( int i = 0; i < size; i++)
         {
-            auto name = outputTensorNames[i];
+            auto name = m_output_names[i];
             result[name] = tensorsInfo[name]->host<void>();
         }
         return result;

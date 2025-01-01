@@ -5,16 +5,17 @@
 
 namespace TENSORRT_WRAPPER
 {
-    class YoloNMSExecutionInfo : public ExecutionInfo
+    class YoloNMSExecution : public BaseExecution
     {
     public:
-        YoloNMSExecutionInfo(CUDARuntime *runtime, 
+        YoloNMSExecution(CUDARuntime *runtime, 
             std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root);
-        ~YoloNMSExecutionInfo();
+        ~YoloNMSExecution() = default;
         bool init(Json::Value& root) override;
         void run() override;
         void callYoloNMSExecutionKernel();
         void recycleBuffers();
+
     private:
         std::shared_ptr<Buffer> sortIdxBuffer;
         std::shared_ptr<Buffer> sortProbBuffer;

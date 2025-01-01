@@ -52,10 +52,10 @@ namespace TENSORRT_WRAPPER
         void setDevice(void* ptr);
         void setHost(void* ptr);
         template <typename T>
-        T* host() { return (T*)hostPtr;}
+        T* host() { return (T*)hostPtr; }
         template <typename T>
-        T* device() { return (T*)devicePtr;}
-        void setStorageType(StorageType type) {storageType = type;}
+        T* device() { return (T*)devicePtr; }
+        void setStorageType(StorageType type) { storageType = type; }
         StorageType getStorageType() { return storageType; }
 
     private:

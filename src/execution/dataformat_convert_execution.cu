@@ -1,7 +1,8 @@
-#include "dataformat_convert_execution_info.hpp"
+#include "dataformat_convert_execution.hpp"
 
 namespace TENSORRT_WRAPPER
 {
+
     template <typename T>
     __global__ void BGR2RGBExecutionKernel(const T* src, T* dst, const int size, const int channel)
     {
@@ -14,7 +15,7 @@ namespace TENSORRT_WRAPPER
     }
 
     DataFormatConvertExecutionInfo::DataFormatConvertExecutionInfo(CUDARuntime *runtime,
-        std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root) : ExecutionInfo(runtime, tensorsInfo, root)
+        std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root) : BaseExecution(runtime, tensorsInfo, root)
     {
         convertType = "";
         blockSize = 0;
@@ -24,10 +25,6 @@ namespace TENSORRT_WRAPPER
         dstTensor = nullptr;        
     }
     
-    DataFormatConvertExecutionInfo::~DataFormatConvertExecutionInfo()
-    {
-    }
-
     bool DataFormatConvertExecutionInfo::init(Json::Value& root)
     {
         convertType = root["attr"]["convert_type"].asString();

@@ -39,7 +39,7 @@ namespace TENSORRT_WRAPPER
     }
 
     TransposeExecutionInfo::TransposeExecutionInfo(CUDARuntime *runtime,
-        std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root) : ExecutionInfo(runtime, tensorsInfo, root)
+        std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root) : BaseExecution(runtime, tensorsInfo, root)
     {
         blockSize = 0;
         gridSize = 0;

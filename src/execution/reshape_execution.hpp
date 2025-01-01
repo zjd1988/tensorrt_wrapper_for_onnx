@@ -4,7 +4,7 @@
 
 namespace TENSORRT_WRAPPER
 {
-    class ReshapeExecutionInfo : public ExecutionInfo
+    class ReshapeExecutionInfo : public BaseExecution
     {
     public:
         ReshapeExecutionInfo(CUDARuntime *runtime, 

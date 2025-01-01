@@ -4,7 +4,7 @@ namespace TENSORRT_WRAPPER
 {
 
     ReshapeExecutionInfo::ReshapeExecutionInfo(CUDARuntime *runtime,
-        std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root) : ExecutionInfo(runtime, tensorsInfo, root)
+        std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root) : BaseExecution(runtime, tensorsInfo, root)
     {
         newShape.clear();
         totalElementSize = 0;

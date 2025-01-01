@@ -1,31 +1,18 @@
+/********************************************
+ * Filename: base_execution.cpp
+ * Created by zjd1988 on 2024/12/19
+ * Description:
+ ********************************************/
 #include <iostream>
 #include <map>
-#include "execution_info.hpp"
-#include "utils.hpp"
-#include "datatype_convert_execution_info.hpp"
-#include "dataformat_convert_execution_info.hpp"
-#include "reshape_execution_info.hpp"
-#include "transpose_execution_info.hpp"
-#include "normalization_execution_info.hpp"
-#include "onnx_model_execution_info.hpp"
-#include "yolo_nms_execution_info.hpp"
-#include "hfnet_resample_execution_info.hpp"
+#include "common/logger.hpp"
+#include "execution/base_execution.hpp"
 using namespace std;
-
-#define CONSTUCT_EXECUTIONINFO_FUNC_DEF(type)                                                                  \
-ExecutionInfo* construct##type##ExecutionInfo(CUDARuntime *runtime,                                            \
-        std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root)                        \
-{                                                                                                              \
-    ExecutionInfo* executionInfo = new type##ExecutionInfo(runtime, tensorsInfo, root);                        \
-    return executionInfo;                                                                                      \
-}
-
-#define CONSTUCT_EXECUTIONINFO_FUNC(type) construct##type##ExecutionInfo
 
 namespace TENSORRT_WRAPPER
 {
 
-    ExecutionInfo::ExecutionInfo(CUDARuntime *runtime, std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root)
+    BaseExecution::BaseExecution(CUDARuntime *runtime, Json::Value& root)
     {
         inputTensorNames.clear();
         outputTensorNames.clear();
@@ -57,16 +44,7 @@ namespace TENSORRT_WRAPPER
         // recycleBuffers();
     }
 
-    ExecutionInfo::~ExecutionInfo()
-    {
-        tensors.clear();
-        inputTensorNames.clear();
-        outputTensorNames.clear();
-        cudaRuntime = nullptr;
-        executionInfoType = "";
-    }
-
-    void ExecutionInfo::initTensorInfo(std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root)
+    void BaseExecution::initTensorInfo(std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root)
     {
         for (auto elem : root.getMemberNames()) {
             if(tensorsInfo.count(elem) == 0) {
@@ -95,7 +73,8 @@ namespace TENSORRT_WRAPPER
             }
         }
     }
-    void ExecutionInfo::printExecutionInfo() {
+    void BaseExecution::printExecutionInfo()
+    {
         LOG("################### Execution Info ######################\n");
         LOG("current execution type is %s\n", executionInfoType.c_str());
         LOG("Input tensor is :\n");
@@ -109,7 +88,8 @@ namespace TENSORRT_WRAPPER
             LOG("%s \n", outputTensorNames[i].c_str());
         }        
     }
-    void ExecutionInfo::recycleBuffers()
+
+    void BaseExecution::recycleBuffers()
     {
         auto runtime = getCudaRuntime();
         for(int i = 0; i < inputTensorNames.size(); i++)
@@ -121,8 +101,10 @@ namespace TENSORRT_WRAPPER
                 runtime->onReleaseBuffer(tensors[tensor_name], StorageType::DYNAMIC);
             }
         }
+        return;
     }
-    Buffer* ExecutionInfo::mallocBuffer(int size, OnnxDataType dataType, bool mallocHost, 
+
+    Buffer* BaseExecution::mallocBuffer(int size, OnnxDataType dataType, bool mallocHost, 
         bool mallocDevice, StorageType type)
     {
         Buffer* buffer = nullptr;
@@ -135,7 +117,8 @@ namespace TENSORRT_WRAPPER
         }
         return buffer;
     }
-    Buffer* ExecutionInfo::mallocBuffer(std::vector<int> shape, OnnxDataType dataType, bool mallocHost, 
+
+    Buffer* BaseExecution::mallocBuffer(std::vector<int> shape, OnnxDataType dataType, bool mallocHost, 
         bool mallocDevice, StorageType type)
     {
         Buffer* buffer = nullptr;
@@ -149,7 +132,7 @@ namespace TENSORRT_WRAPPER
         return buffer;
     }
 
-    void ExecutionInfo::beforeRun()
+    void BaseExecution::beforeRun()
     {
         for(auto item : memcpyDir)
         {
@@ -161,7 +144,7 @@ namespace TENSORRT_WRAPPER
         }
     }
 
-    void ExecutionInfo::afterRun()
+    void BaseExecution::afterRun()
     {
         for(auto item : memcpyDir)
         {
@@ -173,45 +156,61 @@ namespace TENSORRT_WRAPPER
         }
     }
 
-    CONSTUCT_EXECUTIONINFO_FUNC_DEF(HFNETResample)
-    CONSTUCT_EXECUTIONINFO_FUNC_DEF(YoloNMS)
-    CONSTUCT_EXECUTIONINFO_FUNC_DEF(Normalization)
-    CONSTUCT_EXECUTIONINFO_FUNC_DEF(Transpose)
-    CONSTUCT_EXECUTIONINFO_FUNC_DEF(Reshape)
-    CONSTUCT_EXECUTIONINFO_FUNC_DEF(DataFormatConvert)
-    CONSTUCT_EXECUTIONINFO_FUNC_DEF(DataTypeConvert)
-    CONSTUCT_EXECUTIONINFO_FUNC_DEF(OnnxModel)
-
-    constructExecutionInfoFunc ConstructExecutionInfo::getConstructExecutionInfoFunc(std::string executionType)
+    static std::map<ExecutionType, const ExecutionCreator*>& getExecutionCreatorMap()
     {
-        if(constructExecutionInfoFuncMap.size() == 0)
-            registerConstructExecutionInfoFunc();
-        if(constructExecutionInfoFuncMap.count(executionType) != 0)
-            return constructExecutionInfoFuncMap[executionType];
-        else
-            return (constructExecutionInfoFunc)nullptr;
+        static std::once_flag gInitFlag;
+        static std::map<ExecutionType, const ExecutionCreator*>* gExecutionCreatorMap;
+        std::call_once(gInitFlag, [&]() {
+            gExecutionCreatorMap = new std::map<ExecutionType, const ExecutionCreator*>;
+        });
+        return *gExecutionCreatorMap;
     }
 
-    void ConstructExecutionInfo::registerConstructExecutionInfoFunc()
+    extern void registerExecutionCreator();
+    const ExecutionCreator* getExecutionCreator(const ExecutionType type)
     {
-        constructExecutionInfoFuncMap["HFNETResample"]              = CONSTUCT_EXECUTIONINFO_FUNC(HFNETResample);
-        constructExecutionInfoFuncMap["YoloNMS"]                    = CONSTUCT_EXECUTIONINFO_FUNC(YoloNMS);
-        constructExecutionInfoFuncMap["Normalization"]              = CONSTUCT_EXECUTIONINFO_FUNC(Normalization);
-        constructExecutionInfoFuncMap["Transpose"]                  = CONSTUCT_EXECUTIONINFO_FUNC(Transpose);
-        constructExecutionInfoFuncMap["Reshape"]                    = CONSTUCT_EXECUTIONINFO_FUNC(Reshape);
-        constructExecutionInfoFuncMap["DataFormatConvert"]          = CONSTUCT_EXECUTIONINFO_FUNC(DataFormatConvert);
-        constructExecutionInfoFuncMap["DataTypeConvert"]            = CONSTUCT_EXECUTIONINFO_FUNC(DataTypeConvert);
-        constructExecutionInfoFuncMap["OnnxModel"]                  = CONSTUCT_EXECUTIONINFO_FUNC(OnnxModel);
+        registerExecutionCreator();
+        auto& creator_map = getExecutionCreatorMap();
+        auto iter = creator_map.find(type);
+        if (iter == creator_map.end())
+        {
+            return nullptr;
+        }
+        if (iter->second)
+        {
+            return iter->second;
+        }
+        return nullptr;
     }
 
-    ConstructExecutionInfo* ConstructExecutionInfo::instance = new ConstructExecutionInfo;
-
-    constructExecutionInfoFunc getConstructExecutionInfoFuncMap(std::string executionType)
+    bool insertExecutionCreator(const ExecutionType type, const ExecutionCreator* creator)
     {
-        auto instance = ConstructExecutionInfo::getInstance();
-        if(instance != nullptr)
-            return instance->getConstructExecutionInfoFunc(executionType);
-        else
-            return (constructExecutionInfoFunc)nullptr;
+        auto& creator_map = getExecutionCreatorMap();
+        if (gExecutionTypeToStr.end() == gExecutionTypeToStr.find(type))
+        {
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "invalid execution creator:{}", int(type));
+            return false;
+        }
+        std::string type_str = gExecutionTypeToString[type];
+        if (creator_map.find(type) != creator_map.end())
+        {
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "insert duplicate {} execution creator", type_str);
+            return false;
+        }
+        creator_map.insert(std::make_pair(type, creator));
+        return true;
     }
-}
+
+    void logRegisteredExecutionCreator()
+    {
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "registered execution creator as follows:");
+        auto& creator_map = getExecutionCreatorMap();
+        for (const auto& it : creator_map)
+        {
+            std::string execution_type = gExecutionTypeToString[it.first];
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "{}:{} execution creator", int(it.first), execution_type);
+        }
+        return;
+    }
+
+} // namespace TENSORRT_WRAPPER

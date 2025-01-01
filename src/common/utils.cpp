@@ -8,13 +8,13 @@
 namespace TENSORRT_WRAPPER
 {
 
-    int onnxDataTypeEleCount[] = {0, 4, 1, 1, 2, 2, 4, 8, 0, 1, 2, 8, 4, 8, 8, 16, 2};
+    static const int gOnnxDataTypeEleCount[] = {0, 4, 1, 1, 2, 2, 4, 8, 0, 1, 2, 8, 4, 8, 8, 16, 2};
 
     std::vector<float> parseFloatArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape)
     {
         bool supportFlag = (dataType == int(OnnxDataType::FLOAT) || dataType == int(OnnxDataType::DOUBLE));
         CHECK_ASSERT(supportFlag , "only support FLOAT and DOUBLE\n");
-        int eleCount = onnxDataTypeEleCount[dataType];
+        int eleCount = gOnnxDataTypeEleCount[dataType];
         int size = shape.size();
         int shapeCount = 1;
         std::vector<float> arrValue;
@@ -46,7 +46,7 @@ namespace TENSORRT_WRAPPER
     {
         bool supportFlag = (dataType == int(OnnxDataType::INT32) || dataType == int(OnnxDataType::INT64));
         CHECK_ASSERT(supportFlag , "only support int32 and int64\n");
-        int eleCount = onnxDataTypeEleCount[dataType];
+        int eleCount = gOnnxDataTypeEleCount[dataType];
         int size = shape.size();
         int shapeCount = 1;
         std::vector<int> arrValue;

@@ -1,4 +1,4 @@
-#include "yolo_nms_execution_info.hpp"
+#include "yolo_nms_execution.hpp"
 #include <cub/cub.cuh>
 #define NMS_THRESH 0.3
 #define IOU_THRESH 0.6
@@ -141,7 +141,7 @@ namespace TENSORRT_WRAPPER
         }
     }
 
-    void YoloNMSExecutionInfo::callYoloNMSExecutionKernel()
+    void YoloNMSExecution::callYoloNMSExecutionKernel()
     {
         auto srcTensorNames = getInputTensorNames();
         auto dstTensorNames = getOutputTensorNames();
@@ -216,8 +216,8 @@ namespace TENSORRT_WRAPPER
         // }
     }
 
-    YoloNMSExecutionInfo::YoloNMSExecutionInfo(CUDARuntime *runtime,
-        std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root) : ExecutionInfo(runtime, tensorsInfo, root)
+    YoloNMSExecution::YoloNMSExecution(CUDARuntime *runtime,
+        std::map<std::string, std::shared_ptr<Buffer>> &tensorsInfo, Json::Value& root) : BaseExecution(runtime, tensorsInfo, root)
     {
         sortIdxBuffer.reset();
         sortProbBuffer.reset();
@@ -236,15 +236,10 @@ namespace TENSORRT_WRAPPER
         iouThresh = 0.6;
     }
     
-    YoloNMSExecutionInfo::~YoloNMSExecutionInfo()
-    {
-    }
-
-
-    void YoloNMSExecutionInfo::recycleBuffers()
+    void YoloNMSExecution::recycleBuffers()
     {
         auto runtime = getCudaRuntime();
-        ExecutionInfo::recycleBuffers();
+        BaseExecution::recycleBuffers();
         runtime->onReleaseBuffer(idxBuffer.get(), StorageType::DYNAMIC);
         runtime->onReleaseBuffer(sortIdxBuffer.get(), StorageType::DYNAMIC);
         runtime->onReleaseBuffer(probBuffer.get(), StorageType::DYNAMIC);
@@ -254,7 +249,7 @@ namespace TENSORRT_WRAPPER
         runtime->onReleaseBuffer(maskRemoveBuffer.get(), StorageType::DYNAMIC);
     }
 
-    bool YoloNMSExecutionInfo::init(Json::Value& root)
+    bool YoloNMSExecution::init(Json::Value& root)
     {
         imgHeight = root["attr"]["img_height"].asInt();
         imgWidth = root["attr"]["img_width"].asInt();
@@ -300,7 +295,7 @@ namespace TENSORRT_WRAPPER
         return true;
     }
 
-    void YoloNMSExecutionInfo::run()
+    void YoloNMSExecution::run()
     {
         beforeRun();
         callYoloNMSExecutionKernel();

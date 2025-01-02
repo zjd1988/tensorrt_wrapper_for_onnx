@@ -4,7 +4,7 @@
  * Description:
  ********************************************/
 #pragma once
-#include "node_info/node_info.hpp"
+#include "node/node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {

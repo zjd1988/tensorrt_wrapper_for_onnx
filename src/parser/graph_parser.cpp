@@ -5,7 +5,7 @@
  ********************************************/
 #include <fstream>
 #include "parser/graph_parser.hpp"
-#include "node_create/create_node.hpp"
+#include "node_create/node_factory.hpp"
 
 namespace TENSORRT_WRAPPER
 {
@@ -340,10 +340,8 @@ namespace TENSORRT_WRAPPER
         {
             std::string nodeName = m_node_topo_order[i];
             LOG("create %s node\n", nodeName.c_str());
-            // if(nodeName.compare("prefix/pred/global_head/vlad/Reshape") == 0)
-            //     LOG("run here\n");
             auto nodeConfigInfo = m_node_info_map[nodeName];
-            nvinfer1::ILayer* layer = createNode(network, tensors, nodeConfigInfo.get(), m_net_weights_info);
+            nvinfer1::ILayer* layer = NodeFactory::create(network, tensors, nodeConfigInfo.get(), m_net_weights_info);
             layer->setName(nodeName.c_str());
             CHECK_ASSERT(layer != nullptr, "create %s node fail\n", nodeName);
             netNode[nodeName] = layer;

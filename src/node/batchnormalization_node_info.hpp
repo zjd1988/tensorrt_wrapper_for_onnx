@@ -14,10 +14,13 @@ namespace TENSORRT_WRAPPER
     public:
         BatchNormalizationNodeInfo();
         ~BatchNormalizationNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        virtual void printNodeInfo() override;
         float getEpsilon() { return m_epsilon; }
         float getMomentum() { return m_momentum; }
+
+    protected:
+        virtual bool parseNodeAttributesFromJson(const Json::Value& root) override;
+        virtual bool verifyParsedNodeInfo() override;
+        virtual void printNodeAttributeInfo() override;
 
     private:
         float                          m_epsilon;

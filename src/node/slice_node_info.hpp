@@ -14,7 +14,9 @@ namespace TENSORRT_WRAPPER
     public:
         SliceNodeInfo();
         ~SliceNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
+
+    protected:
+        virtual bool verifyParsedNodeInfo() override;
     };
 
 } // namespace TENSORRT_WRAPPER

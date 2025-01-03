@@ -14,17 +14,20 @@ namespace TENSORRT_WRAPPER
     public:
         PaddingNodeInfo();
         ~PaddingNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
         std::string getMode() { return m_mode; }
         std::vector<int> getPads() { return m_pads; }
-        float getFloatValue() { return m_float_value; }
-        int getIntValue() { return m_int_value; }
+        float getFloatValue() { return m_value; }
+        int getIntValue() { return (int)m_value; }
+
+    protected:
+        virtual bool parseNodeAttributesFromJson(const Json::Value& root) override;
+        virtual bool verifyParsedNodeInfo() override;
+        virtual void printNodeAttributeInfo() override;
 
     private:
         std::string                    m_mode;
         std::vector<int>               m_pads;
-        float                          m_float_value;
-        int                            m_int_value;
+        float                          m_value;
     };
 
 } // namespace TENSORRT_WRAPPER

@@ -14,9 +14,13 @@ namespace TENSORRT_WRAPPER
     public:
         ResizeNodeInfo();
         ~ResizeNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        void printNodeInfo();
         std::string getMode() { return m_mode; }
+
+    protected:
+        virtual bool parseNodeAttributesFromJson(const Json::Value& root) override;
+        virtual bool verifyParsedNodeInfo() override;
+        virtual void printNodeAttributeInfo() override;
+
     private:
         std::string                    m_mode;
     };

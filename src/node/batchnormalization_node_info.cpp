@@ -9,80 +9,59 @@ namespace TENSORRT_WRAPPER
 {
 
     // BatchNormalization Node
-    BatchNormalizationNodeInfo::BatchNormalizationNodeInfo()
+    BatchNormalizationNodeInfo::BatchNormalizationNodeInfo() : NodeInfo("BatchNormalization")
     {
         m_epsilon = 1e-05f;
         m_momentum = 0.9f;
-        setNodeType("BatchNormalization");
-        setNodeSubType("");
     }
 
-    bool BatchNormalizationNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
+    bool BatchNormalizationNodeInfo::parseNodeAttributesFromJson(const std::string type, const Json::Value& root)
     {
-        setNodeSubType(type);
-
-        // parse node inputs and check inputs size
-        auto input_size = root["inputs"].size();
-        if (5 != input_size)
+        // check contain attributes
+        if (!value.isMember("attributes"))
         {
-            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_ERROR, "BatchNormalization node get {} inputs, expect 5 inputs", input_size);
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} not contain attributes", m_type, m_name);
             return false;
-        }
-        for(int i = 0; i < input_size; i++)
-        {
-            addInput(root["inputs"][i].asString());
-        }
-
-        // parse node outputs and check outputs size
-        auto output_size = root["outputs"].size();
-        if (1 != output_size)
-        {
-            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_ERROR, "BatchNormalization node get {} outputs, expect 1 outputs", output_size);
-            return false;
-        }
-        for(int i = 0; i < output_size; i++)
-        {
-            addOutput(root["outputs"][i].asString());
         }
 
         // parse node attributes
         auto attr = root["attributes"];
-        for (auto elem : attr.getMemberNames())
+        if (false == getValue<float>(attr, "epsilon", m_epsilon, true, 1e-05f) || 
+            false == getValue<float>(attr, "momentum", m_momentum, true, 0.9f))
         {
-            if(elem.compare("epsilon") == 0)
-            {
-                auto size = attr[elem].size();
-                if (1 != size)
-                {
-                    TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_ERROR, "BatchNormalization node's epsilon get {} elements, expect 1 element", size);
-                    return false;
-                }
-                m_epsilon = attr[elem][0].asFloat();
-            }
-            else if(elem.compare("momentum") == 0)
-            {
-                auto size = attr[elem].size();
-                if (1 != size)
-                {
-                    TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_ERROR, "BatchNormalization node's momentum get {} elements, expect 1 element", size);
-                    return false;
-                }
-                m_momentum = attr[elem][0].asFloat();
-            }            
-            else
-            {
-                TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_WARN, "current BatchNormalization node not support {}", elem);
-            }
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} parse attributes fail", m_type, m_name);
+            return false;
         }
         return true;
     }
 
-    void BatchNormalizationNodeInfo::printNodeInfo()
+    bool BatchNormalizationNodeInfo::verifyParsedNodeInfo()
     {
-        NodeInfo::printNodeInfo();
-        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_INFO, "node attribute as follows:\n");
-        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_INFO, "epsilon is : %f \n", m_epsilon);
-        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_INFO, "momentum is : %f \n", m_momentum);
+        // verify node inputs size
+        auto input_size = m_inputs.size();
+        if (5 != input_size)
+        {
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} inputs, expect 5 inputs", 
+                m_type, m_name, input_size);
+            return false;
+        }
+
+        // verify node outputs size
+        auto output_size = m_outputs.size();
+        if (1 != output_size)
+        {
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} outputs, expect 1 outputs",
+                m_type, m_name, output_size);
+            return false;
+        }
+        return true;
+    }
+
+    void BatchNormalizationNodeInfo::printNodeAttributeInfo()
+    {
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "node attribute as follows:");
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "epsilon is: {}", m_epsilon);
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "momentum is: {}", m_momentum);
         return;
     }
 

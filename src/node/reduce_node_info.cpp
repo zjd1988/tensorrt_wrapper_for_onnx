@@ -9,59 +9,38 @@ namespace TENSORRT_WRAPPER
 {
 
     // Reduce Node
-    ReduceNodeInfo::ReduceNodeInfo()
+    ReduceNodeInfo::ReduceNodeInfo() : NodeInfo("Reduce")
     {
         m_axes.clear();
         m_keepdims = 0;
-        setNodeType("Reduce");
-        setNodeSubType("");        
     }
 
     bool ReduceNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
     {
-        setNodeSubType(type);
-        auto input_size = root["inputs"].size();
-        CHECK_ASSERT(input_size == 1, "Reduce node must have 1 inputs\n");
-        for(int i = 0; i < input_size; i++)
+        // check contain attributes
+        if (!value.isMember("attributes"))
         {
-            addInput(root["inputs"][i].asString());
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} not contain attributes", m_type, m_name);
+            return false;
         }
-        auto output_size = root["outputs"].size();
-        CHECK_ASSERT(output_size == 1, "Reduce node must have 1 output\n");
-        for(int i = 0; i < output_size; i++)
-        {
-            addOutput(root["outputs"][i].asString());
-        }
+
+        // parse node attributes
         auto attr = root["attributes"];
-        for (auto elem : attr.getMemberNames())
+        if (false == getValue<std::vector<int>>(attr, "axes", m_axes, true, {}) || 
+            false == getValue<int>(attr, "keepdims", m_keepdims, true, 0))
         {
-            if(elem.compare("axes") == 0)
-            {
-                auto size = attr[elem].size();
-                // CHECK_ASSERT(size == 1, "Reduce node's axes must have 1 element\n");
-                for(int i = 0; i < size; i++)
-                    m_axes.push_back(attr[elem][0].asInt());
-            }
-            else if(elem.compare("keepdims") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size == 1, "Reduce node's keepdims must have 1 element\n");
-                m_keepdims = attr[elem][0].asInt();
-            }            
-            else
-            {
-                LOG("currnet Reduce node not support %s \n", elem.c_str());
-            }
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} parse attributes fail", m_type, m_name);
+            return false;
         }
         return true;
     }
 
-    void ReduceNodeInfo::printNodeInfo()
+    void ReduceNodeInfo::printNodeAttributeInfo()
     {
-        NodeInfo::printNodeInfo();
-        LOG("node attribute is as follows:\n");
-        LOG("----axes is : %d \n", axes);
-        LOG("----keepdims is : %d \n", keepdims);
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "node attribute is as follows:");
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "axes is: {}", spdlog::fmt::join(m_axes, ","));
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "keepdims is: {}", m_keepdims);
+        return;
     }
 
 } // namespace TENSORRT_WRAPPER

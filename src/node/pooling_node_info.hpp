@@ -14,15 +14,16 @@ namespace TENSORRT_WRAPPER
     public:
         PoolingNodeInfo();
         ~PoolingNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        void printNodeInfo();
         std::vector<int> getKernelShape() { return m_kernel_shape; }
         std::vector<int> getPads() { return m_pads; }
         std::vector<int> getStrides() { return m_strides; }
-        // std::vector<int> getDilations() { return dilations; }
-        std::string      getAutoPad() { return m_auto_pad; }
-        bool             getCeilMode() { return (1 == m_ceil_mode); }
-        int              getCountIncludePad() { return m_count_include_pad; }
+        std::string getAutoPad() { return m_auto_pad; }
+        bool getCeilMode() { return (1 == m_ceil_mode); }
+        int getCountIncludePad() { return m_count_include_pad; }
+
+    protected:
+        virtual bool parseNodeAttributesFromJson(const Json::Value& root) override;
+        virtual void printNodeAttributeInfo() override;
 
     private:
         int                            m_ceil_mode;
@@ -31,7 +32,6 @@ namespace TENSORRT_WRAPPER
         std::vector<int>               m_kernel_shape;
         std::vector<int>               m_pads;
         std::vector<int>               m_strides;
-        // std::vector<int> dilations;
     };
 
 } // namespace TENSORRT_WRAPPER

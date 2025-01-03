@@ -14,7 +14,6 @@ namespace TENSORRT_WRAPPER
     public:
         ShapeNodeInfo();
         ~ShapeNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
     };
 
 } // namespace TENSORRT_WRAPPER

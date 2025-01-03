@@ -9,26 +9,28 @@ namespace TENSORRT_WRAPPER
 {
 
     // Slice Node
-    SliceNodeInfo::SliceNodeInfo()
+    SliceNodeInfo::SliceNodeInfo() : NodeInfo("Slice")
     {
-        setNodeType("Slice");
-        setNodeSubType("");
     }
 
-    bool SliceNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
+    bool SliceNodeInfo::verifyParsedNodeInfo()
     {
-        setNodeSubType(type);
-        auto input_size = root["inputs"].size();
-        CHECK_ASSERT(input_size >= 3, "slice node must greate equal than 3 inputs\n");
-        for(int i = 0; i < input_size; i++)
+        // verify node inputs size
+        auto input_size = m_inputs.size();
+        if (!(3 <= input_size))
         {
-            addInput(root["inputs"][i].asString());
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} inputs, expect [3, ) inputs", 
+                m_type, m_name, input_size);
+            return false;
         }
-        auto output_size = root["outputs"].size();
-        CHECK_ASSERT(output_size == 1, "slice node must have 1 output\n");
-        for(int i = 0; i < output_size; i++)
+
+        // verify node outputs size
+        auto output_size = m_outputs.size();
+        if (1 != output_size)
         {
-            addOutput(root["outputs"][i].asString());
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} outputs, expect 1 outputs",
+                m_type, m_name, output_size);
+            return false;
         }
         return true;
     }

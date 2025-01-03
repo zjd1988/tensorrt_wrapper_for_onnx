@@ -14,20 +14,23 @@ namespace TENSORRT_WRAPPER
     public:
         Conv2dNodeInfo();
         ~Conv2dNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        void printNodeInfo();
         int getGroup() { return m_group; }
         std::vector<int> getKernelShape() { return m_kernel_shape; }
         std::vector<int> getPads() { return m_pads; }
         std::vector<int> getStrides() { return m_strides; }
-        std::vector<int> getDilation() { return m_dilation; }
+        std::vector<int> getDilation() { return m_dilations; }
+
+    protected:
+        virtual bool parseNodeAttributesFromJson(const Json::Value& root) override;
+        virtual bool verifyParsedNodeInfo() override;
+        virtual void printNodeAttributeInfo() override;
 
     private:
         int                            m_group;
         std::vector<int>               m_kernel_shape;
         std::vector<int>               m_pads;
         std::vector<int>               m_strides;
-        std::vector<int>               m_dilation;
+        std::vector<int>               m_dilations;
     };
 
 } // namespace TENSORRT_WRAPPER

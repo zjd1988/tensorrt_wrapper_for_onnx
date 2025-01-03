@@ -21,6 +21,11 @@ namespace TENSORRT_WRAPPER
         int getTransA() {return m_transA; }
         int getTransB() { return m_transB; }
 
+    protected:
+        virtual bool parseNodeAttributesFromJson(const Json::Value& root) override;
+        virtual bool verifyParsedNodeInfo() override;
+        virtual void printNodeAttributeInfo() override;
+
     private:
         float                          m_alpha;
         float                          m_beta;

@@ -14,9 +14,11 @@ namespace TENSORRT_WRAPPER
     public:
         IdentityNodeInfo();
         ~IdentityNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        void printNodeInfo();
         int getDataType() { return m_data_type; }
+
+    protected:
+        virtual bool parseNodeAttributesFromJson(const Json::Value& root) override;
+        virtual void printNodeAttributeInfo() override;
 
     private:
         int                            m_data_type;

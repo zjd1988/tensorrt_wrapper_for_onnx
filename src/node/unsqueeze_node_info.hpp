@@ -14,9 +14,11 @@ namespace TENSORRT_WRAPPER
     public:
         UnsqueezeNodeInfo();
         ~UnsqueezeNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        void printNodeInfo();
         std::vector<int> getAxes() { return m_axes; }
+
+    protected:
+        virtual bool parseNodeAttributesFromJson(const Json::Value& root) override;
+        virtual void printNodeAttributeInfo() override;
 
     private:
         std::vector<int>               m_axes;

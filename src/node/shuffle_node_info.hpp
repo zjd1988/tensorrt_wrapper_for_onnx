@@ -14,10 +14,13 @@ namespace TENSORRT_WRAPPER
     public:
         ShuffleNodeInfo();
         ~ShuffleNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        void printNodeInfo();
         std::vector<int> getPerm() { return m_perm; }
         int getAxis() { return m_axis; }
+
+    protected:
+        virtual bool parseNodeAttributesFromJson(const Json::Value& root) override;
+        virtual bool verifyParsedNodeInfo() override;
+        virtual void printNodeAttributeInfo() override;
 
     private:
         std::vector<int>               m_perm;

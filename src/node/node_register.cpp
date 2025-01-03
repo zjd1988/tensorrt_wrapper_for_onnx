@@ -13,6 +13,19 @@ namespace TENSORRT_WRAPPER
     extern void registerBatchNormalizationNodeCreator();
     extern void registerConcatenationNodeCreator();
     extern void registerElementWiseNodeCreator();
+    extern void registerGatherNodeCreator();
+    extern void registerIdentityNodeCreator();
+    extern void registerNonZeroNodeCreator();
+    extern void registerPaddingNodeCreator();
+    extern void registerPoolingNodeCreator();
+    extern void registerReduceNodeCreator();
+    extern void registerResizeNodeCreator();
+    extern void registerShapeNodeCreator();
+    extern void registerShuffleNodeCreator();
+    extern void registerSliceNodeCreator();
+    extern void registerSoftmaxNodeCreator();
+    extern void registerUnaryNodeCreator();
+    extern void registerUnsqueezeNodeCreator();
 
     static std::once_flag s_flag;
     void registerNodeCreator()
@@ -21,7 +34,19 @@ namespace TENSORRT_WRAPPER
             registerActivationNodeCreator();
             registerBatchNormalizationNodeCreator();
             registerConcatenationNodeCreator();
-            registerElementWiseNodeCreator();
+            registerGatherNodeCreator();
+            registerIdentityNodeCreator();
+            registerPaddingNodeCreator();
+            registerPoolingNodeCreator();
+            registerReduceNodeCreator();
+            registerResizeNodeCreator();
+            registerShapeNodeCreator();
+            registerShuffleNodeCreator();
+            registerSliceNodeCreator();
+            registerSoftmaxNodeCreator();
+            registerUnaryNodeCreator();
+            registerUnsqueezeNodeCreator();
+
             logRegisteredNodeCreator();
         });
     }

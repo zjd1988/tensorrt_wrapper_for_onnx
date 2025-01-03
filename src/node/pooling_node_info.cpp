@@ -9,7 +9,7 @@ namespace TENSORRT_WRAPPER
 {
 
     // Pooling Node
-    PoolingNodeInfo::PoolingNodeInfo()
+    PoolingNodeInfo::PoolingNodeInfo() : NodeInfo("Pooling")
     {
         m_kernel_shape.clear();
         m_pads.clear();
@@ -17,99 +17,42 @@ namespace TENSORRT_WRAPPER
         m_ceil_mode = 0;
         m_count_include_pad = 0;
         m_auto_pad = "NOTSET";
-        setNodeType("Pooling");
-        setNodeSubType("");
     }
 
-    bool PoolingNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
+    bool PoolingNodeInfo::parseNodeAttributesFromJson(const Json::Value& root)
     {
-        setNodeSubType(type);
-        auto input_size = root["inputs"].size();
-        CHECK_ASSERT(input_size == 1, "Pooling node must have 1 inputs\n");
-        for(int i = 0; i < input_size; i++)
+        // check contain attributes
+        if (!value.isMember("attributes"))
         {
-            addInput(root["inputs"][i].asString());
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} not contain attributes", m_type, m_name);
+            return false;
         }
-        auto output_size = root["outputs"].size();
-        CHECK_ASSERT(output_size == 1, "Pooling node must have 1 output\n");
-        for(int i = 0; i < output_size; i++)
-        {
-            addOutput(root["outputs"][i].asString());
-        }
+
+        // parse node attributes
         auto attr = root["attributes"];
-        for (auto elem : attr.getMemberNames())
+        if (false == getValue<std::vector<int>>(attr, "kernel_shape", m_kernel_shape, true, {}) || 
+            false == getValue<std::vector<int>>(attr, "pads", m_pads, true, {}) || 
+            false == getValue<std::vector<int>>(attr, "strides", m_strides, true, {}) || 
+            false == getValue<int>(attr, "ceil_mode", m_ceil_mode, true, 0) || 
+            false == getValue<int>(attr, "count_include_pad", m_count_include_pad, 0) || 
+            false == getValue<std::string>(attr, "auto_pad", m_auto_pad, "NOTSET"))
         {
-            if(elem.compare("kernel_shape") == 0)
-            {
-                auto size = attr[elem].size();
-                for(int i = 0; i < size; i++)
-                {
-                    m_kernel_shape.push_back(attr[elem][i].asInt());
-                }
-            }
-            else if(elem.compare("pads") == 0)
-            {
-                auto size = attr[elem].size();
-                for(int i = 0; i < size; i++)
-                {
-                    m_pads.push_back(attr[elem][i].asInt());
-                }
-            }
-            else if(elem.compare("strides") == 0)
-            {
-                auto size = attr[elem].size();
-                for(int i = 0; i < size; i++)
-                {
-                    m_strides.push_back(attr[elem][i].asInt());
-                }
-            }
-            else if(elem.compare("ceil_mode") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size == 1, "Pooling node's ceil_mode must have 1 element\n");
-                m_ceil_mode = attr[elem][0].asInt();
-            }
-            else if(elem.compare("count_include_pad") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size == 1, "Pooling node's count_include_pad must have 1 element\n");
-                m_count_include_pad = attr[elem][0].asInt();
-            }
-            else if(elem.compare("auto_pad") == 0)
-            {
-                m_auto_pad = attr[elem].asString();
-            }
-            else
-            {
-                LOG("currnet Pooling node not support %s attribute\n", elem.c_str());
-            }
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} parse attributes fail", m_type, m_name);
+            return false;
         }
         return true;
     }
 
-    void PoolingNodeInfo::printNodeInfo()
+    void PoolingNodeInfo::printNodeAttributeInfo()
     {
-        NodeInfo::printNodeInfo();
-        LOG("node attribute is as follows:\n");
-        LOG("----kernelShape is : ");
-        for(int i = 0; i < m_kernel_shape.size(); i++)
-        {
-            LOG("%d ", m_kernel_shape[i]);
-        }
-        LOG("\n----pads is : ");
-        for(int i = 0; i < m_pads.size(); i++)
-        {
-            LOG("%d ", m_pads[i]);  
-        }
-        LOG("\n----strides is : ");
-        for(int i = 0; i < m_strides.size(); i++)
-        {
-            LOG("%d ", m_strides[i]);  
-        }
-        LOG("\n----ceil_mode is : %d", m_ceil_mode);
-        LOG("\n----count_include_pad is : %d", m_count_include_pad);
-        LOG("\n----auto_pad is : %s", m_auto_pad.c_str());
-        LOG("\n");
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "node attribute is as follows:");
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "kernel_shape is: {}", spdlog::fmt::join(m_kernel_shape, ","));
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "pads is: {}", spdlog::fmt::join(m_pads, ","));
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "strides is: {}", spdlog::fmt::join(m_strides, ","));
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "ceil_mode is: {}", m_ceil_mode);
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "count_include_pad is: {}", m_count_include_pad);
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "auto_pad is: {}", m_auto_pad);
+        return;
     }
 
 } // namespace TENSORRT_WRAPPER

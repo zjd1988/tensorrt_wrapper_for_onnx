@@ -14,10 +14,12 @@ namespace TENSORRT_WRAPPER
     public:
         ReduceNodeInfo();
         ~ReduceNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(std::string type, Json::Value &root) override;
-        void printNodeInfo();
         std::vector<int> getAxes() {return m_axes;}
         bool getKeepdims() { return m_keepdims == 1; }
+
+    protected:
+        virtual bool parseNodeAttributesFromJson(const Json::Value& root) override;
+        virtual void printNodeAttributeInfo() override;
 
     private:
         std::vector<int>               m_axes;

@@ -9,50 +9,35 @@ namespace TENSORRT_WRAPPER
 {
 
     // Identity Node
-    IdentityNodeInfo::IdentityNodeInfo()
+    IdentityNodeInfo::IdentityNodeInfo() : NodeInfo("Identity")
     {
-        setNodeType("Identity");
-        setNodeSubType("");
         m_data_type = 0;
     }
 
-    bool IdentityNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
+    bool IdentityNodeInfo::parseNodeAttributesFromJson(const Json::Value& root)
     {
-        setNodeSubType(type);
-        auto input_size = root["inputs"].size();
-        CHECK_ASSERT(input_size == 1, "Identity node must have 1 inputs\n");
-        for(int i = 0; i < input_size; i++)
+        // check contain attributes
+        if (!value.isMember("attributes"))
         {
-            addInput(root["inputs"][i].asString());
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} not contain attributes", m_type, m_name);
+            return false;
         }
-        auto output_size = root["outputs"].size();
-        CHECK_ASSERT(output_size == 1, "Identity node must have 1 output\n");
-        for(int i = 0; i < output_size; i++)
-        {
-            addOutput(root["outputs"][i].asString());
-        }
+
+        // parse node attributes
         auto attr = root["attributes"];
-        for (auto elem : attr.getMemberNames())
+        if (false == getValue<int>(attr, "to", m_data_type, true, 0))
         {
-            if(elem.compare("to") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size == 1, "Identity node's to must have 1 element\n");
-                m_data_type = attr[elem][0].asInt();
-            }
-            else
-            {
-                LOG("currnet Identity node not support %s \n", elem.c_str());
-            }
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} parse attributes fail", m_type, m_name);
+            return false;
         }
         return true;
     }
 
-    void IdentityNodeInfo::printNodeInfo()
+    void IdentityNodeInfo::printNodeAttributeInfo()
     {
-        NodeInfo::printNodeInfo();
-        LOG("node attribute is as follows:\n");
-        LOG("----dataType is : %d \n", m_data_type);
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "node attribute is as follows:");
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "to is: {}", m_data_type);
+        return;
     }
 
 } // namespace TENSORRT_WRAPPER

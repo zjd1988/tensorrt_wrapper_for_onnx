@@ -14,10 +14,13 @@ namespace TENSORRT_WRAPPER
     public:
         ActivationNodeInfo();
         ~ActivationNodeInfo() = default;
-        virtual bool parseNodeInfoFromJson(const std::string type, const Json::Value &root) override;
-        virtual void printNodeInfo() override;
         float getAlpha() { return m_alpha; }
         float getBeta() { return m_beta; }
+
+    protected:
+        virtual bool parseNodeAttributesFromJson(const Json::Value& root) override;
+        virtual bool verifyParsedNodeInfo() override;
+        virtual void printNodeAttributeInfo() override;
 
     private:
         float                          m_alpha;

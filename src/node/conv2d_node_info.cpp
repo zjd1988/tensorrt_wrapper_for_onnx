@@ -9,108 +9,69 @@ namespace TENSORRT_WRAPPER
 {
 
     // Conv2d Node
-    Conv2dNodeInfo::Conv2dNodeInfo()
+    Conv2dNodeInfo::Conv2dNodeInfo() : NodeInfo("Conv2d")
     {
         m_group = 0;
         m_kernel_shape.clear();
         m_pads.clear();
         m_strides.clear();
         m_dilation.clear();
-        setNodeType("Conv2d");
-        setNodeSubType("");
     }
 
-    bool Conv2dNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
+    bool Conv2dNodeInfo::parseNodeAttributesFromJson(std::string type, Json::Value &root)
     {
-        setNodeSubType(type);
-        auto input_size = root["inputs"].size();
-        CHECK_ASSERT(input_size >= 2, "conv2d node inputs size must larger than 2\n");
-        for(int i = 0; i < input_size; i++)
+        // check contain attributes
+        if (!value.isMember("attributes"))
         {
-            addInput(root["inputs"][i].asString());
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} not contain attributes", m_type, m_name);
+            return false;
         }
-        auto output_size = root["outputs"].size();
-        CHECK_ASSERT(output_size == 1, "conv2d node must have 1 output\n");
-        for(int i = 0; i < output_size; i++)
-        {
-            addOutput(root["outputs"][i].asString());
-        }
+
+        // parse node attributes
         auto attr = root["attributes"];
-        for (auto elem : attr.getMemberNames())
+        if (false == getValue<int>(attr, "group", m_group, true, 0) || 
+            false == getValue<std::vector<int>>(attr, "kernel_shape", m_kernel_shape, true, {}) || 
+            false == getValue<std::vector<int>>(attr, "pads", m_pads, true, {}) || 
+            false == getValue<std::vector<int>>(attr, "strides", m_strides, true, {}) || 
+            false == getValue<std::vector<int>>(attr, "dilations", m_dilations, true, {}))
         {
-            if(elem.compare("kernel_shape") == 0)
-            {
-                auto size = attr[elem].size();
-                for(int i = 0; i < size; i++)
-                {
-                    m_kernel_shape.push_back(attr[elem][i].asInt());
-                }
-            }
-            else if(elem.compare("dilations") == 0 )
-            {
-                auto size = attr[elem].size();
-                for(int i = 0; i < size; i++)
-                {
-                    m_dilation.push_back(attr[elem][i].asInt());
-                }
-            }
-            else if(elem.compare("strides") == 0)
-            {
-                auto size = attr[elem].size();
-                for(int i = 0; i < size; i++)
-                {
-                    m_strides.push_back(attr[elem][i].asInt());
-                }
-            }
-            else if(elem.compare("group") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size <= 1, "conv2d node's group must less than 1 element\n");
-                if(size)
-                    m_group = attr[elem][0].asInt();
-            }
-            else if(elem.compare("pads") == 0)
-            {
-                auto size = attr[elem].size();
-                for(int i = 0; i < size; i++)
-                {
-                    m_pads.push_back(attr[elem][i].asInt());
-                }                
-            }
-            else
-            {
-                LOG("currnet conv2d node not support %s \n", elem.c_str());
-            }
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} parse attributes fail", m_type, m_name);
+            return false;
         }
         return true;
     }
 
-    void Conv2dNodeInfo::printNodeInfo()
+    bool Conv2dNodeInfo::verifyParsedNodeInfo()
     {
-        NodeInfo::printNodeInfo();
-        LOG("node attribute is as follows:\n");
-        LOG("----group is %d \n", group);
-        LOG("----kernel_shape is : ");
-        for(int i = 0; i < m_kernel_shape.size(); i++)
+        // verify node inputs size
+        auto input_size = m_inputs.size();
+        if (!(2 <= input_size))
         {
-            LOG("%d ", m_kernel_shape[i]);  
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} inputs, expect [2, ) inputs", 
+                m_type, m_name, input_size);
+            return false;
         }
-        LOG("\n----pads is : ");
-        for(int i = 0; i < m_pads.size(); i++)
+
+        // verify node outputs size
+        auto output_size = m_outputs.size();
+        if (1 != output_size)
         {
-            LOG("%d ", m_pads[i]);  
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} outputs, expect 1 outputs",
+                m_type, m_name, output_size);
+            return false;
         }
-        LOG("\n----stride is : ");
-        for(int i = 0; i < m_strides.size(); i++)
-        {
-            LOG("%d ", m_strides[i]);  
-        }
-        LOG("\n----dilation is : ");
-        for(int i = 0; i < m_dilation.size(); i++)
-        {
-            LOG("%d ", m_dilation[i]);
-        }
-        LOG("\n");
+        return true;
+    }
+
+    void Conv2dNodeInfo::printNodeAttributeInfo()
+    {
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "node attribute is as follows:");
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "group is: {}", m_group);
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "kernel_shape is: {}", spdlog::fmt::join(m_kernel_shape, ","));
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "pads is: {}", spdlog::fmt::join(m_pads, ","));
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "strides is: {}", spdlog::fmt::join(m_strides, ","));
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "dilations is: {}", spdlog::fmt::join(m_dilations, ","));
+        return;
     }
 
 } // namespace TENSORRT_WRAPPER

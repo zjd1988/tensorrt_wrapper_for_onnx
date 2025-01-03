@@ -9,74 +9,66 @@ namespace TENSORRT_WRAPPER
 {
 
     // Gemm Node
-    GemmNodeInfo::GemmNodeInfo()
+    GemmNodeInfo::GemmNodeInfo() : NodeInfo("Gemm")
     {
         m_alpha = 1.0f;
         m_beta = 1.0f;
         m_transA = 0;
         m_transB = 0;
-        setNodeType("Gemm");
-        setNodeSubType("");
     }
 
-    bool GemmNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
+    bool GemmNodeInfo::parseNodeAttributesFromJson(const Json::Value& root)
     {
-        setNodeSubType(type);
-        auto input_size = root["inputs"].size();
-        CHECK_ASSERT(input_size >= 2 && input_size <= 3, "Gemm node inputs must less than 3 and biger than 2\n");
-        for(int i = 0; i < input_size; i++)
+        // check contain attributes
+        if (!value.isMember("attributes"))
         {
-            addInput(root["inputs"][i].asString());
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} not contain attributes", m_type, m_name);
+            return false;
         }
-        auto output_size = root["outputs"].size();
-        CHECK_ASSERT(output_size == 1, "Gemm node must have 1 output\n");
-        for(int i = 0; i < output_size; i++)
-        {
-            addOutput(root["outputs"][i].asString());
-        }
+
+        // parse node attributes
         auto attr = root["attributes"];
-        for (auto elem : attr.getMemberNames())
+        if (false == getValue<float>(attr, "alpha", m_alpha, true, 1.0f) || 
+            false == getValue<float>(attr, "beta", m_beta, true, 1.0f) || 
+            false == getValue<int>(attr, "transA", m_transA, true, 0) || 
+            false == getValue<int>(attr, "transB", m_transB, true, 0))
         {
-            if(elem.compare("alpha") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size == 1, "Gemm node's alpha must have 1 element\n");
-                m_alpha = attr[elem][0].asFloat();
-            }
-            else if(elem.compare("beta") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size == 1, "Gemm node's beta must have 1 element\n");
-                m_beta = attr[elem][0].asFloat();
-            }
-            else if(elem.compare("transA") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size == 1, "Gemm node's transA must have 1 element\n");
-                m_transA = attr[elem][0].asFloat();
-            }
-            else if(elem.compare("transB") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size == 1, "Gemm node's transB must have 1 element\n");
-                m_transB = attr[elem][0].asFloat();
-            }                        
-            else
-            {
-                LOG("currnet Gemm node not support %s \n", elem.c_str());
-            }
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} parse attributes fail", m_type, m_name);
+            return false;
         }
         return true;
     }
 
-    void GemmNodeInfo::printNodeInfo()
+    bool GemmNodeInfo::verifyParsedNodeInfo()
     {
-        NodeInfo::printNodeInfo();
-        LOG("node attribute is as follows:\n");
-        LOG("----alpha is :  %f\n", m_alpha);
-        LOG("----beta is :  %f\n", m_beta);
-        LOG("----transA is :  %d\n", m_transA);
-        LOG("----transB is :  %d\n", m_transB);
+        // verify node inputs size
+        auto input_size = m_inputs.size();
+        if (!(2 <= input_size && 3 >= input_size))
+        {
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} inputs, expect [2, 3] inputs", 
+                m_type, m_name, input_size);
+            return false;
+        }
+
+        // verify node outputs size
+        auto output_size = m_outputs.size();
+        if (1 != output_size)
+        {
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} outputs, expect 1 outputs",
+                m_type, m_name, output_size);
+            return false;
+        }
+        return true;
+    }
+
+    void GemmNodeInfo::printNodeAttributeInfo()
+    {
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "node attribute is as follows:");
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "alpha is: {}", m_alpha);
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "beta is: {}", m_beta);
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "transA is: {}", m_transA);
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "transB is: {}", m_transB);
+        return;
     }
 
 } // namespace TENSORRT_WRAPPER

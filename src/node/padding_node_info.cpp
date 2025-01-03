@@ -9,60 +9,63 @@ namespace TENSORRT_WRAPPER
 {
 
     // Padding Node
-    PaddingNodeInfo::PaddingNodeInfo()
+    PaddingNodeInfo::PaddingNodeInfo() : NodeInfo("Padding")
     {
         m_mode = "constant";
         m_pads.clear();
-        m_float_value = 0.0f;
-        m_int_value = 0;
-        setNodeType("Padding");
-        setNodeSubType("");
+        m_value = 0.0f;
     }
 
-    bool PaddingNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
+    bool PaddingNodeInfo::parseNodeAttributesFromJson(const Json::Value& root)
     {
-        setNodeSubType(type);
-        auto input_size = root["inputs"].size();
-        CHECK_ASSERT(input_size >= 1, "Padding node must have 2 inputs\n");
-        for(int i = 0; i < input_size; i++)
+        // check contain attributes
+        if (!value.isMember("attributes"))
         {
-            addInput(root["inputs"][i].asString());
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} not contain attributes", m_type, m_name);
+            return false;
         }
-        auto output_size = root["outputs"].size();
-        CHECK_ASSERT(output_size == 1, "Padding node must have 1 output\n");
-        for(int i = 0; i < output_size; i++)
-        {
-            addOutput(root["outputs"][i].asString());
-        }
+
+        // parse node attributes
         auto attr = root["attributes"];
-        for (auto elem : attr.getMemberNames())
+        if (false == getValue<std::string>(attr, "mode", m_mode, true, "constant") || 
+            false == getValue<std::vector<int>>(attr, "pads", m_pads, true, {}) || 
+            false == getValue<float>(attr, "value", m_value, true, 0.0f))
         {
-            if(elem.compare("mode") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size == 1, "Padding node's mode must have 1 element\n");
-                m_mode = attr[elem][0].asString();
-            }
-            else if(elem.compare("pads") == 0)
-            {
-                auto size = attr[elem].size();
-                for(int i = 0; i < size; i++)
-                {
-                    m_pads.push_back(attr[elem][i].asInt());
-                }
-            }
-            else if(elem.compare("value") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size == 1, "Padding node's value must have 1 element\n");
-                m_float_value = attr[elem][0].asFloat();
-            }            
-            else
-            {
-                LOG("currnet Softmax node not support %s \n", elem.c_str());
-            }
-        }        
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} parse attributes fail", m_type, m_name);
+            return false;
+        }
         return true;
+    }
+
+    bool PaddingNodeInfo::verifyParsedNodeInfo()
+    {
+        // verify node inputs size
+        auto input_size = m_inputs.size();
+        if (!(1 <= input_size))
+        {
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} inputs, expect [1, ) inputs", 
+                m_type, m_name, input_size);
+            return false;
+        }
+
+        // verify node outputs size
+        auto output_size = m_outputs.size();
+        if (1 != output_size)
+        {
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} outputs, expect 1 outputs",
+                m_type, m_name, output_size);
+            return false;
+        }
+        return true;
+    }
+
+    void PaddingNodeInfo::printNodeAttributeInfo()
+    {
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "node attribute is as follows:");
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "mode is: {}", m_mode);
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "pads is: {}", spdlog::fmt::join(m_pads, ","));
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "value is: {}", m_value);
+        return;
     }
 
 } // namespace TENSORRT_WRAPPER

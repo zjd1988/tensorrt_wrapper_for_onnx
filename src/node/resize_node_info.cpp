@@ -9,50 +9,57 @@ namespace TENSORRT_WRAPPER
 {
 
     // Resize Node
-    ResizeNodeInfo::ResizeNodeInfo()
+    ResizeNodeInfo::ResizeNodeInfo() : NodeInfo("Resize")
     {
         m_mode = "nearest";
-        setNodeType("Resize");
-        setNodeSubType("");
     }
 
-    bool ResizeNodeInfo::parseNodeInfoFromJson(std::string type, Json::Value &root)
+    bool ResizeNodeInfo::parseNodeAttributesFromJson(const Json::Value& root)
     {
-        setNodeSubType(type);
-        auto input_size = root["inputs"].size();
-        CHECK_ASSERT(input_size > 1, "Resize node must larger than 1 inputs\n");
-        for(int i = 0; i < input_size; i++)
+        // check contain attributes
+        if (!value.isMember("attributes"))
         {
-            addInput(root["inputs"][i].asString());
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} not contain attributes", m_type, m_name);
+            return false;
         }
-        auto output_size = root["outputs"].size();
-        CHECK_ASSERT(output_size == 1, "Resize node must have 1 output\n");
-        for(int i = 0; i < output_size; i++)
-        {
-            addOutput(root["outputs"][i].asString());
-        }
+
+        // parse node attributes
         auto attr = root["attributes"];
-        for (auto elem : attr.getMemberNames())
+        if (false == getValue<std::string>(attr, "mode", m_mode, "nearest"))
         {
-            if(elem.compare("mode") == 0)
-            {
-                auto size = attr[elem].size();
-                CHECK_ASSERT(size == 1, "Resize node's mode must have 1 element\n");
-                m_mode = attr[elem][0].asString();
-            }
-            else
-            {
-                LOG("currnet Resize node not support %s \n", elem.c_str());
-            }
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} parse attributes fail", m_type, m_name);
+            return false;
         }
         return true;
     }
 
-    void ResizeNodeInfo::printNodeInfo()
+    bool ResizeNodeInfo::verifyParsedNodeInfo()
     {
-        NodeInfo::printNodeInfo();
-        LOG("node attribute is as follows:\n");
-        LOG("----mode is : %s \n", mode.c_str());
+        // verify node inputs size
+        auto input_size = m_inputs.size();
+        if (!(2 <= input_size))
+        {
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} inputs, expect [2, ) inputs", 
+                m_type, m_name, input_size);
+            return false;
+        }
+
+        // verify node outputs size
+        auto output_size = m_outputs.size();
+        if (1 != output_size)
+        {
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "{} node:{} get {} outputs, expect 1 outputs",
+                m_type, m_name, output_size);
+            return false;
+        }
+        return true;
+    }
+
+    void ResizeNodeInfo::printNodeAttributeInfo()
+    {
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "node attribute is as follows:");
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "mode is: {}", m_mode);
+        return;
     }
 
 } // namespace TENSORRT_WRAPPER

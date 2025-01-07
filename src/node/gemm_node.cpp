@@ -6,7 +6,7 @@
 #include "NvInfer.h"
 #include "parser/graph_parser.hpp"
 #include "node/node_creator.hpp"
-#include "node/gemm_node_info.hpp"
+#include "node_info/gemm_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {

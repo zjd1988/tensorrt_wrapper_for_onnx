@@ -20,12 +20,12 @@ namespace TENSORRT_WRAPPER
             TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "have no creator for type: {}", node_type);
             return nullptr;
         }
-        auto engine = creator->onCreate(network, tensors, node_info, node_weight_info);
-        if (nullptr == engine)
+        auto node = creator->onCreate(network, tensors, node_info, node_weight_info);
+        if (nullptr == node)
         {
             TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "create {} node failed, creator return nullptr", node_type);
         }
-        return engine;
+        return node;
     }
 
 } // namespace LM_INFER_ENGINE

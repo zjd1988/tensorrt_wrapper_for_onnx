@@ -6,7 +6,7 @@
 #include "NvInfer.h"
 #include "parser/graph_parser.hpp"
 #include "node/node_creator.hpp"
-#include "node/activation_node_info.hpp"
+#include "node_info/activation_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
@@ -21,59 +21,59 @@ namespace TENSORRT_WRAPPER
         nvinfer1::IActivationLayer* activation = nullptr;
         nvinfer1::ITensor* input_tensors = tensors[inputs[0]];
         //Clip kRELU
-        if(0 == sub_type.compare("Clip"))
+        if("Clip" == sub_type)
         {
             act_type = nvinfer1::ActivationType::kCLIP;
             int size = inputs.size();
-            CHECK_ASSERT(size == 3, "Clip must have 3 inputs!\n");
+            CHECK_ASSERT(size == 3, "Clip expect 3 inputs!");
             auto alpha = parseFloatArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
                 node_weight_info[inputs[1]].byteCount, node_weight_info[inputs[1]].shape);
             auto beta = parseFloatArrayValue(node_weight_info[inputs[2]].dataType, node_weight_info[inputs[2]].data, 
                 node_weight_info[inputs[2]].byteCount, node_weight_info[inputs[2]].shape);
             activation = network->addActivation(*input_tensors, act_type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
+            CHECK_ASSERT(nullptr != activation, "create activation node fail, activation type is {}", sub_type);
             activation->setAlpha(alpha[0]);
             activation->setBeta(beta[0]);
         }
-        else if(0 == sub_type.compare("Relu"))
+        else if("Relu" == sub_type)
         {
             act_type = nvinfer1::ActivationType::kRELU;
             activation = network->addActivation(*input_tensors, act_type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
+            CHECK_ASSERT(nullptr != activation, "create activation node fail, activation type is {}", sub_type);
         }
-        else if(0 == sub_type.compare("LeakyRelu"))
+        else if("LeakyRelu" == sub_type)
         {
             act_type = nvinfer1::ActivationType::kLEAKY_RELU;
             auto alpha = act_node_info->getAlpha();
             activation = network->addActivation(*input_tensors, act_type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
+            CHECK_ASSERT(nullptr != activation, "create activation node fail, activation type is {}", sub_type);
             activation->setAlpha(alpha);
         }
-        else if(0 == sub_type.compare("Sigmoid"))
+        else if("Sigmoid" == sub_type)
         {
             act_type = nvinfer1::ActivationType::kSIGMOID;
             activation = network->addActivation(*input_tensors, act_type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
+            CHECK_ASSERT(nullptr != activation, "create activation node fail, activation type is {}", sub_type);
         }
-        else if(0 == sub_type.compare("Softplus"))
+        else if("Softplus" == sub_type)
         {
             float alpha = 1.0f;
             float beta = 1.0f;
             act_type = nvinfer1::ActivationType::kSOFTPLUS;
             activation = network->addActivation(*input_tensors, act_type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
+            CHECK_ASSERT(nullptr != activation, "create activation node fail, activation type is {}", sub_type);
             activation->setAlpha(alpha);
             activation->setBeta(beta);
         }
-        else if(0 == sub_type.compare("Tanh"))
+        else if("Tanh" == sub_type)
         {
             act_type = nvinfer1::ActivationType::kTANH;
             activation = network->addActivation(*input_tensors, act_type);
-            CHECK_ASSERT(activation, "create activation node fail, activation type is %s\n", sub_type.c_str());
+            CHECK_ASSERT(nullptr != activation, "create activation node fail, activation type is {}", sub_type);
         }
         else
         {
-            LOG("Current not support activation type(%s) \n", sub_type);
+            TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "Current not support activation type: {}", sub_type);
             return nullptr;
         }
 

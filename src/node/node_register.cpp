@@ -4,7 +4,7 @@
  * Description:
  ********************************************/
 #include <mutex>
-#include "node_create/create_node.h"
+#include "node/node_creator.h"
 
 namespace TENSORRT_WRAPPER
 {
@@ -31,6 +31,7 @@ namespace TENSORRT_WRAPPER
     void registerNodeCreator()
     {
         std::call_once(s_flag, [&]() {
+            // register node creator
             registerActivationNodeCreator();
             registerBatchNormalizationNodeCreator();
             registerConcatenationNodeCreator();

@@ -18,8 +18,8 @@ namespace TENSORRT_WRAPPER
         nvinfer1::ITensor* input_tensor = tensors[inputs[0]];
         auto creator = getPluginRegistry()->getPluginCreator("NonZero_TRT", "1");
         auto pfc = creator->getFieldNames();
-        nvinfer1::IPluginV2 *pluginObj = creator->createPlugin("nonzero_plugin", pfc);
-        auto nonzero = network->addPluginV2(&input_tensor, 1, *pluginObj);
+        nvinfer1::IPluginV2 *plugin_obj = creator->createPlugin("nonzero_plugin", pfc);
+        auto nonzero = network->addPluginV2(&input_tensor, 1, *plugin_obj);
         CHECK_ASSERT(nonzero, "create nonzero node fail\n");
         return nonzero;
     }

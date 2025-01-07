@@ -4,8 +4,11 @@
  * Description:
  ********************************************/
 #include <fstream>
+#include "common/utils.hpp"
+#include "common/logger.hpp"
 #include "parser/graph_parser.hpp"
-#include "node_create/node_factory.hpp"
+#include "node/node_factory.hpp"
+#include "node_info/node_info_factory.hpp"
 
 namespace TENSORRT_WRAPPER
 {
@@ -214,25 +217,10 @@ namespace TENSORRT_WRAPPER
         auto& nodes_root = root[member_key];
         for (auto elem : nodes_root.getMemberNames())
         {
-            if(nodes_root[elem]["op_type"].isString())
-            {
-                auto op_type = nodes_root[elem]["op_type"].asString();
-                std::shared_ptr<NodeInfo> node;
-                auto parse_func = getNodeParserFunc(op_type);
-                if(nullptr != parse_func)
-                {
-                    auto curr_node = parseNodeInfoFromJsonFunc(op_type, nodes_root[elem]);
-                    if(nullptr == curr_node)
-                        return false;
-                    // curr_node->printNodeInfo();
-                    node.reset(curr_node);
-                    m_node_info_map[elem] = node;
-                }
-                else
-                {
-                    LOG("current not support %s node type\n", op_type.c_str());
-                }
-            }
+            std::shared_ptr<NodeInfo> node(NodeInfoFactory::create(nodes_root[elem]));
+            if(nullptr == node.get())
+                return false;
+            m_node_info_map[elem] = node;
         }
         return true;
     }
@@ -397,7 +385,7 @@ namespace TENSORRT_WRAPPER
         network->destroy();
     }
 
-    bool GraphParser::saveEngineFile(std::string save_file)
+    bool GraphParser::saveEngineFile(const std::string save_file)
     {
         nvinfer1::IHostMemory* engine_buffer = nullptr;
         if(nullptr == m_cuda_engine)

@@ -8,11 +8,10 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "NvInfer.h"
 #include "json/json.h"
-#include "common/utils.hpp"
-#include "common/logger.hpp"
 #include "common/non_copyable.hpp"
-#include "parser/node_parser.hpp"
+#include "node_info/node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
@@ -32,7 +31,7 @@ namespace TENSORRT_WRAPPER
             nvinfer1::Weights w;
             w.values = data;
             auto type = getTensorrtDataType((OnnxDataType)data_type);
-            CHECK_ASSERT(type != -1, "not supported type !!\n");
+            CHECK_ASSERT(type != -1, "not supported type !!");
             w.type = (nvinfer1::DataType)type;
             w.count = byte_count / onnxDataTypeEleCount[data_type];
             return w;
@@ -59,7 +58,7 @@ namespace TENSORRT_WRAPPER
     class GraphParser : public NonCopyable
     {
     public:
-        GraphParser(const std::string &json_file, const std::string &weight_file);
+        GraphParser(const std::string& json_file, const std::string& weight_file);
         ~GraphParser();
         bool getInitFlag() { return m_init_flag; }
         bool saveEngineFile(const std::string save_file);

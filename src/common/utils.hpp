@@ -9,19 +9,16 @@
 #include "NvOnnxParser.h"
 #include <cuda_runtime_api.h>
 #include <iostream>
-#include "assert.h"
+#include <assert.h>
+#include "common/logger.hpp"
 
-#define CHECK_ASSERT(x, format, args...) do {   \
-    if(!(x)) {                                  \
-        printf(format, ##args);                 \
-        assert(0);                              \
-    }                                           \
+#define CHECK_ASSERT(x, format, args...)                                 \
+do {                                                                     \
+    if(!(x)) {                                                           \
+        TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_FATAL, format, ##args);    \
+        assert(0);                                                       \
+    }                                                                    \
 } while(0)
-
-#define LOG(format, args...) do {               \
-        printf(format, ##args);                 \
-} while(0)
-
 
 #define CUDA_CHECK(_x)                                       \
     do {                                                     \
@@ -32,25 +29,25 @@
     } while (0)
 
 #define CUBLAS_CHECK(_x)                                     \
-    do {                                                     \
-        cublasStatus_t _err = (_x);                          \
-        if (_err != CUBLAS_STATUS_SUCCESS) {                 \
-            CHECK_ASSERT(_err, #_x);                         \
-        }                                                    \
-    } while (0)
+do {                                                         \
+    cublasStatus_t _err = (_x);                              \
+    if (_err != CUBLAS_STATUS_SUCCESS) {                     \
+        CHECK_ASSERT(_err, #_x);                             \
+    }                                                        \
+} while (0)
 
 #define CUSOLVER_CHECK(_x)                                   \
-    do {                                                     \
-        cusolverStatus_t _err = (_x);                        \
-        if (_err != CUSOLVER_STATUS_SUCCESS) {               \
-            CHECK_ASSERT(_err, #_x);                         \
-        }                                                    \
-    } while (0)
+do {                                                         \
+    cusolverStatus_t _err = (_x);                            \
+    if (_err != CUSOLVER_STATUS_SUCCESS) {                   \
+        CHECK_ASSERT(_err, #_x);                             \
+    }                                                        \
+} while (0)
 
 #define AFTER_KERNEL_LAUNCH()                                \
-    do {                                                     \
-        CUDA_CHECK(cudaGetLastError());                      \
-    } while (0)
+do {                                                         \
+    CUDA_CHECK(cudaGetLastError());                          \
+} while (0)
 
 namespace TENSORRT_WRAPPER
 {
@@ -61,25 +58,46 @@ namespace TENSORRT_WRAPPER
 
         Logger(): Logger(Severity::kWARNING) {}
 
-        Logger(Severity severity): reportableSeverity(severity) {}
+        Logger(Severity severity): m_reportable_severity(severity) {}
 
         void log(Severity severity, const char* msg) override
         {
             // suppress messages with severity enum value greater than the reportable
-            if (severity > reportableSeverity) return;
+            if (severity > m_reportable_severity)
+                return;
 
             switch (severity)
             {
-                case Severity::kINTERNAL_ERROR: std::cerr << "INTERNAL_ERROR: "; break;
+                case Severity::kINTERNAL_ERROR:
+                {
+                    TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "INTERNAL_ERROR: {}", msg);
+                    break;
+                }
                 case Severity::kERROR: std::cerr << "ERROR: "; break;
+                {
+                    TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "ERROR: {}", msg);
+                    break;
+                }
                 case Severity::kWARNING: std::cerr << "WARNING: "; break;
+                {
+                    TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_WARN, "WARNING: {}", msg);
+                    break;
+                }
                 case Severity::kINFO: std::cerr << "INFO: "; break;
-                default: std::cerr << "UNKNOWN: "; break;
+                {
+                    TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_INFO, "INFO: {}", msg);
+                    break;
+                }
+                default:
+                {
+                    TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "UNKONWN: {}", msg);
+                    break;
+                }
             }
-            std::cerr << msg << std::endl;
         }
 
-        Severity reportableSeverity{Severity::kWARNING};
+    private:
+        Severity m_reportable_severity{Severity::kWARNING};
     };
 
     enum OnnxDataType {

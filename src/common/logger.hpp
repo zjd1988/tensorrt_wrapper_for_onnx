@@ -59,7 +59,6 @@ do {                                                                            
     }                                                                                         \
 } while(0)
 
-
 #define TRT_WRAPPER_LOG(level, ...)  TRT_WRAPPER_LOG_IMPL(level, ##__VA_ARGS__)
 
 #define CHECK(express, err_str)                                                               \
@@ -68,6 +67,7 @@ do {                                                                            
     {                                                                                         \
         TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_FATAL, "check {} fail, {}",                     \
             #express, err_str);                                                               \
+        assert(0);                                                                            \
     }                                                                                         \
 } while(0)
 
@@ -77,6 +77,7 @@ do {                                                                            
     {                                                                                         \
         TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_FATAL, "check {} == {} fail, {}",               \
             #expa, #expb, err_str);                                                           \
+        assert(0);                                                                            \
     }                                                                                         \
 } while(0)
 
@@ -86,6 +87,7 @@ do {                                                                            
     {                                                                                         \
         TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_FATAL, "check {} >= {} fail, {}",               \
             #expa, #expb, err_str);                                                           \
+        assert(0);                                                                            \
     }                                                                                         \
 } while(0)
 

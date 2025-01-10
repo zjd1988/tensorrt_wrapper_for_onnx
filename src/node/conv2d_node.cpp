@@ -12,7 +12,7 @@ namespace TENSORRT_WRAPPER
 {
 
     nvinfer1::ILayer* createConv2dNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto conv2d_node_info = (Conv2dNodeInfo *)node_info;
         auto inputs = conv2d_node_info->getInputs();
@@ -22,25 +22,25 @@ namespace TENSORRT_WRAPPER
 
         nvinfer1::IConvolutionLayer* conv2d = nullptr;
         nvinfer1::ITensor* input_tensor = tensors[inputs[0]];
-        nvinfer1::DataType dataType = (node_weight_info[inputs[1]].dataType == OnnxDataType::FLOAT) ? 
+        nvinfer1::DataType dataType = (weight_info[inputs[1]].dataType == OnnxDataType::FLOAT) ? 
             nvinfer1::DataType::kFLOAT : nvinfer1::DataType::kHALF;
-        int weightEleCount = onnxDataTypeEleCount[node_weight_info[inputs[1]].dataType];
-        CHECK_ASSERT(node_weight_info[inputs[1]].byteCount % weightEleCount == 0,
-            "weights byte count shoud be mulptile of element byte count\n");
+        int weightEleCount = getOnnxDataTypeByteSize(weight_info[inputs[1]].dataType);
+        CHECK_ASSERT(weight_info[inputs[1]].byteCount % weightEleCount == 0,
+            "weights byte count shoud be mulptile of element byte count");
         nvinfer1::Weights wt{dataType, nullptr, 0};
         wt.type   = dataType;
-        wt.values = node_weight_info[inputs[1]].data;
-        wt.count  = node_weight_info[inputs[1]].byteCount / weightEleCount;
-        int nbOutputMaps = node_weight_info[inputs[1]].shape[0];
+        wt.values = weight_info[inputs[1]].data;
+        wt.count  = weight_info[inputs[1]].byteCount / weightEleCount;
+        int nbOutputMaps = weight_info[inputs[1]].shape[0];
         if(inputs.size() > 2)
         {
-            int biasEleCount = onnxDataTypeEleCount[node_weight_info[inputs[2]].dataType];
-            CHECK_ASSERT(node_weight_info[inputs[2]].byteCount % biasEleCount == 0,
+            int biasEleCount = getOnnxDataTypeByteSize(weight_info[inputs[2]].dataType);
+            CHECK_ASSERT(weight_info[inputs[2]].byteCount % biasEleCount == 0,
                 "bias byte count shoud be mulptile of element byte count\n");
             nvinfer1::Weights bias{dataType, nullptr, 0};
             bias.type = dataType;
-            bias.values = node_weight_info[inputs[2]].data;
-            bias.count = node_weight_info[inputs[2]].byteCount / biasEleCount;
+            bias.values = weight_info[inputs[2]].data;
+            bias.count = weight_info[inputs[2]].byteCount / biasEleCount;
             conv2d = network->addConvolution(*input_tensor, nbOutputMaps, nvinfer1::DimsHW{kernelShape[0], kernelShape[1]}, wt, bias);
         }
         else
@@ -75,9 +75,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createConv2dNode(network, tensors, node_info, node_weight_info);
+            return createConv2dNode(network, tensors, node_info, weight_info);
         }
     };
 

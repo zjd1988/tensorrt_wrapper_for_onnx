@@ -8,103 +8,165 @@
 namespace TENSORRT_WRAPPER
 {
 
-    static const int gOnnxDataTypeEleCount[] = {0, 4, 1, 1, 2, 2, 4, 8, 0, 1, 2, 8, 4, 8, 8, 16, 2};
-
-    std::vector<float> parseFloatArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape)
+    int getOnnxDataTypeByteSize(int type)
     {
-        bool supportFlag = (dataType == int(OnnxDataType::FLOAT) || dataType == int(OnnxDataType::DOUBLE));
-        CHECK_ASSERT(supportFlag , "only support FLOAT and DOUBLE\n");
-        int eleCount = gOnnxDataTypeEleCount[dataType];
-        int size = shape.size();
-        int shapeCount = 1;
-        std::vector<float> arrValue;
-        for(int i = 0; i < size; i++)
+        OnnxDataType data_type = (OnnxDataType)type;
+        int byte_size = 0;
+        switch (data_type)
         {
-            shapeCount *= shape[i];
-        }
-        CHECK_ASSERT((shapeCount * eleCount) == byteCount , "shapeCount * eleCount not equal to byteCount\n");
-        if(dataType == int(OnnxDataType::FLOAT))
-        {
-            float *floatData = (float *)data;
-            for(int i = 0; i < shapeCount; i++)
+            case FLOAT:
+            case INT32:
+            case UINT32:
             {
-                arrValue.push_back(floatData[i]);
+                byte_size = 4;
+                break;
+            }
+            case UINT8:
+            case INT8:
+            case BOOL:
+            case STRING:
+            {
+                byte_size = 1;
+                break;
+            }
+            case UINT16:
+            case INT16:
+            case FLOAT16:
+            case BFLOAT16:
+            {
+                byte_size = 2;
+                break;
+            }
+            case INT64:
+            case DOUBLE:
+            case UINT64:
+            case COMPLEX64:
+            {
+                byte_size = 8;
+                break;
+            }
+            case COMPLEX128:
+            {
+                byte_size = 16;
+                break;
+            }
+            default:
+            {
+                CHECK_ASSERT(false, "unsupported data type: {}", type);
+            }
+        }
+        return byte_size;
+    }
+
+    std::vector<float> parseFloatArrayValue(int data_type, char* data, int byte_count, const std::vector<int> shape)
+    {
+        bool support_flag = (int(OnnxDataType::FLOAT) == data_type || int(OnnxDataType::DOUBLE) == data_type);
+        CHECK_ASSERT(support_flag , "only support FLOAT and DOUBLE");
+        int byte_size = getOnnxDataTypeByteSize(data_type);
+        int ele_count = 0;
+        for(size_t i = 0; i < shape.size(); i++)
+        {
+            ele_count = (0 == i) ? shape[i] : ele_count * shape[i];
+        }
+        CHECK_ASSERT((ele_count * byte_size) == byte_count , "ele_count * byte_size != byte_count");
+
+        std::vector<float> arr_value;
+        if(int(OnnxDataType::FLOAT) == data_type)
+        {
+            float *float_data = (float *)data;
+            for(int i = 0; i < ele_count; i++)
+            {
+                arr_value.push_back(float_data[i]);
             }
         }
         else
         {
-            double *doubleData = (double *)data;
-            for(int i = 0; i < shapeCount; i++)
+            double *double_data = (double *)data;
+            for(int i = 0; i < ele_count; i++)
             {
-                arrValue.push_back(doubleData[i]);
+                arr_value.push_back(double_data[i]);
             }
         }
-        return arrValue;
+        return arr_value;
     }
 
-    std::vector<int> parseIntArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape)
+    std::vector<int> parseIntArrayValue(int data_type, char* data, int byte_count, const std::vector<int> shape)
     {
-        bool supportFlag = (dataType == int(OnnxDataType::INT32) || dataType == int(OnnxDataType::INT64));
-        CHECK_ASSERT(supportFlag , "only support int32 and int64\n");
-        int eleCount = gOnnxDataTypeEleCount[dataType];
-        int size = shape.size();
-        int shapeCount = 1;
-        std::vector<int> arrValue;
-        for(int i = 0; i < size; i++)
+        bool support_flag = (int(OnnxDataType::INT32) == data_type || int(OnnxDataType::INT64) == data_type);
+        CHECK_ASSERT(support_flag , "only support int32 and int64");
+        int byte_size = getOnnxDataTypeByteSize(data_type);
+        int ele_count = 0;
+        for(size_t i = 0; i < shape.size(); i++)
         {
-            shapeCount *= shape[i];
+            ele_count = (0 == i) ? shape[i] : ele_count * shape[i];
         }
-        CHECK_ASSERT((shapeCount * eleCount) == byteCount , "shapeCount * eleCount not equal to byteCount\n");
-        if(dataType == int(OnnxDataType::INT32))
+        CHECK_ASSERT((ele_count * byte_size) == byte_count , "ele_count * byte_size != byte_count");
+
+        std::vector<int> arr_value;
+        if(int(OnnxDataType::INT32) == data_type)
         {
-            int *intData = (int *)data;
-            for(int i = 0; i < shapeCount; i++)
+            int* int_data = (int *)data;
+            for(int i = 0; i < ele_count; i++)
             {
-                arrValue.push_back(intData[i]);
+                arr_value.push_back(int_data[i]);
             }
         }
         else
         {
-            int64_t *int64Data = (int64_t *)data;
-            for(int i = 0; i < shapeCount; i++)
+            int64_t* int64_data = (int64_t *)data;
+            for(int i = 0; i < ele_count; i++)
             {
-                arrValue.push_back(int64Data[i]);
+                arr_value.push_back(int64_data[i]);
             }
         }
-        return arrValue;
+        return arr_value;
     }
 
-    int getTensorrtDataType(OnnxDataType onnxDataType)
+    int getTensorrtDataType(OnnxDataType data_type)
     {
-        switch(onnxDataType)
+        int tensorrt_type = -1;
+        switch(data_type)
         {
             case OnnxDataType::FLOAT:
-                return int(nvinfer1::DataType::kFLOAT);
+            {
+                tensorrt_type = int(nvinfer1::DataType::kFLOAT);
+                break;
+            }
             case OnnxDataType::FLOAT16:
-                return int(nvinfer1::DataType::kHALF);
+            {
+                tensorrt_type = int(nvinfer1::DataType::kHALF);
+                break;
+            }
             case OnnxDataType::INT32:
-                return int(nvinfer1::DataType::kINT32);
+            {
+                tensorrt_type = int(nvinfer1::DataType::kINT32);
+                break;
+            }
             default:
-                return -1;
+            {
+                TRT_WRAPPER_LOG(TRT_WRAPPER_LOG_LEVEL_ERROR, "current not support convert onnx type: {}", data_type):
+                break;
+            }
         }
+        return tensorrt_type;
     }
 
-    std::vector<int> dimsToVector(nvinfer1::Dims dims)
+    std::vector<int64_t> dimsToVector(nvinfer1::Dims dims)
     {
-        std::vector<int> shapeVec;
+        std::vector<int64_t> shape_vec;
         for(int i = 0; i < dims.nbDims; i++)
         {
-            shapeVec.push_back(dims.d[i]);
+            shape_vec.push_back(dims.d[i]);
         }
-        return shapeVec;
+        return shape_vec;
     }
 
-    nvinfer1::Dims vectorToDims(std::vector<int> shape)
+    nvinfer1::Dims vectorToDims(std::vector<int64_t> shape)
     {
-        int size = shape.size();
+        size_t nb_dim = shape.size();
         nvinfer1::Dims dims;
-        dims.nbDims = size;
-        for(int i = 0; i < size; i++)
+        dims.nbDims = nb_dim;
+        for(size_t i = 0; i < nb_dim; i++)
         {
             dims.d[i] = shape[i];
         }

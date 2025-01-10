@@ -6,13 +6,13 @@
 #include "NvInfer.h"
 #include "parser/graph_parser.hpp"
 #include "node/node_creator.hpp"
-#include "node/resize_node_info.hpp"
+#include "node_info/resize_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
 
     nvinfer1::ILayer* createResizeNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto resize_node_info = (ResizeNodeInfo*)node_info;
         auto inputs = resize_node_info->getInputs();
@@ -28,7 +28,7 @@ namespace TENSORRT_WRAPPER
         nvinfer1::IResizeLayer* resize = network->addResize(*input_tensor);
         CHECK_ASSERT(resize, "create resize node fail\n");
 
-        auto scale_weights = node_weight_info[inputs[1]];
+        auto scale_weights = weight_info[inputs[1]];
         auto scales = parseFloatArrayValue(scale_weights.dataType, scale_weights.data, scale_weights.byteCount, scale_weights.shape);
         resize->setScales(scales.data(), scales.size());
         resize->setResizeMode(resize_mode);
@@ -39,9 +39,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createResizeNode(network, tensors, node_info, node_weight_info);
+            return createResizeNode(network, tensors, node_info, weight_info);
         }
     };
 

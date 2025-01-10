@@ -5,31 +5,32 @@
  ********************************************/
 #include <fstream>
 #include <vector>
-#include "infer_engine/tensorrt_engine.hpp"
-#include "node_create/create_node.hpp"
+#include "common/utils.hpp"
+#include "engine/tensorrt_engine.hpp"
 using namespace std;
 
 namespace TENSORRT_WRAPPER
 {
 
-    TensorrtEngine::TensorrtEngine(const std::string json_file, const std::string weightsFile, bool fp16_flag)
+    TensorrtEngine::TensorrtEngine(const std::string json_file, const std::string weight_file)
     {
-        m_weight_graph_parser.reset(new WeightGraphParser(json_file, weightsFile, fp16_flag));
-        CHECK_ASSERT(m_weight_graph_parser.get()->getInitFlag(), "init from json_file and weight_file fail!\n");
+        m_graph_parser.reset(new GraphParser(json_file, weight_file));
+        CHECK_ASSERT(m_graph_parser->getInitFlag(), "init from json_file: {} and weight_file: {} fail!", json_file, weight_file);
         return;
     }
 
     TensorrtEngine::TensorrtEngine(const std::string engine_file, int gpu_id)
     {
         m_cuda_runtime.reset(new CUDARuntime(gpu_id));
+        CHECK_ASSERT(m_cuda_runtime.get()->getInitFlag(), "init from engine_file: {} fail!", engine_file);
         m_execution_parser.reset(new ExecutionParser(m_cuda_runtime.get(), engine_file));
-        CHECK_ASSERT(m_execution_parser.get()->getInitFlag(), "init from engine_file fail!\n");
+        CHECK_ASSERT(m_execution_parser.get()->getInitFlag(), "init from engine_file: {} fail!", engine_file);
         return;
     }
 
     bool TensorrtEngine::saveEnginePlanFile(std::string save_file)
     {
-        return m_weight_graph_parser->saveEnginePlanFile(save_file);
+        return m_graph_parser->saveEnginePlanFile(save_file);
     }
 
     void TensorrtEngine::prepareData(std::map<std::string, void*> dataMap)

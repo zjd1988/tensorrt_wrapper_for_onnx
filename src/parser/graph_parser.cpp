@@ -56,9 +56,9 @@ namespace TENSORRT_WRAPPER
     GraphParser::~GraphParser()
     {
         if(nullptr != m_builder)
-            m_builder->destroy();
+            delete m_builder;
         if(nullptr != m_cuda_engine)
-            m_cuda_engine->destroy();
+            delete m_cuda_engine;
         for(auto it : m_net_weights_info)
         {
             if(nullptr != it.second.data)

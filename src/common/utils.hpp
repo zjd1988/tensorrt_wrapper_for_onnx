@@ -4,12 +4,12 @@
  * Description:
  ********************************************/
 #pragma once
+#include <iostream>
+#include <assert.h>
 #include "NvInfer.h"
 #include "NvOnnxConfig.h"
 #include "NvOnnxParser.h"
 #include <cuda_runtime_api.h>
-#include <iostream>
-#include <assert.h>
 #include "common/logger.hpp"
 
 #define CHECK_ASSERT(x, format, args...)                                 \
@@ -20,33 +20,33 @@ do {                                                                     \
     }                                                                    \
 } while(0)
 
-#define CUDA_CHECK(_x)                                       \
-    do {                                                     \
-        cudaError_t _err = (_x);                             \
-        if (_err != cudaSuccess) {                           \
-            CHECK_ASSERT(_err, #_x);                         \
-        }                                                    \
+#define CUDA_CHECK(_x)                                                   \
+    do {                                                                 \
+        cudaError_t _err = (_x);                                         \
+        if (_err != cudaSuccess) {                                       \
+            CHECK_ASSERT(_err, #_x);                                     \
+        }                                                                \
     } while (0)
 
-#define CUBLAS_CHECK(_x)                                     \
-do {                                                         \
-    cublasStatus_t _err = (_x);                              \
-    if (_err != CUBLAS_STATUS_SUCCESS) {                     \
-        CHECK_ASSERT(_err, #_x);                             \
-    }                                                        \
+#define CUBLAS_CHECK(_x)                                                 \
+do {                                                                     \
+    cublasStatus_t _err = (_x);                                          \
+    if (_err != CUBLAS_STATUS_SUCCESS) {                                 \
+        CHECK_ASSERT(_err, #_x);                                         \
+    }                                                                    \
 } while (0)
 
-#define CUSOLVER_CHECK(_x)                                   \
-do {                                                         \
-    cusolverStatus_t _err = (_x);                            \
-    if (_err != CUSOLVER_STATUS_SUCCESS) {                   \
-        CHECK_ASSERT(_err, #_x);                             \
-    }                                                        \
+#define CUSOLVER_CHECK(_x)                                               \
+do {                                                                     \
+    cusolverStatus_t _err = (_x);                                        \
+    if (_err != CUSOLVER_STATUS_SUCCESS) {                               \
+        CHECK_ASSERT(_err, #_x);                                         \
+    }                                                                    \
 } while (0)
 
-#define AFTER_KERNEL_LAUNCH()                                \
-do {                                                         \
-    CUDA_CHECK(cudaGetLastError());                          \
+#define AFTER_KERNEL_LAUNCH()                                            \
+do {                                                                     \
+    CUDA_CHECK(cudaGetLastError());                                      \
 } while (0)
 
 namespace TENSORRT_WRAPPER
@@ -100,7 +100,8 @@ namespace TENSORRT_WRAPPER
         Severity m_reportable_severity{Severity::kWARNING};
     };
 
-    enum OnnxDataType {
+    typedef enum OnnxDataType
+    {
         UNDEFINED,
         FLOAT,
         UINT8,
@@ -120,7 +121,7 @@ namespace TENSORRT_WRAPPER
         BFLOAT16,
     };
 
-    int onnxDataTypeEleCount[];
+    int getOnnxDataTypeByteSize(int type);
     std::vector<float> parseFloatArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape);
     std::vector<int> parseIntArrayValue(int dataType, char* data, int byteCount, std::vector<int> shape);
     int getTensorrtDataType(OnnxDataType onnxDataType);

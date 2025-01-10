@@ -12,7 +12,7 @@ namespace TENSORRT_WRAPPER
 {
 
     nvinfer1::ILayer* createIdentityNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto identity_node_info = (IdentityNodeInfo *)node_info;
         auto inputs = identity_node_info->getInputs();
@@ -29,9 +29,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createIdentityNode(network, tensors, node_info, node_weight_info);
+            return createIdentityNode(network, tensors, node_info, weight_info);
         }
     };
 

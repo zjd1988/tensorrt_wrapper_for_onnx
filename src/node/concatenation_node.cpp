@@ -12,7 +12,7 @@ namespace TENSORRT_WRAPPER
 {
 
     nvinfer1::ILayer* createConcatenationNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto concat_node_info = (ConcatenationNodeInfo*)node_info;
         auto inputs = concat_node_info->getInputs();
@@ -40,9 +40,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createConcatenationNode(network, tensors, node_info, node_weight_info);
+            return createConcatenationNode(network, tensors, node_info, weight_info);
         }
     };
 

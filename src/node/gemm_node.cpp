@@ -25,7 +25,7 @@ namespace TENSORRT_WRAPPER
     };
 
     nvinfer1::ILayer* createGemmNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto gemmNodeInfo = (GemmNodeInfo*)node_info;
         auto inputs    = gemmNodeInfo->getInputs();
@@ -46,30 +46,30 @@ namespace TENSORRT_WRAPPER
         CHECK_ASSERT(inputTensorA != nullptr, "get gemm input tensor:%d fail,topo order error\n", 0);
         auto dataTypeA = inputTensorA->getType();
         CHECK_ASSERT(dataTypeA != nvinfer1::DataType::kINT32, "gemm node: Int32 tensors are not valid input tensors.\n");
-        if(node_weight_info.count(inputs[0]) != 0)
+        if(weight_info.count(inputs[0]) != 0)
         {
             weightA = true;
-            weightInfoA = node_weight_info[inputs[0]];
+            weightInfoA = weight_info[inputs[0]];
         }
 
         inputTensorB = (tensors.count(inputs[1]) != 0) ? tensors[inputs[1]] : nullptr;
         CHECK_ASSERT(inputTensorB != nullptr, "get gemm input tensor:%d fail,topo order error\n", 1);
         auto dataTypeB = inputTensorB->getType();
         CHECK_ASSERT(dataTypeB != nvinfer1::DataType::kINT32, "gemm node: Int32 tensors are not valid input tensors.\n");        
-        if(node_weight_info.count(inputs[1]) != 0)
+        if(weight_info.count(inputs[1]) != 0)
         {
             weightB = true;
-            weightInfoB = node_weight_info[inputs[1]];
+            weightInfoB = weight_info[inputs[1]];
         }
 
         if(inputs.size() == 3)
         {
             inputTensorC = (tensors.count(inputs[2]) != 0) ? tensors[inputs[2]] : nullptr;
             CHECK_ASSERT(inputTensorC != nullptr, "get gemm input tensor:%d fail,topo order error\n", 2);
-            if(node_weight_info.count(inputs[2]) != 0)
+            if(weight_info.count(inputs[2]) != 0)
             {
                 weightC = true;
-                weightInfoC = node_weight_info[inputs[2]];
+                weightInfoC = weight_info[inputs[2]];
             }
         }
         
@@ -125,9 +125,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createGemmNode(network, tensors, node_info, node_weight_info);
+            return createGemmNode(network, tensors, node_info, weight_info);
         }
     };
 

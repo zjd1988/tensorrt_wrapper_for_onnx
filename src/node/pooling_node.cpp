@@ -6,7 +6,7 @@
 #include "NvInfer.h"
 #include "parser/graph_parser.hpp"
 #include "node/node_creator.hpp"
-#include "node/pooling_node_info.hpp"
+#include "node_info/pooling_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
@@ -80,7 +80,7 @@ namespace TENSORRT_WRAPPER
     }
 
     nvinfer1::ILayer* createPoolingNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto pooling_node_info = (PoolingNodeInfo *)node_info;
         auto inputs = pooling_node_info->getInputs();
@@ -123,9 +123,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createPoolingNode(network, tensors, node_info, node_weight_info);
+            return createPoolingNode(network, tensors, node_info, weight_info);
         }
     };
 

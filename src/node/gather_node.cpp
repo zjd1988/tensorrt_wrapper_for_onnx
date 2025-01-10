@@ -12,7 +12,7 @@ namespace TENSORRT_WRAPPER
 {
 
     nvinfer1::ILayer* createGatherNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto gather_node_info = (GatherNodeInfo*)node_info;
         auto inputs = gather_node_info->getInputs();
@@ -35,9 +35,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createGatherNode(network, tensors, node_info, node_weight_info);
+            return createGatherNode(network, tensors, node_info, weight_info);
         }
     };
 

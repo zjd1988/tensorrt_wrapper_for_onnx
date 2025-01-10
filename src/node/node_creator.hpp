@@ -26,7 +26,7 @@ namespace TENSORRT_WRAPPER
     public:
         virtual ~NodeCreator() = default;
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const = 0;
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const = 0;
 
     protected:
         NodeCreator() = default;

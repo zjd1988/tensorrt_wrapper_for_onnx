@@ -8,9 +8,8 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "common/utils.hpp"
 #include "common/cuda_runtime.hpp"
-#include "parser/weight_graph_parser.hpp"
+#include "parser/graph_parser.hpp"
 #include "parser/execution_parser.hpp"
 using namespace nvinfer1;
 using namespace std;
@@ -30,7 +29,7 @@ namespace TENSORRT_WRAPPER
         std::map<std::string, void*> getInferenceResult();
 
     private:
-        std::shared_ptr<WeightGraphParser>       m_weight_graph_parser;
+        std::shared_ptr<GraphParser>             m_graph_parser;
         std::shared_ptr<ExecutionParser>         m_execution_parser;
         // cuda runtime
         std::shared_ptr<CUDARuntime>             m_cuda_runtime;

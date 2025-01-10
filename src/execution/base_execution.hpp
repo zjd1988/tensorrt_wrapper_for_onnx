@@ -53,7 +53,7 @@ namespace TENSORRT_WRAPPER
             int printStart = (start > count) ? 0 : start;
             int printEnd   = ((end - start) > count) ? (start + count) : end;
             std::cout << "buffer data is :" << std::endl;
-            if(onnxDataTypeEleCount[buffer->getDataType()] != 1)
+            if(getOnnxDataTypeByteSize(buffer->getDataType()) != 1)
             {
                 for(int i = printStart; i < printEnd; i++)
                 {

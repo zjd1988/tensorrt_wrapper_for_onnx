@@ -15,7 +15,7 @@ namespace TENSORRT_WRAPPER
     class BufferPool
     {
     public:
-        BufferPool() { }
+        BufferPool() {}
         ~BufferPool() { clear(); }
         void* alloc(int size, bool seperate = false);
         void recycle(void* buffer, bool release = false);

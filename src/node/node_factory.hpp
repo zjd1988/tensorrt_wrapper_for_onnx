@@ -16,7 +16,7 @@ namespace TENSORRT_WRAPPER
     public:
         static nvinfer1::ILayer* create(const std::string type, nvinfer1::INetworkDefinition* network, 
             std::map<std::string, nvinfer1::ITensor*>& tensors, NodeInfo* node_info, 
-            std::map<std::string, WeightInfo>& node_weight_info);
+            std::map<std::string, WeightInfo>& weight_info);
     };
 
 } // namespace TENSORRT_WRAPPER

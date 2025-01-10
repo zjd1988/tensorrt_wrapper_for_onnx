@@ -33,7 +33,7 @@ namespace TENSORRT_WRAPPER
             auto type = getTensorrtDataType((OnnxDataType)data_type);
             CHECK_ASSERT(type != -1, "not supported type !!");
             w.type = (nvinfer1::DataType)type;
-            w.count = byte_count / onnxDataTypeEleCount[data_type];
+            w.count = byte_count / getOnnxDataTypeByteSize(data_type);
             return w;
         }
 

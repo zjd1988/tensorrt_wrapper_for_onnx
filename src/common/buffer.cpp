@@ -105,8 +105,9 @@ namespace TENSORRT_WRAPPER
         return dataType;
     }
 
-    int Buffer::getSize(){
-        int eleSize = onnxDataTypeEleCount[int(dataType)];
+    int Buffer::getSize()
+    {
+        int eleSize = getOnnxDataTypeByteSize(int(dataType));
         int count = eleSize;
         if(bufferShape.size() <= 0)
             return 0;

@@ -6,13 +6,13 @@
 #include "NvInfer.h"
 #include "parser/graph_parser.hpp"
 #include "node/node_creator.hpp"
-#include "node/shuffle_node_info.hpp"
+#include "node_info/shuffle_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
 
     nvinfer1::ILayer* createShuffleNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto shuffle_node_info = (ShuffleNodeInfo*)node_info;
         auto inputs = shuffle_node_info->getInputs();
@@ -46,8 +46,8 @@ namespace TENSORRT_WRAPPER
         }
         else if(inputs.size() == 2 && subType.compare("Reshape") == 0)
         {
-            auto dims = parseIntArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
-                            node_weight_info[inputs[1]].byteCount, node_weight_info[inputs[1]].shape);
+            auto dims = parseIntArrayValue(weight_info[inputs[1]].dataType, weight_info[inputs[1]].data, 
+                            weight_info[inputs[1]].byteCount, weight_info[inputs[1]].shape);
             shuffle = network->addShuffle(*input_tensor);
             CHECK_ASSERT(shuffle, "create shuffle node fail\n");
 
@@ -87,9 +87,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createShuffleNode(network, tensors, node_info, node_weight_info);
+            return createShuffleNode(network, tensors, node_info, weight_info);
         }
     };
 

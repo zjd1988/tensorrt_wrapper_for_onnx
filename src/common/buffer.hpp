@@ -6,6 +6,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include "common/non_copyable.hpp"
 #include "common/utils.hpp"
 using namespace std;
 
@@ -34,16 +35,12 @@ namespace TENSORRT_WRAPPER
         UNDEFINED_STORAGE_TYPE,
     };
 
-    class Buffer
+    class Buffer : public NonCopyable
     {
     public:
         Buffer(std::vector<int> shape, OnnxDataType dataType, bool mallocFlag = false);
         Buffer(int size, OnnxDataType dataType, bool mallocFlag = false);
         ~Buffer();
-        Buffer(const Buffer&)  = delete;
-        Buffer(const Buffer&&) = delete;
-        Buffer& operator=(const Buffer&) = delete;
-        Buffer& operator=(const Buffer&&) = delete;
         static Buffer* create(std::vector<int> shape, OnnxDataType dataType, void* userData);
         std::vector<int> getShape();
         OnnxDataType getDataType();

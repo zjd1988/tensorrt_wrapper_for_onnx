@@ -6,13 +6,13 @@
 #include "NvInfer.h"
 #include "parser/graph_parser.hpp"
 #include "node/node_creator.hpp"
-#include "node/unary_node_info.hpp"
+#include "node_info/unary_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
 
     nvinfer1::ILayer* createUnaryNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto sub_type = node_info->getNodeSubType();
         nvinfer1::UnaryOperation operation;
@@ -49,9 +49,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createUnaryNode(network, tensors, node_info, node_weight_info);
+            return createUnaryNode(network, tensors, node_info, weight_info);
         }
     };
 

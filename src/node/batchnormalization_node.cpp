@@ -12,16 +12,16 @@ namespace TENSORRT_WRAPPER
 {
 
     nvinfer1::ILayer* createBatchNormalizationNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto batch_normal_node_info = (BatchNormalizationNodeInfo*)node_info;
         auto inputs = batch_normal_node_info->getInputs();
         float epsilon = batch_normal_node_info->getEpsilon();
         nvinfer1::ITensor* input_tensor = tensors[inputs[0]];
-        auto scaleWeight = node_weight_info[inputs[1]];
-        auto biasWeight = node_weight_info[inputs[2]];
-        auto meanWeight = node_weight_info[inputs[3]];
-        auto varWeight = node_weight_info[inputs[4]];
+        auto scaleWeight = weight_info[inputs[1]];
+        auto biasWeight = weight_info[inputs[2]];
+        auto meanWeight = weight_info[inputs[3]];
+        auto varWeight = weight_info[inputs[4]];
         auto scaleType = scaleWeight.dataType;
         auto biasType = biasWeight.dataType;
         auto meanType = meanWeight.dataType;
@@ -40,7 +40,7 @@ namespace TENSORRT_WRAPPER
         combinedScale.data = (char*)malloc(combinedScale.byteCount);
         CHECK_ASSERT(combinedScale.data, "malloc mem fail!\n");
         std::string combinedScaleName = "combinedScale_" + inputs[1];
-        node_weight_info[combinedScaleName] = combinedScale;
+        weight_info[combinedScaleName] = combinedScale;
 
         combinedBias.byteCount = scaleWeight.byteCount;
         combinedBias.dataType = scaleWeight.dataType;
@@ -49,7 +49,7 @@ namespace TENSORRT_WRAPPER
         combinedBias.data = (char*)malloc(combinedBias.byteCount);
         CHECK_ASSERT(combinedBias.data, "malloc mem fail!\n");
         std::string combinedBiasName = "combinedBias_" + inputs[2];
-        node_weight_info[combinedBiasName] = combinedBias;
+        weight_info[combinedBiasName] = combinedBias;
 
         auto nweight = scaleWeight.shape[0];
         for (size_t i = 0; i < nweight; ++i)
@@ -78,9 +78,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createBatchNormalizationNode(network, tensors, node_info, node_weight_info);
+            return createBatchNormalizationNode(network, tensors, node_info, weight_info);
         }
     };
 

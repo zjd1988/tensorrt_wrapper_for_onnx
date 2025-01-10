@@ -6,13 +6,13 @@
 #include "NvInfer.h"
 #include "parser/graph_parser.hpp"
 #include "node/node_creator.hpp"
-#include "node/padding_node_info.hpp"
+#include "node_info/padding_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
 
     nvinfer1::ILayer* createPaddingNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto padding_node_info = (PaddingNodeInfo*)node_info;
         auto inputs = padding_node_info->getInputs();
@@ -23,11 +23,11 @@ namespace TENSORRT_WRAPPER
         {
             input_tensor = tensors[inputs[0]];
             auto dims = input_tensor->getDimensions();
-            auto shape = node_weight_info[inputs[1]].shape;
+            auto shape = weight_info[inputs[1]].shape;
             CHECK_ASSERT(shape.size() == 1 && shape[0] == 2*dims.nbDims, "Pads value must be twice tensor dims\n");
             CHECK_ASSERT(4 == dims.nbDims, "Only 2D padding is currently supported.\n");
-            auto pads = parseIntArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data,
-                node_weight_info[inputs[1]].byteCount, shape);
+            auto pads = parseIntArrayValue(weight_info[inputs[1]].dataType, weight_info[inputs[1]].data,
+                weight_info[inputs[1]].byteCount, shape);
             padding = network->addPadding(*input_tensor, nvinfer1::DimsHW{pads[2], pads[3]}, nvinfer1::DimsHW{pads[6], pads[7]});
         }
         else
@@ -52,9 +52,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createPaddingNode(network, tensors, node_info, node_weight_info);
+            return createPaddingNode(network, tensors, node_info, weight_info);
         }
     };
 

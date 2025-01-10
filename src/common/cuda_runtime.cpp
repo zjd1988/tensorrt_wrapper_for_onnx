@@ -26,11 +26,13 @@
 namespace TENSORRT_WRAPPER
 {
 
-    bool CUDARuntime::isCreateError() {
+    bool CUDARuntime::isCreateError()
+    {
         return mIsCreateError;
     }
 
-    CUDARuntime::CUDARuntime(int device_id) {
+    CUDARuntime::CUDARuntime(int device_id)
+    {
         int version;
         CUDA_CHECK(cudaRuntimeGetVersion(&version));
         if(version != CUDART_VERSION)
@@ -56,99 +58,128 @@ namespace TENSORRT_WRAPPER
 
         mBufferPool.reset(new BufferPool());
         mStaticBufferPool.reset(new BufferPool());
+        return;
     }
 
-    CUDARuntime::~CUDARuntime() {
-        if (mStream) {
+    CUDARuntime::~CUDARuntime()
+    {
+        if (mStream)
+        {
             CUDA_CHECK(cudaStreamDestroy(mStream));
         }
         CUBLAS_CHECK(cublasDestroy(mCublasHandle));
-        if (mCusolverHandle) {
+        if (mCusolverHandle)
+        {
             CUSOLVER_CHECK(cusolverDnDestroy(mCusolverHandle));
         }
     }
 
-    bool CUDARuntime::isSupportedFP16() {
+    bool CUDARuntime::isSupportedFP16()
+    {
         return mIsSupportedFP16;
     }
 
-    bool CUDARuntime::isSupportedDotInt8() {
+    bool CUDARuntime::isSupportedDotInt8()
+    {
         return mSupportDotInt8;
     }
 
-    bool CUDARuntime::isSupportedDotAccInt8() {
+    bool CUDARuntime::isSupportedDotAccInt8()
+    {
         return mSupportDotAccInt8;
     }
 
-    size_t CUDARuntime::mem_alignment_in_bytes() {
+    size_t CUDARuntime::memAlignmentInBytes()
+    {
         return std::max(mProp.textureAlignment, mProp.texturePitchAlignment);
     }
 
-    int CUDARuntime::device_id() {
+    int CUDARuntime::device_id()
+    {
         return mDeviceId;
     }
 
     void CUDARuntime::activate()
     {
         int id = device_id();
-        if (id >= 0) {
+        if (id >= 0)
+        {
             CUDA_CHECK(cudaSetDevice(id));
         }
     }
 
-    cudaStream_t CUDARuntime::stream() {
+    cudaStream_t CUDARuntime::stream()
+    {
         return mStream;
     }
 
     void CUDARuntime::memcpy(void *dst, const void *src, size_t size_in_bytes, CudaRuntimeMemcpyKind_t kind, bool sync)
     {
         cudaMemcpyKind cuda_kind;
-        switch (kind) {
+        switch (kind)
+        {
             case CudaRuntimeMemcpyDeviceToHost:
+            {
                 cuda_kind = cudaMemcpyDeviceToHost;
                 break;
+            }
             case CudaRuntimeMemcpyHostToDevice:
+            {
                 cuda_kind = cudaMemcpyHostToDevice;
                 break;
+            }
             case CudaRuntimeMemcpyDeviceToDevice:
+            {
                 cuda_kind = cudaMemcpyDeviceToDevice;
                 break;
+            }
             default:
-                CHECK_ASSERT(false, "bad cuda memcpy kind\n");
+            {
+                CHECK_ASSERT(false, "bad cuda memcpy kind");
+            }
         }
         if(sync == false)
             CUDA_CHECK(cudaMemcpyAsync(dst, src, size_in_bytes, cuda_kind, mStream));
         else
             CUDA_CHECK(cudaMemcpy(dst, src, size_in_bytes, cuda_kind));
+        return;
     }
 
     void CUDARuntime::memset(void *dst, int value, size_t size_in_bytes)
     {
         CUDA_CHECK(cudaMemsetAsync(dst, value, size_in_bytes, mStream));
+        return;
     }
 
     void CUDARuntime::synchronize()
     {
         CUDA_CHECK(cudaStreamSynchronize(mStream));
+        return;
     }
 
-    cublasHandle_t CUDARuntime::cublas_handle() {
+    cublasHandle_t CUDARuntime::cublasHandle()
+    {
         return mCublasHandle;
     }
 
-    void CUDARuntime::initialize_cusolver() {
+    void CUDARuntime::initializeCusolver()
+    {
         CUSOLVER_CHECK(cusolverDnCreate(&mCusolverHandle));
         CUSOLVER_CHECK(cusolverDnSetStream(mCusolverHandle, mStream));
+        return;
     }
-    cusolverDnHandle_t CUDARuntime::cusolver_handle() {
-        std::call_once(mCusolverInitialized,
-                        [this] { initialize_cusolver(); });
+
+    cusolverDnHandle_t CUDARuntime::cusolverHandle()
+    {
+        std::call_once(mCusolverInitialized, [this] { initialize_cusolver(); });
         return mCusolverHandle;
     }
 
-    bool CUDARuntime::onAcquireBuffer(Buffer* buffer, StorageType storageType) {
+    bool CUDARuntime::onAcquireBuffer(Buffer* buffer, StorageType storageType)
+    {
         int mallocSize = buffer->getSize();
-        if (storageType == DYNAMIC) {
+        if (storageType == DYNAMIC)
+        {
             auto bufferPtr = mBufferPool->alloc(mallocSize, false);
             buffer->setDevice(bufferPtr);
             return true;
@@ -159,48 +190,58 @@ namespace TENSORRT_WRAPPER
         return true;
     }
 
-    bool CUDARuntime::onReleaseBuffer(Buffer* buffer, StorageType storageType) {
+    bool CUDARuntime::onReleaseBuffer(Buffer* buffer, StorageType storageType)
+    {
         auto bufferPtr = buffer->device<void>();
-        if (storageType == DYNAMIC) {
+        if (storageType == DYNAMIC)
+        {
             mBufferPool->recycle((void*)bufferPtr);
         }
-        else if (storageType == STATIC) {
+        else if (storageType == STATIC)
+        {
             mStaticBufferPool->recycle((void*)bufferPtr, true);
         }
-        else{
+        else
+        {
             LOG("unknown storage type!\n");
             return false;
         }
         return true;
     }
 
-    bool CUDARuntime::onClearBuffer() {
+    bool CUDARuntime::onClearBuffer()
+    {
         mBufferPool->clear();
         mStaticBufferPool->clear();
         return true;
     }
 
-    bool CUDARuntime::onWaitFinish() {
+    bool CUDARuntime::onWaitFinish()
+    {
         synchronize();
         return true;
     }
 
-    void CUDARuntime::copyFromDevice(Buffer* srcBuffer, Buffer* dstBuffer, bool sync) {
+    void CUDARuntime::copyFromDevice(Buffer* srcBuffer, Buffer* dstBuffer, bool sync)
+    {
         auto dstSize = dstBuffer->getSize();
         auto srcSize = srcBuffer->getSize();
         CHECK_ASSERT(srcSize <= dstSize, "src buffer size must less than dst buffer size!\n");
         auto hostPtr = dstBuffer->host<void>();
         auto devicePtr = srcBuffer->device<void>();
         memcpy(hostPtr, devicePtr, srcSize, CudaRuntimeMemcpyDeviceToHost, sync);
+        return;
     }
 
-    void CUDARuntime::copyToDevice(Buffer* srcBuffer, Buffer* dstBuffer, bool sync) {
+    void CUDARuntime::copyToDevice(Buffer* srcBuffer, Buffer* dstBuffer, bool sync)
+    {
         auto dstSize = dstBuffer->getSize();
         auto srcSize = srcBuffer->getSize();
         CHECK_ASSERT(srcSize == dstSize, "src buffer size must be equal to dst buffer size!\n");
         auto hostPtr = srcBuffer->host<void>();
         auto devicePtr = dstBuffer->device<void>();
         memcpy(devicePtr, hostPtr, dstSize, CudaRuntimeMemcpyHostToDevice, sync);
+        return;
     }
 
     void CUDARuntime::copyFromDeviceToDevice(Buffer* srcBuffer, Buffer* dstBuffer, bool sync)
@@ -211,6 +252,7 @@ namespace TENSORRT_WRAPPER
         auto srcPtr = srcBuffer->device<void>();
         auto dstPtr = dstBuffer->device<void>();
         memcpy(dstPtr, srcPtr, srcSize, CudaRuntimeMemcpyDeviceToDevice, sync);
+        return;
     }
 
     // void CUDARuntime::onCopyBuffer(Buffer* srcBuffer, Buffer* dstBuffer) {

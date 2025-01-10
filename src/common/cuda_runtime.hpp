@@ -15,6 +15,7 @@
 #include <cublas_v2.h>
 #include <cusolverDn.h>
 #include <cuda.h>
+#include "common/non_copyable.hpp"
 #include "common/utils.hpp"
 #include "common/buffer_pool.hpp"
 #include "common/buffer.hpp"
@@ -29,30 +30,29 @@ namespace TENSORRT_WRAPPER
         CudaRuntimeMemcpyDeviceToDevice = 3,
     } CudaRuntimeMemcpyKind_t;
 
-    class CUDARuntime
+    class CUDARuntime : public NonCopyable
     {
     public:
         CUDARuntime(int device_id);
         ~CUDARuntime();
-        CUDARuntime(const CUDARuntime &) = delete;
-        CUDARuntime &operator=(const CUDARuntime &) = delete;
 
         bool isSupportedFP16();
         bool isSupportedDotInt8();
         bool isSupportedDotAccInt8();
         bool isCreateError();
         int device_id();
-        size_t mem_alignment_in_bytes();
+        size_t memAlignmentInBytes();
         void activate();
 
         cudaStream_t stream();
-        cublasHandle_t cublas_handle();
-        void initialize_cusolver();
-        cusolverDnHandle_t cusolver_handle();
+        cublasHandle_t cublasHandle();
+        void initializeCusolver();
+        cusolverDnHandle_t cusolverHandle();
 
-        int threads_num() { return mProp.maxThreadsPerBlock; }
-        int major_sm() { return mProp.major; }
-        int blocks_num(const int total_threads) {
+        int threadsNum() { return mProp.maxThreadsPerBlock; }
+        int majorSm() { return mProp.major; }
+        int blocksNum(const int total_threads)
+        {
             return std::min(((total_threads - 1) / mProp.maxThreadsPerBlock) + 1, mProp.multiProcessorCount);
         }
         bool onAcquireBuffer(Buffer *buffer, StorageType storageType);

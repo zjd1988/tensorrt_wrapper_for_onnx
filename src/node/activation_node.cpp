@@ -12,7 +12,7 @@ namespace TENSORRT_WRAPPER
 {
 
     nvinfer1::ILayer* createActivationNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto act_node_info = (ActivationNodeInfo*)node_info;
         auto sub_type = act_node_info->getNodeSubType();
@@ -20,16 +20,16 @@ namespace TENSORRT_WRAPPER
         auto inputs = act_node_info->getInputs();
         nvinfer1::IActivationLayer* activation = nullptr;
         nvinfer1::ITensor* input_tensors = tensors[inputs[0]];
-        //Clip kRELU
+
         if("Clip" == sub_type)
         {
             act_type = nvinfer1::ActivationType::kCLIP;
             int size = inputs.size();
-            CHECK_ASSERT(size == 3, "Clip expect 3 inputs!");
-            auto alpha = parseFloatArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
-                node_weight_info[inputs[1]].byteCount, node_weight_info[inputs[1]].shape);
-            auto beta = parseFloatArrayValue(node_weight_info[inputs[2]].dataType, node_weight_info[inputs[2]].data, 
-                node_weight_info[inputs[2]].byteCount, node_weight_info[inputs[2]].shape);
+            CHECK_ASSERT(size == 3, "Clip expect 3 inputs");
+            auto alpha = parseFloatArrayValue(weight_info[inputs[1]].dataType, weight_info[inputs[1]].data, 
+                weight_info[inputs[1]].byteCount, weight_info[inputs[1]].shape);
+            auto beta = parseFloatArrayValue(weight_info[inputs[2]].dataType, weight_info[inputs[2]].data, 
+                weight_info[inputs[2]].byteCount, weight_info[inputs[2]].shape);
             activation = network->addActivation(*input_tensors, act_type);
             CHECK_ASSERT(nullptr != activation, "create activation node fail, activation type is {}", sub_type);
             activation->setAlpha(alpha[0]);
@@ -84,9 +84,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createActivationNode(network, tensors, node_info, node_weight_info);
+            return createActivationNode(network, tensors, node_info, weight_info);
         }
     };
 

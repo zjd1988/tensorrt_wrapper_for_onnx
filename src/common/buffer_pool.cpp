@@ -8,10 +8,13 @@
 namespace TENSORRT_WRAPPER
 {
 
-    void* BufferPool::alloc(int size, bool seperate) {
-        if (!seperate) {
+    void* BufferPool::alloc(int size, bool seperate)
+    {
+        if (!seperate)
+        {
             auto iter = mFreeList.lower_bound(size);
-            if (iter != mFreeList.end()) {
+            if (iter != mFreeList.end())
+            {
                 auto buffer = iter->second->buffer;
                 mFreeList.erase(iter);
                 return buffer;
@@ -22,20 +25,24 @@ namespace TENSORRT_WRAPPER
         return node->buffer;
     }
 
-    void BufferPool::recycle(void* buffer, bool release) {
+    void BufferPool::recycle(void* buffer, bool release)
+    {
         auto iter = mAllBuffer.find(buffer);
-        if (iter == mAllBuffer.end()) {
-            CHECK_ASSERT(false, "Error for recycle buffer\n");
+        if (iter == mAllBuffer.end())
+        {
+            CHECK_ASSERT(false, "Error for recycle buffer");
             return;
         }
-        if (release) {
+        if (release)
+        {
             mAllBuffer.erase(iter);
             return;
         }
         mFreeList.insert(std::make_pair(iter->second->size, iter->second));
     }
 
-    void BufferPool::clear() {
+    void BufferPool::clear()
+    {
         mFreeList.clear();
         mAllBuffer.clear();
     }

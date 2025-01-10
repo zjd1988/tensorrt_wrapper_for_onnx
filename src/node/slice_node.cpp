@@ -6,13 +6,13 @@
 #include "NvInfer.h"
 #include "parser/graph_parser.hpp"
 #include "node/node_creator.hpp"
-#include "node/slice_node_info.hpp"
+#include "node_info/slice_node_info.hpp"
 
 namespace TENSORRT_WRAPPER
 {
 
     nvinfer1::ILayer* createSliceNode(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,
-        NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info)
+        NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info)
     {
         auto inputs = node_info->getInputs();
         CHECK_ASSERT(inputs.size() >= 3 && inputs.size() <= 5, "conv2d inputs must greater equal than 3 and less equal than 5\n");
@@ -21,10 +21,10 @@ namespace TENSORRT_WRAPPER
         nvinfer1::Dims dims = input_tensor->getDimensions();
         if(inputs.size() == 3)
         {
-            auto starts = parseIntArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
-                    node_weight_info[inputs[1]].byteCount, node_weight_info[inputs[1]].shape);
-            auto ends   = parseIntArrayValue(node_weight_info[inputs[2]].dataType, node_weight_info[inputs[2]].data, 
-                    node_weight_info[inputs[2]].byteCount, node_weight_info[inputs[2]].shape);
+            auto starts = parseIntArrayValue(weight_info[inputs[1]].dataType, weight_info[inputs[1]].data, 
+                    weight_info[inputs[1]].byteCount, weight_info[inputs[1]].shape);
+            auto ends   = parseIntArrayValue(weight_info[inputs[2]].dataType, weight_info[inputs[2]].data, 
+                    weight_info[inputs[2]].byteCount, weight_info[inputs[2]].shape);
             std::vector<int> axes = {1, 1, 1, 1};
             std::vector<int> steps = {1, 1, 1, 1};
             CHECK_ASSERT(starts.size() == ends.size(), "starts size must be equal to ends size!\n");
@@ -50,12 +50,12 @@ namespace TENSORRT_WRAPPER
         }
         else if(inputs.size() == 4)
         {
-            auto starts = parseIntArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
-                    node_weight_info[inputs[1]].byteCount, node_weight_info[inputs[1]].shape);
-            auto ends   = parseIntArrayValue(node_weight_info[inputs[2]].dataType, node_weight_info[inputs[2]].data, 
-                    node_weight_info[inputs[2]].byteCount, node_weight_info[inputs[2]].shape);
-            auto axes   = parseIntArrayValue(node_weight_info[inputs[3]].dataType, node_weight_info[inputs[3]].data, 
-                    node_weight_info[inputs[3]].byteCount, node_weight_info[inputs[3]].shape);
+            auto starts = parseIntArrayValue(weight_info[inputs[1]].dataType, weight_info[inputs[1]].data, 
+                    weight_info[inputs[1]].byteCount, weight_info[inputs[1]].shape);
+            auto ends   = parseIntArrayValue(weight_info[inputs[2]].dataType, weight_info[inputs[2]].data, 
+                    weight_info[inputs[2]].byteCount, weight_info[inputs[2]].shape);
+            auto axes   = parseIntArrayValue(weight_info[inputs[3]].dataType, weight_info[inputs[3]].data, 
+                    weight_info[inputs[3]].byteCount, weight_info[inputs[3]].shape);
             std::vector<int> steps = {1, 1, 1, 1};
             CHECK_ASSERT(starts.size() == dims.nbDims, "starts size(%d) must be equal to input tensor dims(%d)!\n", starts.size(), dims.nbDims);
             CHECK_ASSERT(starts.size() == ends.size(), "starts size must be equal to ends size!\n");
@@ -84,14 +84,14 @@ namespace TENSORRT_WRAPPER
         }
         else
         {
-            auto starts = parseIntArrayValue(node_weight_info[inputs[1]].dataType, node_weight_info[inputs[1]].data, 
-                    node_weight_info[inputs[1]].byteCount, node_weight_info[inputs[1]].shape);
-            auto ends   = parseIntArrayValue(node_weight_info[inputs[2]].dataType, node_weight_info[inputs[2]].data, 
-                    node_weight_info[inputs[2]].byteCount, node_weight_info[inputs[2]].shape);
-            auto axes   = parseIntArrayValue(node_weight_info[inputs[3]].dataType, node_weight_info[inputs[3]].data, 
-                    node_weight_info[inputs[3]].byteCount, node_weight_info[inputs[3]].shape);
-            auto steps = parseIntArrayValue(node_weight_info[inputs[4]].dataType, node_weight_info[inputs[4]].data, 
-                    node_weight_info[inputs[4]].byteCount, node_weight_info[inputs[4]].shape);
+            auto starts = parseIntArrayValue(weight_info[inputs[1]].dataType, weight_info[inputs[1]].data, 
+                    weight_info[inputs[1]].byteCount, weight_info[inputs[1]].shape);
+            auto ends   = parseIntArrayValue(weight_info[inputs[2]].dataType, weight_info[inputs[2]].data, 
+                    weight_info[inputs[2]].byteCount, weight_info[inputs[2]].shape);
+            auto axes   = parseIntArrayValue(weight_info[inputs[3]].dataType, weight_info[inputs[3]].data, 
+                    weight_info[inputs[3]].byteCount, weight_info[inputs[3]].shape);
+            auto steps = parseIntArrayValue(weight_info[inputs[4]].dataType, weight_info[inputs[4]].data, 
+                    weight_info[inputs[4]].byteCount, weight_info[inputs[4]].shape);
             CHECK_ASSERT(starts.size() <= dims.nbDims, "starts size(%d) must be less than input tensor dims(%d)!\n", starts.size(), dims.nbDims);
             CHECK_ASSERT(starts.size() == ends.size(), "starts size must be equal to ends size!\n");
             CHECK_ASSERT(starts.size() == axes.size(), "starts size must be equal to axes size!\n");
@@ -134,9 +134,9 @@ namespace TENSORRT_WRAPPER
     {
     public:
         virtual nvinfer1::ILayer* onCreate(nvinfer1::INetworkDefinition* network, std::map<std::string, nvinfer1::ITensor*>& tensors,  
-            NodeInfo* node_info, std::map<std::string, WeightInfo>& node_weight_info) const override 
+            NodeInfo* node_info, std::map<std::string, WeightInfo>& weight_info) const override 
         {
-            return createSliceNode(network, tensors, node_info, node_weight_info);
+            return createSliceNode(network, tensors, node_info, weight_info);
         }
     };
 
